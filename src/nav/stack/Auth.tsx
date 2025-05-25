@@ -1,5 +1,5 @@
-import LogIn from "../../screens/Auth/LogIn"
-import SignUp from "../../screens/Auth/SignUp";
+import {LoginScreen} from "../../screens/Auth/LogIn"
+import {SignUpScreen} from "../../screens/Auth/SignUp";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -13,10 +13,10 @@ const AuthStack = () => {
     <Stack.Navigator>
       <Stack.Screen 
         name="LogIn" 
-        component={LogIn} 
+        component={LoginScreen} 
         options={{headerShown:false}}
       />
-      <Stack.Screen name="SignUp" component={SignUp} options={{title:'회원가입'}}/> 
+      <Stack.Screen name="SignUp" component={SignUpScreen} options={{title:'회원가입'}}/> 
     </Stack.Navigator>
   );
 };

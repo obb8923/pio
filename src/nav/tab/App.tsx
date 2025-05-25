@@ -6,9 +6,9 @@ import {MapStack} from '../stack/Map';
 import {PiodexStack} from '../stack/Piodex';
 import {ProfileStack} from '../stack/Profile';
 
-import MapIcon from '../../../assets/svg/Map.svg';
-import PiodexIcon from '../../../assets/svg/Piodex.svg';
-import ProfileIcon from '../../../assets/svg/Profile.svg';
+import MapIcon from '../../../assets/svgs/Map.svg';
+import PiodexIcon from '../../../assets/svgs/Piodex.svg';
+import ProfileIcon from '../../../assets/svgs/Profile.svg';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import {Colors} from '../../constants/Colors';

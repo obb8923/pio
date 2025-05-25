@@ -1,11 +1,14 @@
+
 export const Colors = {
-  black: '#000000',
-  white: '#ffffff',
-  gray: '#808080',
-  lightGray: '#D3D3D3',
-  darkGray: '#A9A9A9',
+  background: '#fafafa',
+  backgroundf8: '#fafafaf8',
+  matcha: '#5F9B41',
+  skyblue: '#378FE9',
+  brick: '#E06847',
+  white: '#fefefe',
+  black: '#191919',
+  svggray: '#6b7280',
+  svggray2: '#9ca3af',
+  bluegray: '#F1F2F4',
   red: '#FF0000',
-  blue: '#0000FF',
-  green: '#00FF00',
-  yellow: '#FFFF00',
 }
