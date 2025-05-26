@@ -11,10 +11,10 @@ export const MapScreen = () => {
   return <Background>
     <View className="flex-1">
       <Text>Map</Text>
-      <NaverMapView
+      {/* <NaverMapView
           style={{ flex: 1 }}
           initialCamera={INITIAL_CAMERA}
-        />
+        /> */}
     </View>
   </Background>
 }

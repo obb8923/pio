@@ -8,9 +8,16 @@ import { useEffect } from 'react';
 import { useAuthStore } from './src/store/authStore';
 import AuthStack from './src/nav/stack/Auth'; // AuthStack import 추가
 import AppTab from './src/nav/tab/App'; // AppTab import 추가
+import SplashScreen from "react-native-splash-screen";
 
 function App(): React.JSX.Element {
   const { isLoggedIn, isLoading, checkLoginStatus } = useAuthStore();
+
+  useEffect(() => {
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 10000); //스플래시 활성화 시간
+  });
 
   useEffect(() => {
     checkLoginStatus();
