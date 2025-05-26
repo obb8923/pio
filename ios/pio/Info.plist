@@ -2,8 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <!-- 새로운 Maps 단독 상품용 키 (2024.04.17 이후) -->
+  <key>NMFNcpKeyId</key>
+  <string>m0hdt32426</string>
+  <!-- 기존 AI NAVER API 고객용 (호환성 유지) -->
+  <key>NMFClientId</key>
+  <string>m0hdt32426</string>
+  <key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>com.googleusercontent.apps.913491434166-9n12vussfamleoa46obmm1qesm0osenl</string>
+    </array>
+  </dict>
+</array>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>ko</string>
 	<key>CFBundleDisplayName</key>
 	<string>pio</string>
 	<key>CFBundleExecutable</key>

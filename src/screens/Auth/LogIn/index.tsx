@@ -116,6 +116,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
       {/*Google Login Button */}
       <View style={{width: '80%'}}>
       <AuthButton handleLogin={handleGoogleLogin} loading={loading} type="google" />
+      <AuthButton handleLogin={login} loading={loading} type="google" />
       </View>
     </View>
     </Background>
