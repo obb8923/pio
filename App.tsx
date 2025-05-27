@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 // import RootStack from "./src/nav/stack/Root"; // RootStack import 제거
 import "./global.css"
-import { SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar, Platform, View } from 'react-native'; // ActivityIndicator, View 제거
 import { useEffect, useState, useRef } from 'react';
@@ -129,16 +129,18 @@ function App(): React.JSX.Element {
   //   );
   // }
   return (
-    <GestureHandlerRootView style={{flex:1}}>
-      <SafeAreaView style={{flex:1}} >
-        <NavigationContainer>
-          <StatusBar barStyle="dark-content" translucent={true}/>
-          {/* {isLoggedIn ? <AppTab /> : <AuthStack />} */}
-          <AppTab />
-          {/* <View style={{flex:1, backgroundColor:'gray'}}></View> */}
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{flex:1}}>
+        <SafeAreaView style={{flex:1}} edges={['top', 'left', 'right', 'bottom']} >
+          <NavigationContainer>
+            <StatusBar barStyle="dark-content" translucent={false} backgroundColor="#da1e27"/>
+            {/* {isLoggedIn ? <AppTab /> : <AuthStack />} */}
+            {/* <AppTab /> */}
+            <View style={{flex:1, backgroundColor:'gray'}}></View>
           </NavigationContainer>
         </SafeAreaView>
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
