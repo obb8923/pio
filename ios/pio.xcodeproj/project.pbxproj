@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		1763F5F6CFD9FB2FC9F56AD0 /* libPods-pio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B73B84DE71B30C49ACBAA85 /* libPods-pio.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		C6BDCDB8D9081E2B1C6A6CFC /* libPods-pio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 74BB2D99035AF3047CD4A650 /* libPods-pio.a */; };
+		CE2480FA2DE566BE00027B05 /* tmp.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2480F92DE566BE00027B05 /* tmp.m */; };
 		F83CF5E3DB59970A9DE81567 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -19,11 +20,13 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = pio/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = pio/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = pio/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		3B73B84DE71B30C49ACBAA85 /* libPods-pio.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pio.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AB3A0D1299877C445234F64 /* Pods-pio.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pio.release.xcconfig"; path = "Target Support Files/Pods-pio/Pods-pio.release.xcconfig"; sourceTree = "<group>"; };
+		2E9A4346D6B9893F5ABBC1F4 /* Pods-pio.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pio.debug.xcconfig"; path = "Target Support Files/Pods-pio/Pods-pio.debug.xcconfig"; sourceTree = "<group>"; };
+		74BB2D99035AF3047CD4A650 /* libPods-pio.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pio.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = pio/AppDelegate.swift; sourceTree = "<group>"; };
-		7AEE9B711568291F8BEFD9DC /* Pods-pio.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pio.debug.xcconfig"; path = "Target Support Files/Pods-pio/Pods-pio.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = pio/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		8A61DBD96964A132019B665F /* Pods-pio.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pio.release.xcconfig"; path = "Target Support Files/Pods-pio/Pods-pio.release.xcconfig"; sourceTree = "<group>"; };
+		CE2480F82DE566BE00027B05 /* pio-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "pio-Bridging-Header.h"; sourceTree = "<group>"; };
+		CE2480F92DE566BE00027B05 /* tmp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = tmp.m; path = pio/tmp.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -32,7 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1763F5F6CFD9FB2FC9F56AD0 /* libPods-pio.a in Frameworks */,
+				C6BDCDB8D9081E2B1C6A6CFC /* libPods-pio.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +50,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				CE2480F92DE566BE00027B05 /* tmp.m */,
+				CE2480F82DE566BE00027B05 /* pio-Bridging-Header.h */,
 			);
 			name = pio;
 			sourceTree = "<group>";
@@ -55,7 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				3B73B84DE71B30C49ACBAA85 /* libPods-pio.a */,
+				74BB2D99035AF3047CD4A650 /* libPods-pio.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -92,8 +97,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				7AEE9B711568291F8BEFD9DC /* Pods-pio.debug.xcconfig */,
-				8A61DBD96964A132019B665F /* Pods-pio.release.xcconfig */,
+				2E9A4346D6B9893F5ABBC1F4 /* Pods-pio.debug.xcconfig */,
+				2AB3A0D1299877C445234F64 /* Pods-pio.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -105,13 +110,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "pio" */;
 			buildPhases = (
-				E13498C9C92BE2E0B8B77010 /* [CP] Check Pods Manifest.lock */,
+				7901460A995C7E16FE9516DD /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				1ECE3D38E3224DC37744B400 /* [CP] Embed Pods Frameworks */,
-				1BEF6506C869221A7F39FDE0 /* [CP] Copy Pods Resources */,
+				77DF19DD56B6BDB3D3785E76 /* [CP] Embed Pods Frameworks */,
+				0AECE8B0EB8DD6396BC47D05 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -131,7 +136,7 @@
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1620;
 					};
 				};
 			};
@@ -183,7 +188,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		1BEF6506C869221A7F39FDE0 /* [CP] Copy Pods Resources */ = {
+		0AECE8B0EB8DD6396BC47D05 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -200,7 +205,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pio/Pods-pio-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		1ECE3D38E3224DC37744B400 /* [CP] Embed Pods Frameworks */ = {
+		77DF19DD56B6BDB3D3785E76 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -217,7 +222,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pio/Pods-pio-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E13498C9C92BE2E0B8B77010 /* [CP] Check Pods Manifest.lock */ = {
+		7901460A995C7E16FE9516DD /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -247,6 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				CE2480FA2DE566BE00027B05 /* tmp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +261,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AEE9B711568291F8BEFD9DC /* Pods-pio.debug.xcconfig */;
+			baseConfigurationReference = 2E9A4346D6B9893F5ABBC1F4 /* Pods-pio.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -275,6 +281,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = pio;
+				SWIFT_OBJC_BRIDGING_HEADER = "pio-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -283,7 +290,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8A61DBD96964A132019B665F /* Pods-pio.release.xcconfig */;
+			baseConfigurationReference = 2AB3A0D1299877C445234F64 /* Pods-pio.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -302,6 +309,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = pio;
+				SWIFT_OBJC_BRIDGING_HEADER = "pio-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -376,10 +384,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -448,10 +453,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

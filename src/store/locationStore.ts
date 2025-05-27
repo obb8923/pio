@@ -44,10 +44,10 @@ export const useLocationStore = create<LocationState>((set, get) => ({
           });
         },
         (error) => {
-          console.error('[LocationStore] Geolocation.getCurrentPosition error:', error);
+          console.log('[LocationStore] Geolocation.getCurrentPosition error:', error);
           set({ error: `Geolocation error: ${error.code} - ${error.message}`, isLoading: false });
         },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 }
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 10000 }
       );
     } catch (err: any) {
       console.error('[LocationStore] Permission request or other error in fetchLocation:', err);

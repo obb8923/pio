@@ -16,7 +16,7 @@ import {Colors} from '../../constants/Colors';
 const Tab = createBottomTabNavigator();
 const AppTab = () => {
   return (
-<Tab.Navigator screenOptions={{headerShown:false}}>
+<Tab.Navigator screenOptions={{headerShown:false, tabBarStyle: { backgroundColor: Colors.white ,elevation:0}}}>
   <Tab.Screen
     name="MapStack"
         component={MapStack}

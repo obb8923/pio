@@ -14,7 +14,7 @@ import { usePermissionStore } from './src/store/permissionStore';
 import { useLocationStore } from './src/store/locationStore'; // locationStore import 추가
 
 function App(): React.JSX.Element {
-  const { isLoading: authLoading } = useAuthStore();
+  const { isLoading: authLoading, checkLoginStatus } = useAuthStore();
   const {
     location: locationPermission, // from usePermissionStore
     setCameraPermission,
@@ -33,6 +33,11 @@ function App(): React.JSX.Element {
 
   // 타이머 ID를 저장하기 위한 ref (컴포넌트 리렌더링 시에도 유지)
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // 앱 시작 시 로그인 상태 체크
+    checkLoginStatus();
+  }, [checkLoginStatus]);
 
   useEffect(() => {
     // 1. 1.5초 타이머 시작
@@ -123,15 +128,14 @@ function App(): React.JSX.Element {
   //     </View>
   //   );
   // }
-
   return (
     <GestureHandlerRootView style={{flex:1}}>
       <SafeAreaView style={{flex:1}} >
         <NavigationContainer>
-          <StatusBar barStyle="dark-content" translucent={true} />
+          <StatusBar barStyle="dark-content" translucent={true}/>
           {/* {isLoggedIn ? <AppTab /> : <AuthStack />} */}
-          {/* <AppTab /> */}
-          <View style={{flex:1, backgroundColor:'gray'}}></View>
+          <AppTab />
+          {/* <View style={{flex:1, backgroundColor:'gray'}}></View> */}
           </NavigationContainer>
         </SafeAreaView>
     </GestureHandlerRootView>
