@@ -11,9 +11,9 @@ import { useState, useRef, useEffect } from "react";
 
 export const MapScreen = () => {
   const { latitude, longitude, isLoading, error } = useLocationStore();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuAnimation = useRef(new Animated.Value(0)).current;
-  const buttonAnimation = useRef(new Animated.Value(0)).current;
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const menuAnimation = useRef(new Animated.Value(1)).current;
+  const buttonAnimation = useRef(new Animated.Value(1)).current;
 const menuheight = 125;
   useEffect(() => {
     Animated.parallel([
