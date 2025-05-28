@@ -3,3 +3,7 @@ declare module '*.svg' {
     export default content;
   }
   
+declare module '@env' {
+  export const API_URL: string;
+}
+  
