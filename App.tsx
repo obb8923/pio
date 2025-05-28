@@ -131,12 +131,12 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{flex:1}}>
-        <SafeAreaView style={{flex:1}} edges={['top', 'left', 'right', 'bottom']} >
+        <SafeAreaView style={{flex:1}} edges={['top', 'left', 'right']} >
           <NavigationContainer>
-            <StatusBar barStyle="dark-content" translucent={false} backgroundColor="#da1e27"/>
+            <StatusBar barStyle="dark-content" translucent={true}/>
             {/* {isLoggedIn ? <AppTab /> : <AuthStack />} */}
-            {/* <AppTab /> */}
-            <View style={{flex:1, backgroundColor:'gray'}}></View>
+            <AppTab />
+            {/* <View style={{flex:1, backgroundColor:'gray'}}></View> */}
           </NavigationContainer>
         </SafeAreaView>
       </GestureHandlerRootView>

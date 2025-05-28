@@ -12,11 +12,12 @@ import ProfileIcon from '../../../assets/svgs/Profile.svg';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import {Colors} from '../../constants/Colors';
-
+import {TabNavOptions} from '../../constants/TabNavOptions';
 const Tab = createBottomTabNavigator();
 const AppTab = () => {
   return (
-<Tab.Navigator screenOptions={{headerShown:false, tabBarStyle: { backgroundColor: Colors.white ,elevation:0}}}>
+<Tab.Navigator 
+screenOptions={TabNavOptions as BottomTabNavigationOptions}>
   <Tab.Screen
     name="MapStack"
         component={MapStack}
@@ -25,9 +26,9 @@ const AppTab = () => {
           tabBarLabel: '지도',
           tabBarIcon: ({focused}) =>
             focused ? (
-              <MapIcon style={{color: Colors.black}} />
+              <MapIcon style={{color: '#36384E'}} />
             ) : (
-              <MapIcon style={{color: '#dddddd'}} />
+              <MapIcon style={{color: '#999999'}} />
             ),
           }
     }}
@@ -40,9 +41,9 @@ const AppTab = () => {
             tabBarLabel: '피오덱스',
             tabBarIcon: ({focused}) =>
               focused ? (
-                <PiodexIcon style={{color: Colors.black}} />
+                <PiodexIcon style={{color: '#36384E'}} />
               ) : (
-                <PiodexIcon style={{color: '#dddddd'}} />
+                <PiodexIcon style={{color: '#999999'}} />
               ),
           }
         }}
@@ -55,9 +56,9 @@ const AppTab = () => {
           tabBarLabel: '프로필',
           tabBarIcon: ({focused}) =>
             focused ? (
-              <ProfileIcon style={{color: Colors.black}} />
+              <ProfileIcon style={{color: '#36384E'}} />
             ) : (
-              <ProfileIcon style={{color: '#dddddd'}} />
+              <ProfileIcon style={{color: '#999999'}} />
             ),
           }
     }}

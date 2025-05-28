@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Animated } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Animated, Alert } from "react-native";
 import {Background} from "../../../components/Background";
-import { NaverMapView } from '@mj-studio/react-native-naver-map';
+import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
 import CameraIcon from "../../../../assets/svgs/Camera.svg";
 import ImageAddIcon from "../../../../assets/svgs/ImageAdd.svg";
@@ -8,14 +8,6 @@ import ChevronUpIcon from "../../../../assets/svgs/ChevronUp.svg";
 import ChevronDownIcon from "../../../../assets/svgs/ChevronDown.svg";
 import { Colors } from "../../../constants/Colors";
 import { useState, useRef, useEffect } from "react";
-// 초기 카메라 위치 설정
-/*
-const INITIAL_CAMERA = {
-  latitude: 37.5666102,  // 서울 중심부 위도
-  longitude: 126.9783881,  // 서울 중심부 경도
-  zoom: 12,  // 줌 레벨
-};
-*/
 
 export const MapScreen = () => {
   const { latitude, longitude, isLoading, error } = useLocationStore();
@@ -50,11 +42,26 @@ const menuheight = 125;
 
   return <Background>
     <View className="flex-1">
-     
-      {/* <NaverMapView
+{/*      
+      <NaverMapView
           style={{ flex: 1 }}
-          initialCamera={INITIAL_CAMERA}
-        /> */}
+          initialCamera={{
+            latitude: 37.5666102,  // 서울 중심부 위도
+            longitude: 126.9783881,  // 서울 중심부 경도
+            zoom: 12,  // 줌 레벨
+          }}
+        >
+          <NaverMapMarkerOverlay
+    latitude={37.5665} // 마커의 위도
+    longitude={126.9780} // 마커의 경도
+    // image={require('../../../../assets/svgs/Camera.svg')} // 마커 이미지 (선택 사항)
+    // caption={{ text: '서울시청' }} // 마커 캡션 (선택 사항)
+    // width={48} // 마커 너비 (선택 사항)
+    // height={48} // 마커 높이 (선택 사항)
+    onTap={() => Alert.alert('마커가 탭되었습니다!')} // 마커 탭 이벤트 핸들러 (선택 사항)
+  />
+        </NaverMapView> */}
+
     </View>
     
     {/* 메뉴바 */}
