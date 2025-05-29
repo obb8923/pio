@@ -34,6 +34,8 @@ export const TabNavOptions = {
       borderTopLeftRadius: 10,
       borderTopRightRadius: 10,
       padding: 10,
+      display: 'flex',
+
     //   position: 'absolute',
     },
     tabBarItemStyle: {flex: 1},

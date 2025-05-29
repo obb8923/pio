@@ -1,4 +1,7 @@
 import { supabase } from './supabase';
+import { Platform } from 'react-native';
+import * as RNFS from 'react-native-fs';
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 
 /**
  * 현재 로그인된 Supabase 사용자의 ID를 가져옵니다.
@@ -139,34 +142,244 @@ export const checkNicknameUpdateAvailability = async (): Promise<{ canUpdate: bo
 };
 
 /**
- * 사용자의 닉네임을 업데이트합니다.
- * @param newNickname 새로운 닉네임
- * @returns {Promise<{ success: boolean, error?: any }>} 업데이트 성공 여부와 에러 객체
+ * 이미지를 Supabase 스토리지에 업로드하고 공개 URL을 반환합니다.
+ * @param imageUri 업로드할 이미지의 로컬 URI
+ * @param bucketName 이미지를 저장할 버킷 이름
+ * @returns {Promise<string | null>} 이미지의 공개 URL 또는 null (오류 발생 시)
  */
-export const updateUserNickname = async (newNickname: string): Promise<{ success: boolean, error?: any }> => {
+export const uploadImageAndGetUrl = async (imageUri: string, bucketName: string): Promise<string | null> => {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { success: false, error: new Error('사용자 인증에 실패했습니다.') };
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      console.error('User not authenticated');
+      return null;
     }
 
-    const { error } = await supabase
-      .from('users')
-      .update({ 
-        nickname: newNickname,
-        last_profile_update_at: new Date().toISOString()
-      })
-      .eq('id', user.id);
+    // 파일 확장자 추출
+    const extension = imageUri.split('.').pop() || 'jpg';
+    const fileName = `${userId}/${new Date().toISOString()}_${Math.random().toString(36).substring(2, 15)}.${extension}`;
+
+    // base64로 이미지 읽기
+    const base64Data = await RNFS.readFile(imageUri, 'base64');
+
+    // base64를 ArrayBuffer로 변환 (base64-arraybuffer 패키지 사용)
+    const arrayBuffer = decodeBase64(base64Data);
+
+    // Supabase Storage에 업로드
+    const { data, error: uploadError } = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, arrayBuffer, {
+        contentType: `image/${extension}`,
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
+      return null;
+    }
+
+    // 공개 URL 가져오기
+    const { data: publicUrlData } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(data.path);
+
+    if (!publicUrlData || !publicUrlData.publicUrl) {
+      console.error('Error getting public URL for image:', data.path);
+      return null;
+    }
+
+    return publicUrlData.publicUrl;
+  } catch (err) {
+    console.error('uploadImageAndGetUrl function error:', err);
+    return null;
+  }
+};
+
+/**
+ * found_plants 테이블에 식물 데이터를 저장합니다.
+ * @param plantData 저장할 식물 데이터
+ * @returns {Promise<{ success: boolean, error?: any }>} 저장 성공 여부와 에러 객체
+ */
+export const saveFoundPlant = async (plantData: {
+  userId: string;
+  imageUrl: string;
+  memo: string | null;
+  lat: number;
+  lng: number;
+  description: string | null; // plantName은 description으로 우선 사용합니다. 필요시 컬럼 추가.
+  plantName: string | null; 
+}): Promise<{ success: boolean, error?: any }> => {
+  try {
+    const { userId, imageUrl, memo, lat, lng, description, plantName } = plantData;
+    
+    const { error } = await supabase.from('found_plants').insert([
+      {
+        user_id: userId,
+        image_url: imageUrl,
+        memo: memo,
+        lat: lat,
+        lng: lng,
+        // description 필드에 plantName을 우선 사용하고, AI 분석 결과를 추후 업데이트 할 수 있도록 합니다.
+        // 또는 description 필드를 AI 분석 결과용으로 남겨두고, plant_name 필드를 추가하는 것을 고려해야 합니다.
+        // 현재는 plantName 값을 description으로 저장합니다.
+        description: description || plantName, 
+        plant_name: plantName // plant_name 필드가 테이블에 존재한다고 가정합니다. 없다면 마이그레이션 필요.
+      },
+    ]);
 
     if (error) {
-      console.error('Error updating nickname:', error);
+      console.error('Error saving found plant data:', error);
       return { success: false, error };
     }
 
     return { success: true };
   } catch (err) {
-    console.error('updateUserNickname function error:', err);
+    console.error('saveFoundPlant function error:', err);
     return { success: false, error: err };
+  }
+};
+
+/**
+ * 발견된 식물들의 위치 정보를 가져옵니다.
+ * @returns {Promise<Array<{
+ *   id: string;
+ *   lat: number;
+ *   lng: number;
+ *   image_url: string;
+ *   plant_name: string;
+ *   description: string;
+ *   memo: string;
+ * }> | null>} 발견된 식물들의 정보 배열 또는 null (오류 발생 시)
+ */
+export const getFoundPlants = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('found_plants')
+      .select('id, lat, lng, image_url, plant_name, description, memo');
+
+    if (error) {
+      console.error('Error fetching found plants:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('getFoundPlants function error:', err);
+    return null;
+  }
+};
+
+/**
+ * 스토리지의 이미지에 대한 서명된 URL을 생성합니다.
+ * @param imagePath 스토리지 내 이미지 경로
+ * @param bucketName 버킷 이름
+ * @returns {Promise<string | null>} 서명된 URL 또는 null (오류 발생 시)
+ */
+export const getSignedImageUrl = async (imagePath: string, bucketName: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .createSignedUrl(imagePath, 3600); // 1시간 유효
+
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return null;
+    }
+
+    return data.signedUrl;
+  } catch (err) {
+    console.error('getSignedImageUrl function error:', err);
+    return null;
+  }
+};
+
+/**
+ * 현재 사용자가 발견한 식물들의 정보를 가져옵니다.
+ * @returns {Promise<Array<{
+ *   id: string;
+ *   created_at: string;
+ *   image_url: string;
+ *   plant_name: string;
+ *   description: string;
+ *   memo: string;
+ *   lat: number;
+ *   lng: number;
+ *   signed_url?: string;
+ * }> | null>} 현재 사용자가 발견한 식물들의 정보 배열 또는 null (오류 발생 시)
+ */
+export const getCurrentUserFoundPlants = async () => {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      console.error('User not authenticated');
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('found_plants')
+      .select('id, created_at, image_url, plant_name, description, memo, lat, lng')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching current user found plants:', error);
+      return null;
+    }
+
+    // 각 이미지에 대해 서명된 URL 생성
+    const plantsWithSignedUrls = await Promise.all(
+      data.map(async (plant) => {
+        try {
+          // image_url에서 버킷 이름과 경로 추출
+          // 예: https://[project-ref].supabase.co/storage/v1/object/public/found-plants/user-id/image.jpg
+          const urlParts = plant.image_url.split('/');
+          const bucketName = urlParts[urlParts.indexOf('public') + 1];
+          const filePath = urlParts.slice(urlParts.indexOf('public') + 2).join('/');
+          
+          if (bucketName && filePath) {
+            const signedUrl = await getSignedImageUrl(filePath, bucketName);
+            return { ...plant, signed_url: signedUrl || undefined };
+          }
+        } catch (err) {
+          console.error('Error processing image URL:', err);
+        }
+        return { ...plant, signed_url: undefined };
+      })
+    );
+
+    return plantsWithSignedUrls;
+  } catch (err) {
+    console.error('getCurrentUserFoundPlants function error:', err);
+    return null;
+  }
+};
+
+/**
+ * plant_list 테이블에서 식물 사전 데이터를 가져옵니다.
+ * @returns {Promise<Array<{
+ *   id: number;
+ *   updated_at: string;
+ *   image_url: string;
+ *   plant_name: string;
+ *   description: string;
+ * }> | null>} 식물 사전 데이터 배열 또는 null (오류 발생 시)
+ */
+export const getPlantList = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('plant_list')
+      .select('id, updated_at, image_url, plant_name, description')
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching plant list:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('getPlantList function error:', err);
+    return null;
   }
 };

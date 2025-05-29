@@ -8,13 +8,51 @@ import ChevronUpIcon from "../../../../assets/svgs/ChevronUp.svg";
 import ChevronDownIcon from "../../../../assets/svgs/ChevronDown.svg";
 import { Colors } from "../../../constants/Colors";
 import { useState, useRef, useEffect } from "react";
+import {MapStackParamList} from "../../../nav/stack/Map"
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { getFoundPlants } from "../../../libs/supabase/supabaseOperations";
 
-export const MapScreen = () => {
+type MapScreenProps = NativeStackScreenProps<MapStackParamList,'Map'>
+
+type FoundPlant = {
+  id: string;
+  lat: number;
+  lng: number;
+  image_url: string;
+  plant_name: string;
+  description: string;
+  memo: string;
+};
+
+export const MapScreen = ({navigation}:MapScreenProps) => {
   const { latitude, longitude, isLoading, error } = useLocationStore();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [foundPlants, setFoundPlants] = useState<FoundPlant[]>([]);
+  const [isLoadingPlants, setIsLoadingPlants] = useState(true);
   const menuAnimation = useRef(new Animated.Value(1)).current;
   const buttonAnimation = useRef(new Animated.Value(1)).current;
-const menuheight = 125;
+  const menuheight = 125;
+
+  // 발견된 식물 데이터 가져오기
+  useEffect(() => {
+    const fetchFoundPlants = async () => {
+      try {
+        const plants = await getFoundPlants();
+        if (plants) {
+          setFoundPlants(plants);
+        }
+      } catch (error) {
+        console.error('Error fetching found plants:', error);
+        Alert.alert('오류', '식물 데이터를 가져오는 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoadingPlants(false);
+      }
+    };
+
+    fetchFoundPlants();
+  }, []);
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(menuAnimation, {
@@ -40,28 +78,85 @@ const menuheight = 125;
     outputRange: [0, -menuheight],
   });
 
+  const handleCameraPress = () => {
+    launchCamera({
+      mediaType: 'photo',
+      quality: 1,
+    }, (response) => {
+      if (response.didCancel) {
+        return;
+      }
+      if (response.errorCode) {
+        Alert.alert('오류', '카메라 실행 중 오류가 발생했습니다.');
+        return;
+      }
+      if (response.assets && response.assets[0]?.uri) {
+        navigation.navigate('ImageProcessing', {
+          imageUri: response.assets[0].uri,
+        });
+      } else {
+        Alert.alert('오류', '이미지를 가져올 수 없습니다.');
+      }
+    });
+  };
+
+  const handleGalleryPress = () => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      quality: 1,
+    }, (response) => {
+      if (response.didCancel) {
+        return;
+      }
+      if (response.errorCode) {
+        Alert.alert('오류', '갤러리 실행 중 오류가 발생했습니다.');
+        return;
+      }
+      if (response.assets && response.assets[0]?.uri) {
+        navigation.navigate('ImageProcessing', {
+          imageUri: response.assets[0].uri,
+        });
+      } else {
+        Alert.alert('오류', '이미지를 가져올 수 없습니다.');
+      }
+    });
+  };
+
+  const handleMarkerPress = (plant: FoundPlant) => {
+    Alert.alert(
+      plant.plant_name || '이름 없는 식물',
+      `${plant.description || '설명 없음'}\n\n메모: ${plant.memo || '메모 없음'}`,
+      [
+        {
+          text: '확인',
+          style: 'default'
+        }
+      ]
+    );
+  };
+
   return <Background>
     <View className="flex-1">
-{/*      
       <NaverMapView
-          style={{ flex: 1 }}
-          initialCamera={{
-            latitude: 37.5666102,  // 서울 중심부 위도
-            longitude: 126.9783881,  // 서울 중심부 경도
-            zoom: 12,  // 줌 레벨
-          }}
-        >
+        style={{ flex: 1 }}
+        initialCamera={{
+          latitude: latitude || 37.5666102,
+          longitude: longitude || 126.9783881,
+          zoom: 12,
+        }}
+      >
+        {foundPlants.map((plant) => (
           <NaverMapMarkerOverlay
-    latitude={37.5665} // 마커의 위도
-    longitude={126.9780} // 마커의 경도
-    // image={require('../../../../assets/svgs/Camera.svg')} // 마커 이미지 (선택 사항)
-    // caption={{ text: '서울시청' }} // 마커 캡션 (선택 사항)
-    // width={48} // 마커 너비 (선택 사항)
-    // height={48} // 마커 높이 (선택 사항)
-    onTap={() => Alert.alert('마커가 탭되었습니다!')} // 마커 탭 이벤트 핸들러 (선택 사항)
-  />
-        </NaverMapView> */}
-
+            key={plant.id}
+            latitude={plant.lat}
+            longitude={plant.lng}
+            onTap={() => handleMarkerPress(plant)}
+            image={require('../../../../assets/pngs/flowers/flower1.png')}
+            width={32}
+            height={32}
+          />
+        ))}
+      </NaverMapView>
     </View>
     
     {/* 메뉴바 */}
@@ -73,12 +168,18 @@ const menuheight = 125;
       }}
     ><Text className="text-lg font-bold">발견한 식물을 추가해 보세요!</Text>
      <View className="w-full flex-row justify-between mt-2">
-      <TouchableOpacity className="flex-1 py-4 rounded-md flex-row items-center justify-center border border-gray-300">
+      <TouchableOpacity 
+        className="flex-1 py-4 rounded-md flex-row items-center justify-center border border-gray-300"
+        onPress={handleCameraPress}
+      >
        <CameraIcon style={{color: Colors.svggray, width: 20, height: 20,marginRight: 8}}/>
         <Text>카메라로 찍기</Text>
       </TouchableOpacity>
       <View className="w-4"/>
-      <TouchableOpacity className="flex-1 py-4 rounded-md flex-row items-center justify-center border border-gray-300">
+      <TouchableOpacity 
+        className="flex-1 py-4 rounded-md flex-row items-center justify-center border border-gray-300"
+        onPress={handleGalleryPress}
+      >
         <ImageAddIcon style={{color: Colors.svggray, width: 20, height: 20,marginRight: 8}}/>
         <Text>앨범에서 사진 추가</Text>
       </TouchableOpacity>

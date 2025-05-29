@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import "./global.css"
 import { SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, Platform, View } from 'react-native'; // ActivityIndicator, View 제거
+import { StatusBar, Platform } from 'react-native'; // ActivityIndicator, View 제거, Alert 추가
 import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from './src/store/authStore';
 import AuthStack from './src/nav/stack/Auth'; // AuthStack import 추가
@@ -12,6 +12,7 @@ import SplashScreen from "react-native-splash-screen";
 import { requestMultiple, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { usePermissionStore } from './src/store/permissionStore';
 import { useLocationStore } from './src/store/locationStore'; // locationStore import 추가
+import { GoogleSignin } from '@react-native-google-signin/google-signin'; // GoogleSignin import 추가
 
 function App(): React.JSX.Element {
   const { isLoading: authLoading, checkLoginStatus } = useAuthStore();
@@ -33,6 +34,19 @@ function App(): React.JSX.Element {
 
   // 타이머 ID를 저장하기 위한 ref (컴포넌트 리렌더링 시에도 유지)
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Google Sign-In 설정
+    try {
+      GoogleSignin.configure({
+        webClientId: '957741045904-3p8mgb02fbrb80br6o2j38fnc2g4kadd.apps.googleusercontent.com',
+        iosClientId:'957741045904-kn7aqdbfef5k0jtgsedvjqamjkegb6s1.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+      });
+    } catch (error) {
+      console.error('[App.tsx] Google Sign-In configuration error:', error);
+    }
+  }, []); 
 
   useEffect(() => {
     // 앱 시작 시 로그인 상태 체크

@@ -22,6 +22,7 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
     name="MapStack"
         component={MapStack}
         options={({route}) => {
+          const routeName = getFocusedRouteNameFromRoute(route) ?? 'Map';
           return {
           tabBarLabel: '지도',
           tabBarIcon: ({focused}) =>
@@ -30,6 +31,9 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
             ) : (
               <MapIcon style={{color: '#999999'}} />
             ),
+          tabBarStyle: {
+            display: routeName === 'Map' ? 'flex' : 'none'
+          }
           }
     }}
   />
@@ -37,6 +41,7 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
     name="PiodexStack"
         component={PiodexStack}
         options={({route}) => {
+          const routeName = getFocusedRouteNameFromRoute(route) ?? 'Piodex';
           return {
             tabBarLabel: '피오덱스',
             tabBarIcon: ({focused}) =>
@@ -45,6 +50,9 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
               ) : (
                 <PiodexIcon style={{color: '#999999'}} />
               ),
+              tabBarStyle: {
+                display: routeName === 'Piodex' ? 'flex' : 'none'
+              }
           }
         }}
   />
