@@ -2,12 +2,15 @@ import { supabase } from './supabase';
 import { Platform } from 'react-native';
 import * as RNFS from 'react-native-fs';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
+import { useAuthStore } from '../../store/authStore';
+const { isLoggedIn} = useAuthStore.getState();
 
-/**
+export const getCurrentUserId = async (): Promise<string | null> => {
+  /**
  * 현재 로그인된 Supabase 사용자의 ID를 가져옵니다.
  * @returns {Promise<string | null>} 사용자 ID 또는 null (로그인되지 않았거나 오류 발생 시)
  */
-export const getCurrentUserId = async (): Promise<string | null> => {
+  if(!isLoggedIn) return null;
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -28,15 +31,13 @@ export const getCurrentUserId = async (): Promise<string | null> => {
     return null; // 예외 발생 시 null 반환
   }
 };
-
-/**
+export const requestAccountDeletion = async (): Promise<{ success: boolean, error?: any }> => {
+  /**
  * 회원 탈퇴를 위한 Supabase Edge Function 호출을 요청합니다.
  * 실제 삭제 로직은 'delete-user' Edge Function에서 처리됩니다.
  * @returns {Promise<{ success: boolean, error?: any }>} 요청 성공 여부와 에러 객체
  */
-export const requestAccountDeletion = async (): Promise<{ success: boolean, error?: any }> => {
-  console.log('Supabase 회원 탈퇴 요청 시도');
-
+  if(!isLoggedIn) return { success: false, error: new Error('로그인되지 않았습니다.') };
   try {
     // 'delete-user'는 실제 구현된 Edge Function의 이름이어야 합니다.
     const { error } = await supabase.functions.invoke('delete-user');
@@ -58,12 +59,12 @@ export const requestAccountDeletion = async (): Promise<{ success: boolean, erro
     return { success: false, error: new Error(errorMessage) };
   }
 };
-
-/**
+export const getUserNickname = async (): Promise<string | null> => {
+  /**
  * 현재 로그인된 사용자의 닉네임을 가져옵니다.
  * @returns {Promise<string | null>} 사용자의 닉네임 또는 null (로그인되지 않았거나 오류 발생 시)
  */
-export const getUserNickname = async (): Promise<string | null> => {
+  if(!isLoggedIn) return null;
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -89,12 +90,12 @@ export const getUserNickname = async (): Promise<string | null> => {
     return null;
   }
 };
-
-/**
+export const checkNicknameUpdateAvailability = async (): Promise<{ canUpdate: boolean, message?: string }> => {
+  /**
  * 사용자의 닉네임 변경 가능 여부를 확인합니다.
  * @returns {Promise<{ canUpdate: boolean, message?: string }>} 변경 가능 여부와 메시지
  */
-export const checkNicknameUpdateAvailability = async (): Promise<{ canUpdate: boolean, message?: string }> => {
+  if(!isLoggedIn) return { canUpdate: false, message: '로그인되지 않았습니다.' };
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -140,14 +141,14 @@ export const checkNicknameUpdateAvailability = async (): Promise<{ canUpdate: bo
     return { canUpdate: false, message: '닉네임 변경 가능 여부를 확인하는 중 오류가 발생했습니다.' };
   }
 };
-
-/**
+export const uploadImageAndGetUrl = async (imageUri: string, bucketName: string): Promise<string | null> => {
+  /**
  * 이미지를 Supabase 스토리지에 업로드하고 공개 URL을 반환합니다.
  * @param imageUri 업로드할 이미지의 로컬 URI
  * @param bucketName 이미지를 저장할 버킷 이름
  * @returns {Promise<string | null>} 이미지의 공개 URL 또는 null (오류 발생 시)
  */
-export const uploadImageAndGetUrl = async (imageUri: string, bucketName: string): Promise<string | null> => {
+  if(!isLoggedIn) return null;
   try {
     const userId = await getCurrentUserId();
     if (!userId) {
@@ -195,12 +196,6 @@ export const uploadImageAndGetUrl = async (imageUri: string, bucketName: string)
     return null;
   }
 };
-
-/**
- * found_plants 테이블에 식물 데이터를 저장합니다.
- * @param plantData 저장할 식물 데이터
- * @returns {Promise<{ success: boolean, error?: any }>} 저장 성공 여부와 에러 객체
- */
 export const saveFoundPlant = async (plantData: {
   userId: string;
   imageUrl: string;
@@ -210,6 +205,13 @@ export const saveFoundPlant = async (plantData: {
   description: string | null; // plantName은 description으로 우선 사용합니다. 필요시 컬럼 추가.
   plantName: string | null; 
 }): Promise<{ success: boolean, error?: any }> => {
+
+/**
+ * found_plants 테이블에 식물 데이터를 저장합니다.
+ * @param plantData 저장할 식물 데이터
+ * @returns {Promise<{ success: boolean, error?: any }>} 저장 성공 여부와 에러 객체
+ */
+  if(!isLoggedIn) return { success: false, error: new Error('로그인되지 않았습니다.') };
   try {
     const { userId, imageUrl, memo, lat, lng, description, plantName } = plantData;
     
@@ -239,20 +241,20 @@ export const saveFoundPlant = async (plantData: {
     return { success: false, error: err };
   }
 };
-
-/**
+export const getFoundPlants = async () => {
+  /**
  * 발견된 식물들의 위치 정보를 가져옵니다.
  * @returns {Promise<Array<{
  *   id: string;
- *   lat: number;
- *   lng: number;
- *   image_url: string;
- *   plant_name: string;
- *   description: string;
- *   memo: string;
- * }> | null>} 발견된 식물들의 정보 배열 또는 null (오류 발생 시)
- */
-export const getFoundPlants = async () => {
+  *   lat: number;
+  *   lng: number;
+  *   image_url: string;
+  *   plant_name: string;
+  *   description: string;
+  *   memo: string;
+  * }> | null>} 발견된 식물들의 정보 배열 또는 null (오류 발생 시)
+  */
+  if(!isLoggedIn) return null;
   try {
     const { data, error } = await supabase
       .from('found_plants')
@@ -269,14 +271,14 @@ export const getFoundPlants = async () => {
     return null;
   }
 };
-
-/**
+export const getSignedImageUrl = async (imagePath: string, bucketName: string): Promise<string | null> => {
+  /**
  * 스토리지의 이미지에 대한 서명된 URL을 생성합니다.
  * @param imagePath 스토리지 내 이미지 경로
  * @param bucketName 버킷 이름
  * @returns {Promise<string | null>} 서명된 URL 또는 null (오류 발생 시)
  */
-export const getSignedImageUrl = async (imagePath: string, bucketName: string): Promise<string | null> => {
+  if(!isLoggedIn) return null;
   try {
     const { data, error } = await supabase.storage
       .from(bucketName)
@@ -293,22 +295,22 @@ export const getSignedImageUrl = async (imagePath: string, bucketName: string): 
     return null;
   }
 };
-
-/**
+export const getCurrentUserFoundPlants = async () => {
+  /**
  * 현재 사용자가 발견한 식물들의 정보를 가져옵니다.
  * @returns {Promise<Array<{
  *   id: string;
- *   created_at: string;
- *   image_url: string;
- *   plant_name: string;
- *   description: string;
- *   memo: string;
- *   lat: number;
- *   lng: number;
- *   signed_url?: string;
- * }> | null>} 현재 사용자가 발견한 식물들의 정보 배열 또는 null (오류 발생 시)
- */
-export const getCurrentUserFoundPlants = async () => {
+  *   created_at: string;
+  *   image_url: string;
+  *   plant_name: string;
+  *   description: string;
+  *   memo: string;
+  *   lat: number;
+  *   lng: number;
+  *   signed_url?: string;
+  * }> | null>} 현재 사용자가 발견한 식물들의 정보 배열 또는 null (오류 발생 시)
+  */
+  if(!isLoggedIn) return null;
   try {
     const userId = await getCurrentUserId();
     if (!userId) {
@@ -354,18 +356,18 @@ export const getCurrentUserFoundPlants = async () => {
     return null;
   }
 };
-
-/**
+export const getPlantList = async () => {
+  /**
  * plant_list 테이블에서 식물 사전 데이터를 가져옵니다.
  * @returns {Promise<Array<{
  *   id: number;
- *   updated_at: string;
- *   image_url: string;
- *   plant_name: string;
- *   description: string;
- * }> | null>} 식물 사전 데이터 배열 또는 null (오류 발생 시)
- */
-export const getPlantList = async () => {
+  *   updated_at: string;
+  *   image_url: string;
+  *   plant_name: string;
+  *   description: string;
+  * }> | null>} 식물 사전 데이터 배열 또는 null (오류 발생 시)
+  */
+  if(!isLoggedIn) return null;
   try {
     const { data, error } = await supabase
       .from('plant_list')
