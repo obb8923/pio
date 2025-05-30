@@ -27,12 +27,11 @@ type FoundPlant = {
 
 export const MapScreen = ({navigation}:MapScreenProps) => {
   const { latitude, longitude, isLoading, error } = useLocationStore();
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isFabOpen, setIsFabOpen] = useState(false);
   const [foundPlants, setFoundPlants] = useState<FoundPlant[]>([]);
   const [isLoadingPlants, setIsLoadingPlants] = useState(true);
-  const menuAnimation = useRef(new Animated.Value(1)).current;
-  const buttonAnimation = useRef(new Animated.Value(1)).current;
-  const menuheight = 125 + TAB_BAR_HEIGHT;
+  const fabAnimation = useRef(new Animated.Value(0)).current;
+  const overlayAnimation = useRef(new Animated.Value(0)).current;
 
   // 발견된 식물 데이터 가져오기
   useEffect(() => {
@@ -53,32 +52,28 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     fetchFoundPlants();
   }, []);
 
+  // FAB 애니메이션
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(menuAnimation, {
-        toValue: isMenuOpen ? 1 : 0,
-        duration: 300,
+      Animated.timing(fabAnimation, {
+        toValue: isFabOpen ? 1 : 0,
+        duration: 250,
         useNativeDriver: true,
       }),
-      Animated.timing(buttonAnimation, {
-        toValue: isMenuOpen ? 1 : 0,
-        duration: 300,
+      Animated.timing(overlayAnimation, {
+        toValue: isFabOpen ? 1 : 0,
+        duration: 250,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [isMenuOpen]);
+  }, [isFabOpen]);
 
-  const menuTranslateY = menuAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [menuheight, 0],
-  });
-
-  const buttonTranslateY = buttonAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -menuheight+TAB_BAR_HEIGHT],
-  });
+  const toggleFab = () => {
+    setIsFabOpen(!isFabOpen);
+  };
 
   const handleCameraPress = () => {
+    setIsFabOpen(false);
     launchCamera({
       mediaType: 'photo',
       quality: 1,
@@ -101,6 +96,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   };
 
   const handleGalleryPress = () => {
+    setIsFabOpen(false);
     launchImageLibrary({
       mediaType: 'photo',
       quality: 1,
@@ -135,6 +131,27 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     );
   };
 
+  // 애니메이션 값들
+  const cameraButtonTranslateY = fabAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -80],
+  });
+
+  const galleryButtonTranslateY = fabAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -140],
+  });
+
+  const buttonScale = fabAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  const overlayOpacity = overlayAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.3],
+  });
+
   return <Background>
     <View className="flex-1">
       <NaverMapView
@@ -159,54 +176,63 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       </NaverMapView>
     </View>
     
-    {/* 메뉴바 */}
-    <Animated.View
-      className="py-6 px-4 absolute w-full rounded-t-3xl bg-white border-t border-l border-r border-gray-300"
-      style={{
-        transform: [{ translateY: menuTranslateY }],
-        height: menuheight,
-        bottom: 0,
-      }}
-    ><Text className="text-lg font-bold">발견한 식물을 추가해 보세요!</Text>
-     <View className="w-full flex-row justify-between mt-2">
-      <TouchableOpacity 
-        className="flex-1 py-4 rounded-md flex-row items-center justify-center border border-gray-300"
-        onPress={handleCameraPress}
+    {/* Extended FAB */}
+    <View className="absolute" style={{ bottom: TAB_BAR_HEIGHT + 20, right: 20 }}>
+      {/* 갤러리 버튼 */}
+      <Animated.View
+        style={{
+          transform: [
+            { translateY: galleryButtonTranslateY },
+            { scale: buttonScale }
+          ],
+          opacity: fabAnimation,
+        }}
       >
-       <CameraIcon style={{color: Colors.svggray, width: 20, height: 20,marginRight: 8}}/>
-        <Text className="">카메라로 찍기</Text>
-      </TouchableOpacity>
-      <View className="w-4"/>
-      <TouchableOpacity 
-        className="flex-1 py-4 rounded-md flex-row items-center justify-center border border-gray-300"
-        onPress={handleGalleryPress}
+        <TouchableOpacity
+          className="bg-greenTab rounded-full px-6 py-4 flex-row justify-center items-center shadow-lg"
+          onPress={handleGalleryPress}
+        >
+          <ImageAddIcon style={{color: Colors.greenActive, width: 20, height: 20, marginRight: 8}}/>
+          <Text className="text-greenActive font-medium">앨범에서 선택</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* 카메라 버튼 */}
+      <Animated.View
+        style={{
+          transform: [
+            { translateY: cameraButtonTranslateY },
+            { scale: buttonScale }
+          ],
+          opacity: fabAnimation,
+        }}
       >
-        <ImageAddIcon style={{color: Colors.svggray, width: 20, height: 20,marginRight: 8}}/>
-        <Text className="">앨범에서 사진 추가</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          className="bg-greenTab rounded-full px-6 py-4 flex-row justify-center items-center shadow-lg"
+          onPress={handleCameraPress}
+        >
+          <CameraIcon style={{color: Colors.greenActive, width: 20, height: 20, marginRight: 8}}/>
+          <Text className="text-greenActive font-medium">카메라로 찍기</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
-     </View>
-    </Animated.View>
-
-    {/* 버튼 */}
-    <Animated.View 
-      className="absolute w-full items-center justify-center"
-      style={{
-        transform: [{ translateY: buttonTranslateY }],
-        bottom: TAB_BAR_HEIGHT + 16,
-      }}
-    >
+      {/* 메인 Extended FAB */}
       <TouchableOpacity
-        className="w-20 h-10 rounded-full bg-white border border-gray-300 items-center justify-center"
-        onPress={() => setIsMenuOpen(!isMenuOpen)}
+        className="bg-greenTab rounded-full px-6 py-4 flex-row justify-center items-center shadow-lg"
+        onPress={toggleFab}
       >
-        {isMenuOpen ? (
-          <ChevronDownIcon style={{color: Colors.svggray, width: 20, height: 20}}/>
-        ) : (
-          <ChevronUpIcon style={{color: Colors.svggray, width: 20, height: 20}}/>
-        )}
+        <Animated.Text
+          className="text-greenActive text-3xl font-bold"
+          style={{
+            transform: [{ rotate: isFabOpen ? '45deg' : '0deg' }]
+          }}
+        >
+          +
+        </Animated.Text>
+        <Text className="text-greenActive text-lg font-bold ml-2">발견한 식물 추가하기</Text>
+        
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   </Background>
 }
 
