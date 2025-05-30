@@ -12,7 +12,7 @@ import {MapStackParamList} from "../../../nav/stack/Map"
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getFoundPlants } from "../../../libs/supabase/supabaseOperations";
-
+import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
 type MapScreenProps = NativeStackScreenProps<MapStackParamList,'Map'>
 
 type FoundPlant = {
@@ -32,7 +32,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const [isLoadingPlants, setIsLoadingPlants] = useState(true);
   const menuAnimation = useRef(new Animated.Value(1)).current;
   const buttonAnimation = useRef(new Animated.Value(1)).current;
-  const menuheight = 125;
+  const menuheight = 125 + TAB_BAR_HEIGHT;
 
   // 발견된 식물 데이터 가져오기
   useEffect(() => {
@@ -75,7 +75,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
 
   const buttonTranslateY = buttonAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -menuheight],
+    outputRange: [0, -menuheight+TAB_BAR_HEIGHT],
   });
 
   const handleCameraPress = () => {
@@ -160,11 +160,12 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     </View>
     
     {/* 메뉴바 */}
-    <Animated.View 
-      className="py-6 px-4 absolute bottom-0 w-full rounded-t-3xl bg-white border-t border-l border-r border-gray-300"
+    <Animated.View
+      className="py-6 px-4 absolute w-full rounded-t-3xl bg-white border-t border-l border-r border-gray-300"
       style={{
         transform: [{ translateY: menuTranslateY }],
         height: menuheight,
+        bottom: 0,
       }}
     ><Text className="text-lg font-bold">발견한 식물을 추가해 보세요!</Text>
      <View className="w-full flex-row justify-between mt-2">
@@ -173,7 +174,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
         onPress={handleCameraPress}
       >
        <CameraIcon style={{color: Colors.svggray, width: 20, height: 20,marginRight: 8}}/>
-        <Text>카메라로 찍기</Text>
+        <Text className="">카메라로 찍기</Text>
       </TouchableOpacity>
       <View className="w-4"/>
       <TouchableOpacity 
@@ -181,7 +182,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
         onPress={handleGalleryPress}
       >
         <ImageAddIcon style={{color: Colors.svggray, width: 20, height: 20,marginRight: 8}}/>
-        <Text>앨범에서 사진 추가</Text>
+        <Text className="">앨범에서 사진 추가</Text>
       </TouchableOpacity>
 
      </View>
@@ -189,13 +190,14 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
 
     {/* 버튼 */}
     <Animated.View 
-      className="absolute bottom-4 w-full items-center justify-center"
+      className="absolute w-full items-center justify-center"
       style={{
         transform: [{ translateY: buttonTranslateY }],
+        bottom: TAB_BAR_HEIGHT + 16,
       }}
     >
       <TouchableOpacity
-        className="w-20 h-10 rounded-full bg-bluegray border border-gray-300 items-center justify-center"
+        className="w-20 h-10 rounded-full bg-white border border-gray-300 items-center justify-center"
         onPress={() => setIsMenuOpen(!isMenuOpen)}
       >
         {isMenuOpen ? (

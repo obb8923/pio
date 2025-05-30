@@ -3,18 +3,13 @@ import { Background } from "../../../../components/Background"
 import { FoundPlant } from ".."
 import { useRoute } from "@react-navigation/native"
 import { NaverMapView,NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
-import { BlurView } from "@react-native-community/blur";
 
 export const DetailScreen = ()=>{
     const route = useRoute();
-    const {id,image_url,signed_url,plant_name,description,memo,lat,lng} = route.params as FoundPlant   
+    const {id,signed_url,plant_name,description,memo,lat,lng} = route.params as FoundPlant   
     return (
         <Background>
-             <BlurView
-        style={{width:100,height:100}}
-        blurAmount={10}
-        reducedTransparencyFallbackColor="white"
-      />
+           
         <ScrollView className="flex-1 p-4">
           {/* 사진 영역 - 중앙정렬, 정사각형, 둥근 모서리 */}
           <View className="items-center mb-6">
@@ -60,8 +55,6 @@ export const DetailScreen = ()=>{
                   />
                     </NaverMapView>  
                     </View>
-
-        
         </ScrollView>
       </Background>
     )

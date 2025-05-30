@@ -1,10 +1,14 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Animated } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image, Animated, Dimensions } from "react-native";
 import { Background } from "../../../components/Background";
 import { useState, useRef, useEffect } from "react";
 import LinearGradient from 'react-native-linear-gradient';
 import { getCurrentUserFoundPlants, getPlantList } from "../../../libs/supabase/supabaseOperations";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "../../../nav/stack/Piodex";
+import { useAuthStore } from "../../../store/authStore";
+import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 // 식물 데이터 타입 정의
@@ -36,13 +40,20 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   const [loading, setLoading] = useState(true);
   const [plantListLoading, setPlantListLoading] = useState(false);
   const slideAnim = useState(new Animated.Value(0))[0];
+  const { isLoggedIn } = useAuthStore();
+  const insets = useSafeAreaInsets();
+  
+  // 화면 너비 가져오기
+  const screenWidth = Dimensions.get('window').width;
+  const tabWidth = (screenWidth - 32) / 2; // 전체 너비에서 좌우 패딩(32) 제외 후 2로 나눔
 
   // 발견된 식물 데이터 로드
   useEffect(() => {
-    loadFoundPlants();
-  }, []);
+    if(isLoggedIn) loadFoundPlants();
+  }, [isLoggedIn]);
 
   const loadFoundPlants = async () => {
+    if(!isLoggedIn) return;
     try {
       setLoading(true);
       const plants = await getCurrentUserFoundPlants();
@@ -99,6 +110,11 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   };
 
   const renderContent = () => {
+    if(!isLoggedIn) return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-gray-500 text-center">로그인이 필요합니다.</Text>
+      </View>
+    );
     // 로딩 상태 체크 (or로 묶기)
     if (loading || plantListLoading) {
       const loadingText = activeTab === 'piodex' ? '로딩 중...' : '식물 사전 로딩 중...';
@@ -158,21 +174,39 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
     // 식물 사전 탭 (현재는 준비중 메시지만 표시)
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-gray-500 text-center">식물 사전 기능은 준비중입니다\n조금만 기다려주세요!</Text>
+        <Text className="text-greenActive text-center">식물 사전 기능은 준비중입니다\n조금만 기다려주세요!</Text>
       </View>
     );
   };
 
   return (
-    <Background>
-      <View className="flex-1 p-4">
+    <View className="flex-1" style={{paddingTop: insets.top}}>
+      <Image source={require('../../../../assets/pngs/BackgroundGreen.png')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
+      <View className="flex-1 mx-2 absolute top-0 left-0 right-0 bottom-0 bg-white opacity-90"/>
+
+      <View className="flex-1 px-4" style={{paddingBottom: TAB_BAR_HEIGHT+16}}>
+        
       {/* 탭바 */}
-        <View className="flex-row justify-between items-center py-4 relative">
+        <View className="flex-row justify-between items-center py-6 relative ">
+          <Animated.View 
+            className="absolute bottom-0 left-0 h-full justify-center items-center"
+            style={{
+              width: '50%',
+              transform: [{
+                translateX: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, tabWidth]
+                })
+              }]
+            }}
+          >
+            <View className="h-1.5 bg-greenTab rounded-full w-10"/>
+          </Animated.View>
           <TouchableOpacity 
             onPress={() => handleTabChange('piodex')}
             className={`px-6 py-2 h-10 w-1/2 justify-center items-center`}
           >
-            <Text className={`text-base ${activeTab === 'piodex' ? 'text-black font-semibold' : 'text-gray-600'}`}>
+            <Text className={`text-base ${activeTab === 'piodex' ? 'text-greenTab font-semibold' : 'text-greenInactive'}`}>
               도감
             </Text>
           </TouchableOpacity>
@@ -180,30 +214,18 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
             onPress={() => handleTabChange('plant')}
             className={`px-6 py-2 h-10 w-1/2 justify-center items-center`}
           >
-            <Text className={`text-base ${activeTab === 'plant' ? 'text-black font-semibold' : 'text-gray-600'}`}>
+            <Text className={`text-base ${activeTab === 'plant' ? 'text-greenTab font-semibold' : 'text-greenInactive'}`}>
               식물 사전
             </Text>
           </TouchableOpacity>
-          <Animated.View 
-            className="absolute bottom-0 h-0.5 bg-black"
-            style={{
-              width: '50%',
-              transform: [{
-                translateX: slideAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 200]
-                })
-              }]
-            }}
-          />
         </View>
-
+            <View className="w-full h-0.5 bg-greenTab rounded-full"/>
         {/* 콘텐츠 */}
-        <ScrollView className="flex-1 mt-4">
+        <ScrollView className="flex-1 mt-4 px-4">
           {renderContent()}
         </ScrollView>
-      </View>
-    </Background>
+        </View>
+    </View>
   );
 };
 

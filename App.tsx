@@ -6,7 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar, Platform } from 'react-native'; // ActivityIndicator, View 제거, Alert 추가
 import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from './src/store/authStore';
-import AuthStack from './src/nav/stack/Auth'; // AuthStack import 추가
+// import AuthStack from './src/nav/stack/Auth'; // AuthStack import 추가
 import AppTab from './src/nav/tab/App'; // AppTab import 추가
 import SplashScreen from "react-native-splash-screen";
 import { requestMultiple, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -145,7 +145,7 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{flex:1}}>
-        <SafeAreaView style={{flex:1}} edges={['top', 'left', 'right']} >
+        <SafeAreaView style={{flex:1}} edges={[ 'left', 'right']} >
           <NavigationContainer>
             <StatusBar barStyle="dark-content" translucent={true}/>
             {/* {isLoggedIn ? <AppTab /> : <AuthStack />} */}

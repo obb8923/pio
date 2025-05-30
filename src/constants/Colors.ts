@@ -11,4 +11,7 @@ export const Colors = {
   svggray2: '#9ca3af',
   bluegray: '#F1F2F4',
   red: '#FF0000',
+  greenTab: '#1C8597',
+  greenInactive: '#6AE3D0',
+  greenActive: '#ADFDAD',
 }

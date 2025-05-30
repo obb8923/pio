@@ -12,7 +12,7 @@ import ProfileIcon from '../../../assets/svgs/Profile.svg';
 
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import {Colors} from '../../constants/Colors';
-import {TabNavOptions} from '../../constants/TabNavOptions';
+import {TabNavOptions, TabBarStyle,TabBarStyleNone} from '../../constants/TabNavOptions';
 const Tab = createBottomTabNavigator();
 const AppTab = () => {
   return (
@@ -27,13 +27,12 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
           tabBarLabel: '지도',
           tabBarIcon: ({focused}) =>
             focused ? (
-              <MapIcon style={{color: '#36384E'}} />
+              <MapIcon style={{color: '#ADFDAD'}} />
             ) : (
-              <MapIcon style={{color: '#999999'}} />
+              <MapIcon style={{color: '#6AE3D0'}} />
             ),
-          tabBarStyle: {
-            display: routeName === 'Map' ? 'flex' : 'none'
-          }
+          tabBarStyle: routeName === 'Map' ? TabBarStyle : TabBarStyleNone
+          
           }
     }}
   />
@@ -46,13 +45,12 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
             tabBarLabel: '피오덱스',
             tabBarIcon: ({focused}) =>
               focused ? (
-                <PiodexIcon style={{color: '#36384E'}} />
+                <PiodexIcon style={{color: '#ADFDAD'}} />
               ) : (
-                <PiodexIcon style={{color: '#999999'}} />
+                <PiodexIcon style={{color: '#6AE3D0'}} />
               ),
-              tabBarStyle: {
-                display: routeName === 'Piodex' ? 'flex' : 'none'
-              }
+              tabBarStyle: routeName === 'Piodex' ? TabBarStyle : TabBarStyleNone
+
           }
         }}
   />
@@ -60,14 +58,16 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
     name="ProfileStack"
         component={ProfileStack}
         options={({route}) => {
+          const routeName = getFocusedRouteNameFromRoute(route) ?? 'Profile';
           return {
           tabBarLabel: '프로필',
           tabBarIcon: ({focused}) =>
             focused ? (
-              <ProfileIcon style={{color: '#36384E'}} />
+              <ProfileIcon style={{color: '#ADFDAD'}} />
             ) : (
-              <ProfileIcon style={{color: '#999999'}} />
+              <ProfileIcon style={{color: '#6AE3D0'}} />
             ),
+            tabBarStyle: routeName === 'Profile' ? TabBarStyle : TabBarStyleNone
           }
     }}
   />

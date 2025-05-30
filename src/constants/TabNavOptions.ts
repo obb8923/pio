@@ -2,12 +2,15 @@ import {Platform} from 'react-native';
 
 const isIOS = Platform.OS === 'ios';
 
+// 탭바 높이 상수 export
+export const TAB_BAR_HEIGHT = isIOS ? 100 : 78;
+
 export const TabNavOptions0 = {
   headerShown: false,
   tabBarStyle: {
     borderTopColor: 'transparent',
     backgroundColor: '#36384E',
-    height: isIOS ? 100 : 78,
+    height: TAB_BAR_HEIGHT,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     padding: 10,
@@ -25,19 +28,21 @@ export const TabNavOptions0 = {
   tabBarActiveTintColor: '#fafafa',
   tabBarInactiveTintColor: '#585a6c',
 };
+export const TabBarStyle = {
+  borderTopColor: 'transparent',
+  backgroundColor: '#1C8597',
+  height: TAB_BAR_HEIGHT,
+  borderTopLeftRadius: 10,
+  borderTopRightRadius: 10,
+  padding: 10,
+  display: 'flex' as const,
+  elevation: 0,
+  position: 'absolute' as const,
+}
+export const TabBarStyleNone = {  display: 'none' as const}
 export const TabNavOptions = {
     headerShown: false,
-    tabBarStyle: {
-      borderTopColor: 'transparent',
-      backgroundColor: '#fafafa',
-    //   height: isIOS ? 100 : 78,
-      borderTopLeftRadius: 10,
-      borderTopRightRadius: 10,
-      padding: 10,
-      display: 'flex',
-
-    //   position: 'absolute',
-    },
+    tabBarStyle: TabBarStyle,
     tabBarItemStyle: {flex: 1},
     tabBarIconStyle: {flex: 1},
     tabBarLabelStyle: {
@@ -47,7 +52,7 @@ export const TabNavOptions = {
       lineHeight: 16.5,
       letterSpacing: -0.275,
     },
-    tabBarActiveTintColor: '#36384E',
-    tabBarInactiveTintColor: '#999999',
+    tabBarActiveTintColor: '#ADFDAD',
+    tabBarInactiveTintColor: '#6AE3D0',
   };
   
