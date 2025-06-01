@@ -3,59 +3,90 @@ import { Background } from "../../../../components/Background"
 import { FoundPlant } from ".."
 import { useRoute } from "@react-navigation/native"
 import { NaverMapView,NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
-
-export const DetailScreen = ()=>{
+import { Colors } from "../../../../constants/Colors"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { CustomButton } from "../../../../components/CustomButton"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { PiodexStackParamList } from "../../../../nav/stack/Piodex"
+type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
+export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const route = useRoute();
+    const insets = useSafeAreaInsets();
     const {id,signed_url,plant_name,description,memo,lat,lng} = route.params as FoundPlant   
     return (
-        <Background>
-           
-        <ScrollView className="flex-1 p-4">
-          {/* 사진 영역 - 중앙정렬, 정사각형, 둥근 모서리 */}
-          <View className="items-center mb-6">
-            <Image
-              source={{ uri: signed_url }}
-              className="w-64 h-64 rounded-2xl"
-              resizeMode="cover"
-            />
-          </View>
+       <View className="flex-1">
+       
+       <Image source={require('../../../../../assets/pngs/BackgroundGreen.png')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
+       <ScrollView 
+         className="flex-1 p-2 rounded-lg" 
+         style={{paddingTop: insets.top}}
+         contentContainerStyle={{ paddingBottom: 400 }}>
           
-          {/* 식물 이름 영역 */}
-            <Text className="text-center text-xl font-bold text-gray-800 mb-2">
-              {plant_name?plant_name:'알 수 없는 식물'}
-            </Text>
-           
-  
-          {/* 설명 영역 */}
-            <Text className="text-gray-600 leading-5">
-                {description}
-            </Text>
-  
-          {/* 메모 영역 */}
-            <Text className="text-lg font-semibold text-gray-800 mb-2">
-              {memo}    
-            </Text>
-                {/* 지도 영역 */}
-                <View className="w-full h-64">
+           {/* 사진 영역 */}
+           <View className="items-center my-6 w-full h-72">
+             <Image
+               source={{ uri: signed_url }}
+               className="w-full h-full rounded-lg"
+               resizeMode="cover"
+             />
+           </View>
+           {/* 식물 정보 영역 */}
+           <View className="w-full h-full bg-white rounded-lg p-4">
+           {/* 식물 이름 영역 */}
+           <View className="mb-4 flex-row justify-center items-center">
+             <Text
+               className="rounded-lg p-3 text-center bg-white text-2xl"
+             
+             >{plant_name}</Text>
+   
+           </View>
+   
+           {/* 설명 영역 */}
+             <View className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+               <Text
+                 className="text-gray-600"
+               >
+               {description}
+               </Text>
+             </View>
+           <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
+           {/* 메모 영역 */}
+           <View className="mb-4">
+             <Text
+               className="border border-gray-300 rounded-lg p-3 bg-white min-h-20"
+             >
+               {memo}
+             </Text>
+           </View>      
+             {/* 지도 영역 */}
+             <View className="w-full h-64 bg-red-500">
 
-                  <NaverMapView
-                    style={{ width: '100%', height: '100%' }}
-                    initialCamera={{
-                      latitude: lat,
-                      longitude: lng,
-                      zoom: 15,
-                    }}
-                  ><NaverMapMarkerOverlay
-                  latitude={lat}
-                  longitude={lng}
-                  image={require('../../../../../assets/pngs/flowers/flower1.png')}
-                  width={32}
-                  height={32}
-                
-                  />
-                    </NaverMapView>  
-                    </View>
-        </ScrollView>
-      </Background>
+<NaverMapView
+  style={{ width: '100%', height: '100%' }}
+  initialCamera={{
+    latitude: lat,
+    longitude: lng,
+    zoom: 17,
+  }}
+  isShowZoomControls={false}
+  isShowLocationButton={false}
+><NaverMapMarkerOverlay
+latitude={lat}
+longitude={lng}
+image={require('../../../../../assets/pngs/flowers/flower1.png')}
+width={32}
+height={32}
+
+/>
+  </NaverMapView>  
+  </View> 
+           </View>
+            
+         
+         </ScrollView>  
+         <View className="absolute bottom-10 left-0 right-0 h-20 flex-row justify-center items-center">
+        <CustomButton text="확인" size={60} onPress={()=>navigation.goBack()}/>
+        </View>
+         </View>
     )
 }

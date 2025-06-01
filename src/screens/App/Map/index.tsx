@@ -1,18 +1,18 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Animated, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Animated, Alert } from "react-native";
 import {Background} from "../../../components/Background";
 import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
 import CameraIcon from "../../../../assets/svgs/Camera.svg";
 import ImageAddIcon from "../../../../assets/svgs/ImageAdd.svg";
-import ChevronUpIcon from "../../../../assets/svgs/ChevronUp.svg";
-import ChevronDownIcon from "../../../../assets/svgs/ChevronDown.svg";
 import { Colors } from "../../../constants/Colors";
 import { useState, useRef, useEffect } from "react";
 import {MapStackParamList} from "../../../nav/stack/Map"
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { getFoundPlants } from "../../../libs/supabase/supabaseOperations";
 import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
+import React from "react";
 type MapScreenProps = NativeStackScreenProps<MapStackParamList,'Map'>
 
 type FoundPlant = {
@@ -33,24 +33,27 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const fabAnimation = useRef(new Animated.Value(0)).current;
   const overlayAnimation = useRef(new Animated.Value(0)).current;
 
-  // 발견된 식물 데이터 가져오기
-  useEffect(() => {
-    const fetchFoundPlants = async () => {
-      try {
-        const plants = await getFoundPlants();
-        if (plants) {
-          setFoundPlants(plants);
+  // 발견된 식물 데이터 가져오기 - 화면이 포커스될 때마다 실행
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchFoundPlants = async () => {
+        try {
+          setIsLoadingPlants(true);
+          const plants = await getFoundPlants();
+          if (plants) {
+            setFoundPlants(plants);
+          }
+        } catch (error) {
+          console.error('Error fetching found plants:', error);
+          Alert.alert('오류', '식물 데이터를 가져오는 중 오류가 발생했습니다.');
+        } finally {
+          setIsLoadingPlants(false);
         }
-      } catch (error) {
-        console.error('Error fetching found plants:', error);
-        Alert.alert('오류', '식물 데이터를 가져오는 중 오류가 발생했습니다.');
-      } finally {
-        setIsLoadingPlants(false);
-      }
-    };
+      };
 
-    fetchFoundPlants();
-  }, []);
+      fetchFoundPlants();
+    }, [])
+  );
 
   // FAB 애니메이션
   useEffect(() => {
@@ -147,11 +150,6 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     outputRange: [0, 1],
   });
 
-  const overlayOpacity = overlayAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 0.3],
-  });
-
   return <Background>
     <View className="flex-1">
       <NaverMapView
@@ -169,8 +167,8 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
             longitude={plant.lng}
             onTap={() => handleMarkerPress(plant)}
             image={require('../../../../assets/pngs/flowers/flower1.png')}
-            width={32}
-            height={32}
+            width={16}
+            height={16}
           />
         ))}
       </NaverMapView>

@@ -1,36 +1,13 @@
 import {Platform} from 'react-native';
-
+import { Colors } from './Colors';
 const isIOS = Platform.OS === 'ios';
 
 // 탭바 높이 상수 export
 export const TAB_BAR_HEIGHT = isIOS ? 100 : 78;
 
-export const TabNavOptions0 = {
-  headerShown: false,
-  tabBarStyle: {
-    borderTopColor: 'transparent',
-    backgroundColor: '#36384E',
-    height: TAB_BAR_HEIGHT,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    padding: 10,
-    position: 'absolute',
-  },
-  tabBarItemStyle: {flex: 1},
-  tabBarIconStyle: {flex: 1},
-  tabBarLabelStyle: {
-    flex: 1,
-    fontSize: 11,
-    fontFamily: 'WantedSans-Regular',
-    lineHeight: 16.5,
-    letterSpacing: -0.275,
-  },
-  tabBarActiveTintColor: '#fafafa',
-  tabBarInactiveTintColor: '#585a6c',
-};
 export const TabBarStyle = {
   borderTopColor: 'transparent',
-  backgroundColor: '#1C8597',
+  backgroundColor: Colors.greenTab,
   height: TAB_BAR_HEIGHT,
   borderTopLeftRadius: 10,
   borderTopRightRadius: 10,
@@ -52,7 +29,7 @@ export const TabNavOptions = {
       lineHeight: 16.5,
       letterSpacing: -0.275,
     },
-    tabBarActiveTintColor: '#ADFDAD',
-    tabBarInactiveTintColor: '#6AE3D0',
+    tabBarActiveTintColor: Colors.greenActive,
+    tabBarInactiveTintColor: Colors.greenInactive,
   };
   

@@ -5,11 +5,9 @@ import {
 import {MapStack} from '../stack/Map';
 import {PiodexStack} from '../stack/Piodex';
 import {ProfileStack} from '../stack/Profile';
-
 import MapIcon from '../../../assets/svgs/Map.svg';
 import PiodexIcon from '../../../assets/svgs/Piodex.svg';
 import ProfileIcon from '../../../assets/svgs/Profile.svg';
-
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import {Colors} from '../../constants/Colors';
 import {TabNavOptions, TabBarStyle,TabBarStyleNone} from '../../constants/TabNavOptions';
@@ -27,9 +25,9 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
           tabBarLabel: '지도',
           tabBarIcon: ({focused}) =>
             focused ? (
-              <MapIcon style={{color: '#ADFDAD'}} />
+              <MapIcon style={{color: Colors.greenActive}} />
             ) : (
-              <MapIcon style={{color: '#6AE3D0'}} />
+              <MapIcon style={{color: Colors.greenInactive}} />
             ),
           tabBarStyle: routeName === 'Map' ? TabBarStyle : TabBarStyleNone
           
@@ -45,9 +43,9 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
             tabBarLabel: '피오덱스',
             tabBarIcon: ({focused}) =>
               focused ? (
-                <PiodexIcon style={{color: '#ADFDAD'}} />
+                <PiodexIcon style={{color: Colors.greenActive}} />
               ) : (
-                <PiodexIcon style={{color: '#6AE3D0'}} />
+                <PiodexIcon style={{color: Colors.greenInactive}} />
               ),
               tabBarStyle: routeName === 'Piodex' ? TabBarStyle : TabBarStyleNone
 
@@ -63,9 +61,9 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
           tabBarLabel: '프로필',
           tabBarIcon: ({focused}) =>
             focused ? (
-              <ProfileIcon style={{color: '#ADFDAD'}} />
+              <ProfileIcon style={{color: Colors.greenActive}} />
             ) : (
-              <ProfileIcon style={{color: '#6AE3D0'}} />
+              <ProfileIcon style={{color: Colors.greenInactive}} />
             ),
             tabBarStyle: routeName === 'Profile' ? TabBarStyle : TabBarStyleNone
           }

@@ -84,6 +84,10 @@ export const getUserNickname = async (): Promise<string | null> => {
       return null;
     }
 
+    if (__DEV__) {
+      console.log('supabase: getUserNickname', data);
+    }
+
     return data?.nickname || null;
   } catch (err) {
     console.error('getUserNickname function error:', err);
@@ -265,6 +269,10 @@ export const getFoundPlants = async () => {
       return null;
     }
 
+    if (__DEV__) {
+      console.log('supabase: getFoundPlants', data);
+    }
+
     return data;
   } catch (err) {
     console.error('getFoundPlants function error:', err);
@@ -350,6 +358,10 @@ export const getCurrentUserFoundPlants = async () => {
       })
     );
 
+    if (__DEV__) {
+      console.log('supabase: getCurrentUserFoundPlants', plantsWithSignedUrls);
+    }
+
     return plantsWithSignedUrls;
   } catch (err) {
     console.error('getCurrentUserFoundPlants function error:', err);
@@ -406,5 +418,145 @@ export const signOut = async (): Promise<{ success: boolean, error?: any }> => {
     console.error('signOut 함수 처리 중 예외 발생:', err);
     const errorMessage = err?.message || '로그아웃 중 알 수 없는 오류가 발생했습니다.';
     return { success: false, error: new Error(errorMessage) };
+  }
+};
+
+export const getUserInfo = async (): Promise<{
+  name: string | null;
+  nickname: string | null;
+  email: string | null;
+  gender: boolean | null;
+  birthDate: string | null;
+} | null> => {
+  /**
+   * 현재 로그인된 사용자의 정보를 가져옵니다.
+   * @returns {Promise<{ name: string | null, nickname: string | null, email: string | null, gender: boolean | null, birthDate: string | null } | null>} 
+   * 사용자 정보 또는 null (로그인되지 않았거나 오류 발생 시)
+   */
+  if(!isLoggedIn) return null;
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error('Error fetching user or user not logged in:', userError);
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('name, nickname, email, gender, birthdate')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user info:', error);
+      return null;
+    }
+
+    if (__DEV__) {
+      console.log('supabase: getUserInfo', data);
+    }
+
+    return {
+      name: data?.name || null,
+      nickname: data?.nickname || null,
+      email: data?.email || user.email || null,
+      gender: data?.gender,
+      birthDate: data?.birthdate || null
+    };
+  } catch (err) {
+    console.error('getUserInfo function error:', err);
+    return null;
+  }
+};
+
+export const updateUserInfo = async (userData: {
+  nickname: string;
+  gender: boolean | null;
+  birthDate: string | null;
+}): Promise<{ success: boolean; error?: any }> => {
+  /**
+   * 사용자 정보를 업데이트합니다.
+   * @param userData 업데이트할 사용자 정보
+   * @returns {Promise<{ success: boolean; error?: any }>} 업데이트 성공 여부와 에러 객체
+   */
+  if(!isLoggedIn) return { success: false, error: new Error('로그인되지 않았습니다.') };
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return { success: false, error: new Error('사용자 ID를 찾을 수 없습니다.') };
+    }
+
+    const { error } = await supabase
+      .from('users')
+      .update({
+        nickname: userData.nickname,
+        gender: userData.gender,
+        birthdate: userData.birthDate
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error updating user info:', error);
+      return { success: false, error };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('updateUserInfo function error:', err);
+    return { success: false, error: err };
+  }
+};
+
+export const checkProfileUpdateAvailability = async (): Promise<{ canUpdate: boolean; nextUpdateDate?: Date }> => {
+  /**
+   * 사용자 정보 수정 가능 여부를 확인합니다.
+   * @returns {Promise<{ canUpdate: boolean; nextUpdateDate?: Date }>} 수정 가능 여부와 다음 수정 가능 날짜
+   */
+  if(!isLoggedIn) return { canUpdate: false };
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return { canUpdate: false };
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('updated_at')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error checking profile update availability:', error);
+      return { canUpdate: false };
+    }
+
+    // updated_at이 null이면 수정 가능
+    if (!data.updated_at) {
+      return { canUpdate: true };
+    }
+
+    // 마지막 업데이트로부터 한 달이 지났는지 확인
+    const lastUpdate = new Date(data.updated_at);
+    const oneMonthInFuture = new Date(lastUpdate);
+    oneMonthInFuture.setMonth(oneMonthInFuture.getMonth() + 1);
+    const today = new Date();
+
+    if (today < oneMonthInFuture) { // 한달 내에 수정했으면 (즉, 다음 수정 가능일이 오늘보다 미래면)
+      // 다음 수정 가능 날짜 계산
+      const nextUpdateDate = new Date(lastUpdate);
+      nextUpdateDate.setMonth(nextUpdateDate.getMonth() + 1);
+      return { 
+        canUpdate: false, 
+        nextUpdateDate 
+      };
+    }
+    
+    // 한달이 지났거나 오늘이 수정 가능일인 경우
+    return { canUpdate: true };
+
+  } catch (err) {
+    console.error('checkProfileUpdateAvailability function error:', err);
+    return { canUpdate: false };
   }
 };

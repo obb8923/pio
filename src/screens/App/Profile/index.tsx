@@ -13,10 +13,9 @@ type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'
 
 // 프로필 헤더 컴포넌트
 const ProfileHeader = () => {
-  const { isLoggedIn, isLoading, handleGoogleLogin } = useAuthStore();
+  const { isLoggedIn, handleGoogleLogin } = useAuthStore();
   const [nickname, setNickname] = useState<string | null>(null);
   const [nicknameLoading, setNicknameLoading] = useState(false);
-
   useEffect(() => {
     if (isLoggedIn) {
       setNicknameLoading(true);
@@ -25,8 +24,6 @@ const ProfileHeader = () => {
         .finally(() => setNicknameLoading(false));
     }
   }, [isLoggedIn]);
-
-  if (isLoading) return <Skeleton />;
   
   if (isLoggedIn) {
     // 로그인된 경우의 프로필 UI (닉네임 표시)

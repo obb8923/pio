@@ -9,9 +9,11 @@ export const Colors = {
   black: '#191919',
   svggray: '#6b7280',
   svggray2: '#9ca3af',
+  svggray3: '#D1D5DB',
   bluegray: '#F1F2F4',
   red: '#FF0000',
   greenTab: '#1C8597',
+  greenTab900: '#0C3941',
   greenInactive: '#6AE3D0',
   greenActive: '#ADFDAD',
 }

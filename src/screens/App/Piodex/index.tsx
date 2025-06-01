@@ -8,7 +8,6 @@ import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { useAuthStore } from "../../../store/authStore";
 import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 // 식물 데이터 타입 정의
@@ -42,7 +41,7 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   const slideAnim = useState(new Animated.Value(0))[0];
   const { isLoggedIn } = useAuthStore();
   const insets = useSafeAreaInsets();
-  
+  const [aiResponse, setAiResponse] = useState("");
   // 화면 너비 가져오기
   const screenWidth = Dimensions.get('window').width;
   const tabWidth = (screenWidth - 32) / 2; // 전체 너비에서 좌우 패딩(32) 제외 후 2로 나눔
@@ -67,7 +66,7 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
     }
   };
 
-  // const loadPlantList = async () => {
+      // const loadPlantList = async () => {
   //   try {
   //     setPlantListLoading(true);
   //     const plants = await getPlantList();

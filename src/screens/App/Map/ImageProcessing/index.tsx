@@ -1,13 +1,15 @@
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, TextInput, ScrollView, Modal } from 'react-native';
-import { Background } from '../../../../components/Background';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { Colors } from '../../../../constants/Colors';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {MapStackParamList} from "../../../../nav/stack/Map"
 import { NaverMapView } from '@mj-studio/react-native-naver-map';
 import { getCurrentUserId, uploadImageAndGetUrl, saveFoundPlant } from '../../../../libs/supabase/supabaseOperations';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Pencil from "../../../../../assets/svgs/Pencil.svg"
+import { Colors } from '../../../../constants/Colors';
+import { CustomButton } from '../../../../components/CustomButton';
+import { getAIResponseWithImage } from '../../../../libs/utils/AI';
 type ImageProcessingScreenProps =NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
 export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) => {
@@ -15,7 +17,9 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
   const [isProcessing, setIsProcessing] = useState(false);
   const [plantName, setPlantName] = useState('');
   const [memo, setMemo] = useState('');
+  const [description, setDescription] = useState('');
   const [isMapModalVisible, setIsMapModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
   const [center, setCenter] = useState({
     latitude: 37.5666102,
     longitude: 126.9783881,
@@ -25,6 +29,9 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
   const { imageUri } = route.params as {
     imageUri: string;
   };
+  const [aiResponse, setAiResponse] = useState('');
+  // 초기 위치에서 변경되었는지 확인하는 함수
+  const isLocationSelected = center.latitude !== 37.5666102 || center.longitude !== 126.9783881;
 
   // 지도 중심이 바뀔 때마다 중심 좌표 갱신
   const handleCameraChange = (e: any) => {
@@ -65,7 +72,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         memo: memo || null,
         lat: center.latitude,
         lng: center.longitude,
-        description: null, // AI 분석 결과가 없으므로 우선 null로 설정
+        description: description || null,
         plantName: plantName || null,
       };
 
@@ -86,53 +93,62 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
     }
   };
 
+  useEffect(() => {
+    const fetchAIResponse = async () => {
+      const response = await getAIResponseWithImage(imageUri);
+      if(response) setAiResponse(response);
+    };
+    fetchAIResponse();
+  }, []);
+  useEffect(() => {
+    console.log("aiResponse", aiResponse);
+  }, [aiResponse]);
   return (
-    <Background>
-      <ScrollView className="flex-1 p-4">
-        {/* 사진 영역 - 중앙정렬, 정사각형, 둥근 모서리 */}
-        <View className="items-center mb-6">
+    <View className="flex-1">
+    <Image source={require('../../../../../assets/pngs/BackgroundGreen.png')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
+      <ScrollView 
+      className="flex-1 p-2 rounded-lg" 
+      style={{paddingTop: insets.top}}
+      contentContainerStyle={{ paddingBottom: 400 }}>
+        {/* 사진 영역 */}
+        <View className="items-center my-6 w-full h-72">
           <Image
             source={{ uri: imageUri }}
-            className="w-64 h-64 rounded-2xl"
+            className="w-full h-full rounded-lg"
             resizeMode="cover"
           />
         </View>
-        
+        {/* 식물 정보 영역 */}
+        <View className="w-full h-full bg-white rounded-lg p-4">
         {/* 식물 이름 영역 */}
-        <View className="mb-4">
-          <Text className="text-center text-xl font-bold text-gray-800 mb-2">
-            식물 이름
-          </Text>
+        <View className="mb-4 flex-row justify-center items-center">
           <TextInput
-            className="border border-gray-300 rounded-lg p-3 text-center bg-white"
+            className="rounded-lg p-3 text-center bg-white text-2xl"
             placeholder="식물 이름을 입력하세요"
             value={plantName}
             onChangeText={setPlantName}
           />
+          <Pencil style={{width: 24, height: 24,color: Colors.svggray3}} />
+
         </View>
 
         {/* 설명 영역 */}
-        <View className="mb-4">
-          <Text className="text-lg font-semibold text-gray-800 mb-2">
-            식물 설명
-          </Text>
-          <View className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <Text className="text-gray-600 leading-5">
-              이 식물에 대한 자세한 정보가 여기에 표시됩니다. 
-              AI 분석을 통해 식물의 종류, 특징, 관리 방법 등을 
-              제공할 예정입니다.
-            </Text>
+          <View className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <TextInput
+              className="text-gray-600 min-h-20"
+              placeholder={`이 식물에 대한 정보를 입력해 주세요. \n 예시) 이 꽃은 지치과의 속이다. 물망초를 비롯한 유럽의 꽃이 '나를 잊지 마오'라는 꽃말을 가져 물망초로도 불린다. `}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              textAlignVertical="top"
+            />
           </View>
-        </View>
-
+        <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
         {/* 메모 영역 */}
         <View className="mb-4">
-          <Text className="text-lg font-semibold text-gray-800 mb-2">
-            메모
-          </Text>
           <TextInput
             className="border border-gray-300 rounded-lg p-3 bg-white min-h-20"
-            placeholder="이 식물에 대한 메모를 작성하세요"
+            placeholder={`이 식물에 대한 메모를 작성할 수 있어요 \n 예시) 아파트 단지에서 발견한 귀여운 친구, 잘 자랐으면 좋겠다.`}
             value={memo}
             onChangeText={setMemo}
             multiline
@@ -141,38 +157,50 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         </View>
 
         {/* 위치 선택 영역 */}
-        <View className="mb-4">
-          <Text className="text-lg font-semibold text-gray-800 mb-2">
-            발견한 위치
-          </Text>
-          <View className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <Text className="text-gray-600 mb-2">
-              {center.latitude.toFixed(6)}, {center.longitude.toFixed(6)}
-            </Text>
+         
+          <View className="bg-gray-100 pl-4 rounded-full flex-row justify-between items-center">
+            {/* 텍스트 영역 */}
+            <View className="h-full w-auto py-4">
+              <Text className="text-greenTab text-center font-medium">
+                {isLocationSelected ? "위치가 선택되었습니다" : "발견한 곳을 선택해 주세요"}
+              </Text>
+            </View>
+            {/* 버튼 영역 */}
             <TouchableOpacity 
-              className="bg-blue-500 py-2 rounded-md"
+              className="p-4 bg-greenTab rounded-full justify-center items-center"
               onPress={() => setIsMapModalVisible(true)}
             >
-              <Text className="text-white text-center font-medium">발견한 곳 선택하기</Text>
+              <Text className="text-greenActive text-center font-medium">
+                {isLocationSelected ? "수정하기" : "선택하기"}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* 지도 모달 */}
-        <Modal
+       
+        
+      </ScrollView>
+     
+        {/* 버튼 영역 */}
+        <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
+        <CustomButton text="취소" size={60} onPress={() => navigation.goBack()}/>
+          <View className="w-20"/>
+          <CustomButton text="저장" size={70} onPress={handleSave} isProcessing={isProcessing}/>
+        </View>
+          {/* 지도 모달 */}
+       <Modal
           visible={isMapModalVisible}
           animationType="slide"
           transparent={true}
         >
+          {/* 배경 검은색 오버레이 */}
           <View className="flex-1 bg-black/50">
-            <View className="flex-1 mt-20 bg-white rounded-t-3xl">
-              <View className="p-4 border-b border-gray-200">
-                <Text className="text-lg font-semibold text-center">발견한 위치 선택</Text>
-              </View>
-              
-              <View className="flex-1 relative">
+          {/* 내부 영역*/}
+              <View className="flex-1 relative mx-4 my-20 pt-20 pb-20  border border-greenTab900 rounded-3xl bg-greenTab">
+                <View className=" absolute top-0 left-0 right-0 h-20 items-start justify-end px-4 py-2">
+                <Text className=" text-center text-lg text-greenActive">핀을 이동시켜 발견한 위치를 선택해 주세요</Text>
+                </View>
                 <NaverMapView
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ width: '100%', height: '100%'}}
                   initialCamera={{
                     latitude: center.latitude,
                     longitude: center.longitude,
@@ -186,52 +214,16 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
                     <Text className="text-2xl">📍</Text>
                   </View>
                 </View>
-              </View>
-
-              <View className="p-4 border-t border-gray-200">
-                <Text className="text-sm text-gray-600 mb-2 text-center">
-                  현재 선택 위치: {center.latitude.toFixed(6)}, {center.longitude.toFixed(6)}
-                </Text>
-                <View className="flex-row gap-2">
-                  <TouchableOpacity 
-                    className="flex-1 py-3 rounded-md border border-gray-300"
-                    onPress={() => setIsMapModalVisible(false)}
-                  >
-                    <Text className="text-center text-gray-700">취소</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    className="flex-1 py-3 rounded-md bg-blue-500"
-                    onPress={handleLocationSelect}
-                  >
-                    <Text className="text-center text-white">선택 완료</Text>
-                  </TouchableOpacity>
+                  {/* modal button section */}
+              <View className=" h-20 flex-row justify-between items-center gap-4 px-4 ">
+                  <CustomButton text="취소" size={60} onPress={() => setIsMapModalVisible(false)}/>
+                  <CustomButton text="완료" size={70} onPress={handleLocationSelect}/>
                 </View>
               </View>
+
+            
             </View>
-          </View>
         </Modal>
-        
-        {/* 버튼 영역 */}
-        <View className="flex-row justify-between mt-4">
-          <TouchableOpacity
-            className="flex-1 py-4 rounded-md items-center justify-center border border-gray-300 mr-2"
-            onPress={() => navigation.goBack()}
-          >
-            <Text className="text-gray-700 font-medium">취소</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 py-4 rounded-md items-center justify-center bg-blue-500 ml-2"
-            onPress={handleSave}
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-medium">저장</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </Background>
-  );
+      </View>
+    );
 };

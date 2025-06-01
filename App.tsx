@@ -1,18 +1,16 @@
 import { NavigationContainer } from "@react-navigation/native";
-// import RootStack from "./src/nav/stack/Root"; // RootStack import 제거
 import "./global.css"
 import { SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, Platform } from 'react-native'; // ActivityIndicator, View 제거, Alert 추가
+import { StatusBar, Platform } from 'react-native'; 
 import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from './src/store/authStore';
-// import AuthStack from './src/nav/stack/Auth'; // AuthStack import 추가
-import AppTab from './src/nav/tab/App'; // AppTab import 추가
+import AppTab from './src/nav/tab/App'; 
 import SplashScreen from "react-native-splash-screen";
 import { requestMultiple, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { usePermissionStore } from './src/store/permissionStore';
-import { useLocationStore } from './src/store/locationStore'; // locationStore import 추가
-import { GoogleSignin } from '@react-native-google-signin/google-signin'; // GoogleSignin import 추가
+import { useLocationStore } from './src/store/locationStore'; 
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 function App(): React.JSX.Element {
   const { isLoading: authLoading, checkLoginStatus } = useAuthStore();

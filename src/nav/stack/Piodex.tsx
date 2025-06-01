@@ -12,7 +12,7 @@ export const PiodexStack = () => {
   return (
     <Stack.Navigator >
       <Stack.Screen name="Piodex" component={PiodexScreen} options={{headerShown:false}}/>
-      <Stack.Screen name="Detail" component={DetailScreen} options={{title:'식물 상세정보'}}/>
+      <Stack.Screen name="Detail" component={DetailScreen} options={{headerShown:false}}/>
     </Stack.Navigator>
   );
 };
