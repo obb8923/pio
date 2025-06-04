@@ -1,43 +1,17 @@
 import { supabase } from './supabase';
-import { Platform } from 'react-native';
 import * as RNFS from 'react-native-fs';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
+import ImageResizer from 'react-native-image-resizer';
 import { useAuthStore } from '../../store/authStore';
-const { isLoggedIn} = useAuthStore.getState();
 
-export const getCurrentUserId = async (): Promise<string | null> => {
-  /**
- * 현재 로그인된 Supabase 사용자의 ID를 가져옵니다.
- * @returns {Promise<string | null>} 사용자 ID 또는 null (로그인되지 않았거나 오류 발생 시)
- */
-  if(!isLoggedIn) return null;
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (error) {
-      console.log('Supabase 사용자 정보 가져오기 오류:', error);
-      return null; // 오류 발생 시 null 반환
-    }
-
-    if (!user) {
-      console.log('로그인된 사용자가 없습니다.');
-      return null; // 사용자 정보가 없으면 null 반환
-    }
-
-    return user.id; // 사용자 ID 반환
-
-  } catch (err) {
-    console.error('getCurrentUserId 함수 오류:', err);
-    return null; // 예외 발생 시 null 반환
-  }
-};
 export const requestAccountDeletion = async (): Promise<{ success: boolean, error?: any }> => {
-  /**
+  console.log('Supabase 회원 탈퇴 요청 시도');
+/**
  * 회원 탈퇴를 위한 Supabase Edge Function 호출을 요청합니다.
  * 실제 삭제 로직은 'delete-user' Edge Function에서 처리됩니다.
  * @returns {Promise<{ success: boolean, error?: any }>} 요청 성공 여부와 에러 객체
  */
-  if(!isLoggedIn) return { success: false, error: new Error('로그인되지 않았습니다.') };
   try {
     // 'delete-user'는 실제 구현된 Edge Function의 이름이어야 합니다.
     const { error } = await supabase.functions.invoke('delete-user');
@@ -59,24 +33,19 @@ export const requestAccountDeletion = async (): Promise<{ success: boolean, erro
     return { success: false, error: new Error(errorMessage) };
   }
 };
+
 export const getUserNickname = async (): Promise<string | null> => {
   /**
  * 현재 로그인된 사용자의 닉네임을 가져옵니다.
  * @returns {Promise<string | null>} 사용자의 닉네임 또는 null (로그인되지 않았거나 오류 발생 시)
  */
-  if(!isLoggedIn) return null;
+  const { userId } = useAuthStore.getState();
+  if (!userId) return null;
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.error('Error fetching user or user not logged in:', userError);
-      return null;
-    }
-
     const { data, error } = await supabase
       .from('users')
       .select('nickname')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     if (error) {
@@ -94,112 +63,96 @@ export const getUserNickname = async (): Promise<string | null> => {
     return null;
   }
 };
-export const checkNicknameUpdateAvailability = async (): Promise<{ canUpdate: boolean, message?: string }> => {
-  /**
- * 사용자의 닉네임 변경 가능 여부를 확인합니다.
- * @returns {Promise<{ canUpdate: boolean, message?: string }>} 변경 가능 여부와 메시지
- */
-  if(!isLoggedIn) return { canUpdate: false, message: '로그인되지 않았습니다.' };
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      return { canUpdate: false, message: '사용자 인증에 실패했습니다.' };
-    }
-
-    const { data, error } = await supabase
-      .from('users')
-      .select('last_profile_update_at')
-      .eq('id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error checking nickname update availability:', error);
-      return { canUpdate: false, message: '닉네임 변경 가능 여부를 확인하는 중 오류가 발생했습니다.' };
-    }
-
-    // last_profile_update_at이 null이면 변경 가능
-    if (!data.last_profile_update_at) {
-      return { canUpdate: true };
-    }
-
-    // 마지막 업데이트로부터 한 달이 지났는지 확인
-    const lastUpdate = new Date(data.last_profile_update_at);
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-    if (lastUpdate < oneMonthAgo) {
-      return { canUpdate: true };
-    }
-
-    // 다음 변경 가능 날짜 계산
-    const nextUpdateDate = new Date(lastUpdate);
-    nextUpdateDate.setMonth(nextUpdateDate.getMonth() + 1);
-    
-    return { 
-      canUpdate: false, 
-      message: `다음 닉네임 변경은 ${nextUpdateDate.toLocaleDateString()}부터 가능합니다.` 
-    };
-  } catch (err) {
-    console.error('checkNicknameUpdateAvailability function error:', err);
-    return { canUpdate: false, message: '닉네임 변경 가능 여부를 확인하는 중 오류가 발생했습니다.' };
-  }
-};
 export const uploadImageAndGetUrl = async (imageUri: string, bucketName: string): Promise<string | null> => {
   /**
  * 이미지를 Supabase 스토리지에 업로드하고 공개 URL을 반환합니다.
+ * 업로드 전에 이미지 크기를 조절합니다.
  * @param imageUri 업로드할 이미지의 로컬 URI
  * @param bucketName 이미지를 저장할 버킷 이름
  * @returns {Promise<string | null>} 이미지의 공개 URL 또는 null (오류 발생 시)
  */
-  if(!isLoggedIn) return null;
+  const { userId } = useAuthStore.getState();
+  if (!userId) {
+    console.error('uploadImageAndGetUrl: User not authenticated');
+    return null;
+  }
+
   try {
-    const userId = await getCurrentUserId();
-    if (!userId) {
-      console.error('User not authenticated');
+    console.log('uploadImageAndGetUrl: User authenticated, userId:', userId);
+
+    // 이미지 리사이징 (최대 1280px, 품질 85)
+    let resizedImage;
+    try {
+      resizedImage = await ImageResizer.createResizedImage(
+        imageUri,
+        1280, // maxWidth
+        1280, // maxHeight
+        'JPEG', // compressFormat
+        85, // quality
+        0, // rotation
+        undefined, // outputPath
+        false, // keep 메타데이터 유지 여부 (false로 설정하여 용량 줄임)
+        { mode: 'contain', onlyScaleDown: true } // 옵션: 이미지가 작으면 확대하지 않음
+      );
+      console.log('uploadImageAndGetUrl: Image resized successfully. URI:', resizedImage.uri, 'Size:', resizedImage.size);
+    } catch (resizeError) {
+      console.error('uploadImageAndGetUrl: Error resizing image:', resizeError);
       return null;
     }
 
-    // 파일 확장자 추출
-    const extension = imageUri.split('.').pop() || 'jpg';
+    // 파일 확장자 추출 (리사이징된 이미지 기준으로)
+    const extension = resizedImage.name.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `${userId}/${new Date().toISOString()}_${Math.random().toString(36).substring(2, 15)}.${extension}`;
+    console.log('uploadImageAndGetUrl: Generated fileName:', fileName);
 
-    // base64로 이미지 읽기
-    const base64Data = await RNFS.readFile(imageUri, 'base64');
+    // base64로 이미지 읽기 (리사이징된 이미지 사용)
+    let base64Data;
+    try {
+      base64Data = await RNFS.readFile(resizedImage.uri, 'base64');
+      console.log('uploadImageAndGetUrl: Image read to base64 successfully.');
+    } catch (readFileError) {
+      console.error('uploadImageAndGetUrl: Error reading resized image file to base64:', readFileError);
+      return null;
+    }
 
     // base64를 ArrayBuffer로 변환 (base64-arraybuffer 패키지 사용)
     const arrayBuffer = decodeBase64(base64Data);
+    console.log('uploadImageAndGetUrl: Base64 decoded to ArrayBuffer.');
 
     // Supabase Storage에 업로드
-    const { data, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from(bucketName)
       .upload(fileName, arrayBuffer, {
-        contentType: `image/${extension}`,
+        contentType: `image/${extension}`, // 리사이징된 이미지 포맷에 맞게 수정
         cacheControl: '3600',
         upsert: false,
       });
 
     if (uploadError) {
-      console.error('Error uploading image:', uploadError);
+      console.error('uploadImageAndGetUrl: Error uploading image to Supabase:', uploadError);
       return null;
     }
+    console.log('uploadImageAndGetUrl: Image uploaded to Supabase successfully. Path:', uploadData.path);
 
     // 공개 URL 가져오기
     const { data: publicUrlData } = supabase.storage
       .from(bucketName)
-      .getPublicUrl(data.path);
+      .getPublicUrl(uploadData.path);
 
     if (!publicUrlData || !publicUrlData.publicUrl) {
-      console.error('Error getting public URL for image:', data.path);
+      console.error('uploadImageAndGetUrl: Error getting public URL for image. Path:', uploadData.path, 'Public URL Data:', publicUrlData);
       return null;
     }
+    console.log('uploadImageAndGetUrl: Public URL retrieved successfully:', publicUrlData.publicUrl);
 
     return publicUrlData.publicUrl;
   } catch (err) {
-    console.error('uploadImageAndGetUrl function error:', err);
+    console.error('uploadImageAndGetUrl function error (outer try-catch): ', err);
     return null;
   }
 };
+
 export const saveFoundPlant = async (plantData: {
   userId: string;
   imageUrl: string;
@@ -215,10 +168,13 @@ export const saveFoundPlant = async (plantData: {
  * @param plantData 저장할 식물 데이터
  * @returns {Promise<{ success: boolean, error?: any }>} 저장 성공 여부와 에러 객체
  */
-  if(!isLoggedIn) return { success: false, error: new Error('로그인되지 않았습니다.') };
+  const { userId } = useAuthStore.getState();
+  if (!userId) {
+    return { success: false, error: new Error('로그인되지 않았습니다.') };
+  }
   try {
-    const { userId, imageUrl, memo, lat, lng, description, plantName } = plantData;
-    
+    const { imageUrl, memo, lat, lng, description, plantName } = plantData;
+    console.log('saveFoundPlant', plantData);
     const { error } = await supabase.from('found_plants').insert([
       {
         user_id: userId,
@@ -245,6 +201,7 @@ export const saveFoundPlant = async (plantData: {
     return { success: false, error: err };
   }
 };
+
 export const getFoundPlants = async () => {
   /**
  * 발견된 식물들의 위치 정보를 가져옵니다.
@@ -258,7 +215,6 @@ export const getFoundPlants = async () => {
   *   memo: string;
   * }> | null>} 발견된 식물들의 정보 배열 또는 null (오류 발생 시)
   */
-  if(!isLoggedIn) return null;
   try {
     const { data, error } = await supabase
       .from('found_plants')
@@ -279,6 +235,7 @@ export const getFoundPlants = async () => {
     return null;
   }
 };
+
 export const getSignedImageUrl = async (imagePath: string, bucketName: string): Promise<string | null> => {
   /**
  * 스토리지의 이미지에 대한 서명된 URL을 생성합니다.
@@ -286,7 +243,8 @@ export const getSignedImageUrl = async (imagePath: string, bucketName: string): 
  * @param bucketName 버킷 이름
  * @returns {Promise<string | null>} 서명된 URL 또는 null (오류 발생 시)
  */
-  if(!isLoggedIn) return null;
+  const { userId } = useAuthStore.getState();
+  if (!userId) return null;
   try {
     const { data, error } = await supabase.storage
       .from(bucketName)
@@ -303,6 +261,7 @@ export const getSignedImageUrl = async (imagePath: string, bucketName: string): 
     return null;
   }
 };
+
 export const getCurrentUserFoundPlants = async () => {
   /**
  * 현재 사용자가 발견한 식물들의 정보를 가져옵니다.
@@ -318,14 +277,12 @@ export const getCurrentUserFoundPlants = async () => {
   *   signed_url?: string;
   * }> | null>} 현재 사용자가 발견한 식물들의 정보 배열 또는 null (오류 발생 시)
   */
-  if(!isLoggedIn) return null;
+  const { userId } = useAuthStore.getState();
+  if (!userId) {
+    console.error('User not authenticated');
+    return null;
+  }
   try {
-    const userId = await getCurrentUserId();
-    if (!userId) {
-      console.error('User not authenticated');
-      return null;
-    }
-
     const { data, error } = await supabase
       .from('found_plants')
       .select('id, created_at, image_url, plant_name, description, memo, lat, lng')
@@ -368,6 +325,7 @@ export const getCurrentUserFoundPlants = async () => {
     return null;
   }
 };
+
 export const getPlantList = async () => {
   /**
  * plant_list 테이블에서 식물 사전 데이터를 가져옵니다.
@@ -379,7 +337,8 @@ export const getPlantList = async () => {
   *   description: string;
   * }> | null>} 식물 사전 데이터 배열 또는 null (오류 발생 시)
   */
-  if(!isLoggedIn) return null;
+  const { userId } = useAuthStore.getState();
+  if (!userId) return null;
   try {
     const { data, error } = await supabase
       .from('plant_list')
@@ -403,6 +362,10 @@ export const signOut = async (): Promise<{ success: boolean, error?: any }> => {
    * Supabase에서 로그아웃을 수행합니다.
    * @returns {Promise<{ success: boolean, error?: any }>} 로그아웃 성공 여부와 에러 객체
    */
+  const { userId } = useAuthStore.getState();
+  if (!userId) {
+    return { success: false, error: new Error('로그인되지 않았습니다.') };
+  }
   try {
     const { error } = await supabase.auth.signOut();
 
@@ -433,7 +396,8 @@ export const getUserInfo = async (): Promise<{
    * @returns {Promise<{ name: string | null, nickname: string | null, email: string | null, gender: boolean | null, birthDate: string | null } | null>} 
    * 사용자 정보 또는 null (로그인되지 않았거나 오류 발생 시)
    */
-  if(!isLoggedIn) return null;
+  const { userId } = useAuthStore.getState();
+  if (!userId) return null;
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -480,13 +444,11 @@ export const updateUserInfo = async (userData: {
    * @param userData 업데이트할 사용자 정보
    * @returns {Promise<{ success: boolean; error?: any }>} 업데이트 성공 여부와 에러 객체
    */
-  if(!isLoggedIn) return { success: false, error: new Error('로그인되지 않았습니다.') };
+  const { userId } = useAuthStore.getState();
+  if (!userId) {
+    return { success: false, error: new Error('로그인되지 않았습니다.') };
+  }
   try {
-    const userId = await getCurrentUserId();
-    if (!userId) {
-      return { success: false, error: new Error('사용자 ID를 찾을 수 없습니다.') };
-    }
-
     const { error } = await supabase
       .from('users')
       .update({
@@ -513,13 +475,9 @@ export const checkProfileUpdateAvailability = async (): Promise<{ canUpdate: boo
    * 사용자 정보 수정 가능 여부를 확인합니다.
    * @returns {Promise<{ canUpdate: boolean; nextUpdateDate?: Date }>} 수정 가능 여부와 다음 수정 가능 날짜
    */
-  if(!isLoggedIn) return { canUpdate: false };
+  const { userId } = useAuthStore.getState();
+  if (!userId) return { canUpdate: false };
   try {
-    const userId = await getCurrentUserId();
-    if (!userId) {
-      return { canUpdate: false };
-    }
-
     const { data, error } = await supabase
       .from('users')
       .select('updated_at')

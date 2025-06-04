@@ -179,7 +179,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
     }
 
     return (
-        <Background>
+        <Background isStatusBarGap={false} type="background">
             <ScrollView className="flex-1">
                 <View className="p-4">
                     {/* 이름 */}

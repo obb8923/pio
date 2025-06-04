@@ -1,9 +1,12 @@
 import 'react-native-url-polyfill/auto'; // URL polyfill 필요
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
 
-const SUPABASE_URL='https://hiqdelhkugdugbcvvxxb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpcWRlbGhrdWdkdWdiY3Z2eHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTM0MTYsImV4cCI6MjA2Mzk4OTQxNn0.f8zBQ8QPLT1vKq7KxBrhEHRr3-W9X2hu2TanNnG-Hyk';
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Supabase URL 또는 Anon Key가 설정되지 않았습니다.');
+}
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {

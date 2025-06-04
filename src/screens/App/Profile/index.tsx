@@ -7,13 +7,13 @@ import GoogleIcon from "../../../../assets/svgs/GoogleLogo.svg"
 import { Skeleton } from "../../../components/Skeleton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ProfileStackParamList } from "../../../nav/stack/Profile";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ChevronRight from "../../../../assets/svgs/ChevronRight.svg"
+import ChevronRight from "../../../../assets/svgs/ChevronRight.svg";
+import { Background } from "../../../components/Background";
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 // 프로필 헤더 컴포넌트
 const ProfileHeader = () => {
-  const { isLoggedIn, handleGoogleLogin } = useAuthStore();
+  const { isLoggedIn, handleGoogleLogin, isLoading } = useAuthStore();
   const [nickname, setNickname] = useState<string | null>(null);
   const [nicknameLoading, setNicknameLoading] = useState(false);
   useEffect(() => {
@@ -28,7 +28,7 @@ const ProfileHeader = () => {
   if (isLoggedIn) {
     // 로그인된 경우의 프로필 UI (닉네임 표시)
     return (
-      <View className="flex-row items-center px-5 py-6 border-b border-greenTab">
+      <View className="flex-row items-center px-5 py-6 border-b border-greenTab ">
         {nicknameLoading ? (
           <Skeleton/>
         ) : (
@@ -40,12 +40,15 @@ const ProfileHeader = () => {
   
   // 로그인 안 된 경우
   return (
-    <View className="items-center py-8 bg-white opacity-90 rounded-lg">
+    <View className="items-center py-8 rounded-lg">
       <Text className="text-base text-gray-700 mb-2">로그인이 필요합니다</Text>
-      <TouchableOpacity className=" p-4 rounded-full flex-row items-center border border-gray-300"
-      onPress={handleGoogleLogin}
+      <TouchableOpacity 
+        className="p-4 rounded-full flex-row items-center border border-gray-300"
+        onPress={handleGoogleLogin}
+        disabled={isLoading}
       >
-        <GoogleIcon style={{width: 20, height: 20}}/>
+        {!isLoading && <GoogleIcon style={{width: 20, height: 20}}/>}
+        {isLoading && <ActivityIndicator size="small" color={Colors.greenTab} />}
       </TouchableOpacity>
     </View>
   );
@@ -60,12 +63,9 @@ const ProfileItem = ({title, onPress}: {title: string, onPress: () => void}) => 
 };
 export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
   const { isLoggedIn } = useAuthStore();
-  const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-1" style={{paddingTop: insets.top+16}}>
-      <Image source={require('../../../../assets/pngs/BackgroundGreen.png')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
-      <View className="flex-1 mx-2 absolute top-0 left-0 right-0 bottom-0 bg-white opacity-90"/>
+    <Background type="white" isStatusBarGap={true} className="pt-4">
 
       <Text className="text-2xl font-bold text-greenTab ml-9 mb-4">프로필</Text>
       
@@ -88,7 +88,7 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
           <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
           <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
       </ScrollView>
-    </View>
+    </Background>
   );
 };
 

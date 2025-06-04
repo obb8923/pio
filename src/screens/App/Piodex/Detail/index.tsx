@@ -46,7 +46,7 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
                <Text
                  className="text-gray-600"
                >
-               {description}
+               {description || '설명이 없습니다.'}
                </Text>
              </View>
            <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
@@ -55,11 +55,11 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
              <Text
                className="border border-gray-300 rounded-lg p-3 bg-white min-h-20"
              >
-               {memo}
+               {memo || '메모가 없습니다.'}
              </Text>
            </View>      
              {/* 지도 영역 */}
-             <View className="w-full h-64 bg-red-500">
+             <View className="w-full h-64">
 
 <NaverMapView
   style={{ width: '100%', height: '100%' }}
@@ -74,11 +74,14 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
 latitude={lat}
 longitude={lng}
 image={require('../../../../../assets/pngs/flowers/flower1.png')}
-width={32}
-height={32}
+width={16}
+height={16}
 
 />
   </NaverMapView>  
+  <View className="absolute top-2 left-4 flex-row justify-between items-center">
+<Text className="text-lg font-bold text-greenTab">발견한 위치</Text>
+</View>
   </View> 
            </View>
             

@@ -11,9 +11,10 @@ import { requestMultiple, PERMISSIONS, RESULTS } from 'react-native-permissions'
 import { usePermissionStore } from './src/store/permissionStore';
 import { useLocationStore } from './src/store/locationStore'; 
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-
+import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from '@env';
 function App(): React.JSX.Element {
-  const { isLoading: authLoading, checkLoginStatus } = useAuthStore();
+  const { isLoggedIn,isLoading: authLoading, checkLoginStatus } = useAuthStore();
+  console.log("isLoggedIn App.tsx",isLoggedIn)
   const {
     location: locationPermission, // from usePermissionStore
     setCameraPermission,
@@ -37,8 +38,8 @@ function App(): React.JSX.Element {
     // Google Sign-In 설정
     try {
       GoogleSignin.configure({
-        webClientId: '957741045904-3p8mgb02fbrb80br6o2j38fnc2g4kadd.apps.googleusercontent.com',
-        iosClientId:'957741045904-kn7aqdbfef5k0jtgsedvjqamjkegb6s1.apps.googleusercontent.com',
+        webClientId: SUPABASE_WEB_CLIENT_KEY,
+        iosClientId: SUPABASE_IOS_CLIENT_KEY,
         scopes: ['profile', 'email'],
       });
     } catch (error) {

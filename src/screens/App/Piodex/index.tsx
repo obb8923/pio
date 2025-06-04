@@ -1,13 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Animated, Dimensions } from "react-native";
-import { Background } from "../../../components/Background";
-import { useState, useRef, useEffect } from "react";
-import LinearGradient from 'react-native-linear-gradient';
+import { View, Text, TouchableOpacity, Image, Animated, Dimensions, RefreshControl, SectionList } from "react-native";
+import { useState, useEffect } from "react";
 import { getCurrentUserFoundPlants, getPlantList } from "../../../libs/supabase/supabaseOperations";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { useAuthStore } from "../../../store/authStore";
-import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Background } from "../../../components/Background";
+import { Colors } from "../../../constants/Colors";
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 // 식물 데이터 타입 정의
@@ -38,24 +36,33 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   const [plantList, setPlantList] = useState<PlantListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [plantListLoading, setPlantListLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useState(new Animated.Value(0))[0];
   const { isLoggedIn } = useAuthStore();
-  const insets = useSafeAreaInsets();
-  const [aiResponse, setAiResponse] = useState("");
+  const [containerWidth, setContainerWidth] = useState(0);
   // 화면 너비 가져오기
   const screenWidth = Dimensions.get('window').width;
   const tabWidth = (screenWidth - 32) / 2; // 전체 너비에서 좌우 패딩(32) 제외 후 2로 나눔
-
+useEffect(()=>{
+  console.log("foundPlants",foundPlants)
+},[foundPlants])
   // 발견된 식물 데이터 로드
   useEffect(() => {
-    if(isLoggedIn) loadFoundPlants();
+    if(isLoggedIn && foundPlants.length === 0) {
+      loadFoundPlants();
+    } else if (!isLoggedIn) {
+      setFoundPlants([]);
+      setLoading(false);
+    }
   }, [isLoggedIn]);
 
   const loadFoundPlants = async () => {
     if(!isLoggedIn) return;
     try {
-      setLoading(true);
+      console.log('loadFoundPlants - 시작');
+      if (foundPlants.length === 0) setLoading(true);
       const plants = await getCurrentUserFoundPlants();
+      console.log('loadFoundPlants - 받아온 데이터:', plants);
       if (plants) {
         setFoundPlants(plants);
       }
@@ -63,22 +70,10 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
       console.error('Error loading found plants:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
+      console.log('loadFoundPlants - 완료');
     }
   };
-
-      // const loadPlantList = async () => {
-  //   try {
-  //     setPlantListLoading(true);
-  //     const plants = await getPlantList();
-  //     if (plants) {
-  //       setPlantList(plants);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error loading plant list:', error);
-  //   } finally {
-  //     setPlantListLoading(false);
-  //   }
-  // };
 
   const handleTabChange = (tab: 'piodex' | 'plant') => {
     if (activeTab === tab) return;
@@ -108,85 +103,133 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
     });
   };
 
+  // 날짜별로 식물을 그룹화하는 함수 (flex-wrap 렌더링용)
+  const groupPlantsByDate = (plants: FoundPlant[]) => {
+    if (!plants || plants.length === 0) {
+      return [];
+    }
+    // 날짜별로 그룹화
+    const groupedByDate: { [key: string]: FoundPlant[] } = plants.reduce((acc, plant) => {
+      const date = formatDate(plant.created_at);
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(plant);
+      return acc;
+    }, {} as { [key: string]: FoundPlant[] });
+
+    // 각 날짜의 전체 식물 배열을 하나의 데이터 아이템으로 만들기
+    const sections = Object.keys(groupedByDate).map(date => ({
+      title: date,
+      data: [groupedByDate[date]] // 해당 날짜의 모든 식물을 하나의 배열로 감싸기
+    })).sort((a, b) => new Date(b.title).getTime() - new Date(a.title).getTime()); // 최신 날짜부터 정렬
+
+    return sections;
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadFoundPlants();
+  };
+
   const renderContent = () => {
+    // 로그인 상태 체크
     if(!isLoggedIn) return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-gray-500 text-center">로그인이 필요합니다.</Text>
       </View>
     );
-    // 로딩 상태 체크 (or로 묶기)
+
+    // 로딩 상태 체크
     if (loading || plantListLoading) {
-      const loadingText = activeTab === 'piodex' ? '로딩 중...' : '식물 사전 로딩 중...';
       return (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-500">{loadingText}</Text>
+          <Text className="text-gray-500">로딩 중...</Text>
         </View>
       );
     }
 
-    // 데이터가 없을 때
-    const currentData = activeTab === 'piodex' ? foundPlants : plantList;
-    if (currentData.length === 0) {
-      const emptyText = activeTab === 'piodex' 
-        ? "아직 발견한 식물이 없습니다.\n식물을 발견해보세요!"
-        : "식물 사전 기능은 준비중입니다\n조금만 기다려주세요!";
+    // 도감 탭
+    if(activeTab === 'piodex') {
+      // 데이터가 없을 때
+      if(!foundPlants || foundPlants.length === 0) {
+        console.log("foundPlants",foundPlants)
+        return (
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-gray-500 text-center text-lg mb-2">아직 발견한 식물이 없습니다.</Text>
+            <Text className="text-gray-400 text-center">식물을 발견해보세요!</Text>
+          </View>
+        );
+      }
+
+      // 데이터가 있을 때
+      return (
+        <SectionList
+          sections={groupPlantsByDate(foundPlants)}
+          keyExtractor={(item, index) => `section-${index}`}
+          renderItem={({ item: plantsInDate }) => ( // item은 이제 해당 날짜의 모든 식물 배열입니다.
+            <View 
+              className="flex-row flex-wrap justify-start px-1"
+              onLayout={(event) => {
+                const { width } = event.nativeEvent.layout;
+                if (containerWidth === 0) {
+                  setContainerWidth(width);
+                }
+              }}
+            > 
+              {plantsInDate.map((plant) => {
+                const itemWidth = containerWidth > 0 ? (containerWidth - 8) / 4 : 125; // 8은 패딩 고려 (px-1 * 2 + gap)
+                return (
+                  <TouchableOpacity
+                    key={plant.id}
+                    onPress={() => navigation.navigate('Detail', plant)}
+                    className=" p-1 mb-1"
+                    style={{ width: itemWidth, height: itemWidth +30 }}
+                  >
+                    <View className="w-full h-full rounded-sm overflow-hidden">
+                      <Image
+                        source={{ uri: plant.signed_url }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text className=" font-semibold py-2 my-2 rounded-md">{title}</Text>
+          )}
+          stickySectionHeadersEnabled={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.greenTab]} />
+          }
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16,paddingBottom: 16 }}
+        />
+      );
       
+
+    }
+
+    // 식물 사전 탭
+    if(activeTab === 'plant') {
       return (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-500 text-center">{emptyText}</Text>
+          <Text className="text-gray-500 text-center">{`식물 사전은 준비중 입니다. \n 조금만 기다려주세요! `}</Text>
         </View>
       );
     }
-
-    // 데이터가 있을 때 (현재는 piodex만 구현)
-    if (activeTab === 'piodex') {
-      return (
-        <View className="flex-row flex-wrap justify-between">
-          {foundPlants.map((plant) => (
-            <TouchableOpacity 
-            key={plant.id} 
-            onPress={()=>navigation.navigate('Detail',plant)} 
-            className="w-[48%] mb-4 bg-white rounded-lg overflow-hidden shadow-sm">
-              <Image 
-                source={{ uri: plant.signed_url || plant.image_url }} 
-                className="w-full h-[200px]" 
-                resizeMode="cover"
-                defaultSource={require('../../../../assets/pngs/flowers/flower1.png')}
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.8)']}
-                className="absolute bottom-0 left-0 right-0 h-1/2 justify-end p-2"
-              >
-                <Text className="text-xs text-white font-medium mb-1">
-                  {plant.plant_name || '알 수 없는 식물'}
-                </Text>
-                <Text className="text-xs text-white opacity-80">
-                  {formatDate(plant.created_at)}
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
-        </View>
-      );
-    }
-
-    // 식물 사전 탭 (현재는 준비중 메시지만 표시)
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-greenActive text-center">식물 사전 기능은 준비중입니다\n조금만 기다려주세요!</Text>
-      </View>
-    );
+    // 기본 반환
+    return null;
   };
 
   return (
-    <View className="flex-1" style={{paddingTop: insets.top}}>
-      <Image source={require('../../../../assets/pngs/BackgroundGreen.png')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
-      <View className="flex-1 mx-2 absolute top-0 left-0 right-0 bottom-0 bg-white opacity-90"/>
-
-      <View className="flex-1 px-4" style={{paddingBottom: TAB_BAR_HEIGHT+16}}>
-        
-      {/* 탭바 */}
-        <View className="flex-row justify-between items-center py-6 relative ">
+    <Background type="white" isStatusBarGap={true}> 
+      <View className="flex-1 px-4">
+        {/* 탭바 */}
+        <View className="flex-row justify-between items-center py-6 relative">
+          {/* 탭바 애니메이션 움직이는 뷰*/}
           <Animated.View 
             className="absolute bottom-0 left-0 h-full justify-center items-center"
             style={{
@@ -199,7 +242,9 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
               }]
             }}
           >
-            <View className="h-1.5 bg-greenTab rounded-full w-10"/>
+            <View className={`${activeTab!=='piodex'&&'ml-1'} flex-row items-center justify-center w-full`}>
+            <View className="h-1.5 bg-greenTab rounded-full w-1/12"/>
+            </View>
           </Animated.View>
           <TouchableOpacity 
             onPress={() => handleTabChange('piodex')}
@@ -213,18 +258,19 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
             onPress={() => handleTabChange('plant')}
             className={`px-6 py-2 h-10 w-1/2 justify-center items-center`}
           >
-            <Text className={`text-base ${activeTab === 'plant' ? 'text-greenTab font-semibold' : 'text-greenInactive'}`}>
+            <Text className={`text-center ${activeTab === 'plant' ? 'text-greenTab font-semibold' : 'text-greenInactive'}`}>
               식물 사전
             </Text>
           </TouchableOpacity>
         </View>
-            <View className="w-full h-0.5 bg-greenTab rounded-full"/>
-        {/* 콘텐츠 */}
-        <ScrollView className="flex-1 mt-4 px-4">
+        <View className="w-full h-0.5 bg-greenTab rounded-full"/>
+        
+        {/* 콘텐츠 영역 */}
+        <View className="flex-1">
           {renderContent()}
-        </ScrollView>
         </View>
-    </View>
+      </View>
+    </Background>
   );
 };
 
