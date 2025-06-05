@@ -40,7 +40,7 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
         options={({route}) => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'Piodex';
           return {
-            tabBarLabel: '피오덱스',
+            tabBarLabel: '기록',
             tabBarIcon: ({focused}) =>
               focused ? (
                 <PiodexIcon style={{color: Colors.greenActive}} />
