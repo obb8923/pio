@@ -12,6 +12,7 @@ import { usePermissionStore } from './src/store/permissionStore';
 import { useLocationStore } from './src/store/locationStore'; 
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from '@env';
+
 function App(): React.JSX.Element {
   const { isLoggedIn,isLoading: authLoading, checkLoginStatus } = useAuthStore();
   console.log("isLoggedIn App.tsx",isLoggedIn)
@@ -33,6 +34,8 @@ function App(): React.JSX.Element {
 
   // 타이머 ID를 저장하기 위한 ref (컴포넌트 리렌더링 시에도 유지)
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+
+
 
   useEffect(() => {
     // Google Sign-In 설정
@@ -58,9 +61,16 @@ function App(): React.JSX.Element {
       setSplashTimerExpired(true);
     }, 1500);
 
+    // 백업 타이머 - 3초 후 강제로 스플래시 숨김
+    const backupTimer = setTimeout(() => {
+      setAllPermissionsRequested(true);
+      setSplashTimerExpired(true);
+    }, 3000);
+
     // 2. 모든 권한 요청 시작
     const requestAllRequiredPermissions = async () => {
       let locationGranted = false;
+      
       try {
         const permissionsToRequest = Platform.select({
           ios: [
@@ -85,11 +95,16 @@ function App(): React.JSX.Element {
 
         // 각 권한 상태 업데이트 (permissionStore)
         if (Platform.OS === 'ios') {
-          setCameraPermission(statuses[PERMISSIONS.IOS.CAMERA] === RESULTS.GRANTED);
-          setPhotoLibraryPermission(statuses[PERMISSIONS.IOS.PHOTO_LIBRARY] === RESULTS.GRANTED);
+          const cameraGranted = statuses[PERMISSIONS.IOS.CAMERA] === RESULTS.GRANTED;
+          const photoGranted = statuses[PERMISSIONS.IOS.PHOTO_LIBRARY] === RESULTS.GRANTED;
           const iosLocationStatus = statuses[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE];
-          setLocationPermission(iosLocationStatus === RESULTS.GRANTED);
-          if (iosLocationStatus === RESULTS.GRANTED) locationGranted = true;
+          const iosLocationGranted = iosLocationStatus === RESULTS.GRANTED;
+          
+          setCameraPermission(cameraGranted);
+          setPhotoLibraryPermission(photoGranted);
+          setLocationPermission(iosLocationGranted);
+          
+          if (iosLocationGranted) locationGranted = true;
         } else if (Platform.OS === 'android') {
           setCameraPermission(statuses[PERMISSIONS.ANDROID.CAMERA] === RESULTS.GRANTED);
           setPhotoLibraryPermission(statuses[PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE] === RESULTS.GRANTED);
@@ -116,14 +131,21 @@ function App(): React.JSX.Element {
       if (timerIdRef.current) {
         clearTimeout(timerIdRef.current);
       }
+      clearTimeout(backupTimer);
     };
   }, [fetchLocation, setCameraPermission, setLocationPermission, setPhotoLibraryPermission]); // 초기 1회 실행
 
   // 스플래시 화면 숨김 조건 확인 Effect
   useEffect(() => {
     if (!splashHidden && allPermissionsRequested && splashTimerExpired) {
-      SplashScreen.hide();
-      setSplashHidden(true);
+      try {
+        SplashScreen.hide();
+        setSplashHidden(true);
+      } catch (error) {
+        console.error('[App.tsx] Error hiding splash screen:', error);
+        // 에러가 발생해도 상태는 업데이트하여 무한 대기 방지
+        setSplashHidden(true);
+      }
     }
   }, [allPermissionsRequested, splashTimerExpired, splashHidden]);
 
