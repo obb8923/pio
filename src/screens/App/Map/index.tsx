@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Animated, Alert, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, Animated, Alert, ActivityIndicator, Platform, Linking } from "react-native";
 import {Background} from "../../../components/Background";
 import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
@@ -14,6 +14,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getFoundPlants } from "../../../libs/supabase/supabaseOperations";
 import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
 import React from "react";
+import { usePermissionStore } from "../../../store/permissionStore";
+import { requestMultiple, PERMISSIONS, RESULTS, Permission } from 'react-native-permissions';
+
 type MapScreenProps = NativeStackScreenProps<MapStackParamList,'Map'>
 
 type FoundPlant = {
@@ -54,6 +57,14 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const fabAnimation = useRef(new Animated.Value(0)).current;
   const overlayAnimation = useRef(new Animated.Value(0)).current;
 
+  // 권한 상태 가져오기
+  const {
+    camera: cameraPermission,
+    photoLibrary: photoLibraryPermission,
+    setCameraPermission,
+    setPhotoLibraryPermission,
+  } = usePermissionStore();
+
   // 발견된 식물 데이터 가져오기 - 화면이 포커스될 때마다 실행
   useFocusEffect(
     React.useCallback(() => {
@@ -92,11 +103,80 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     ]).start();
   }, [isFabOpen]);
 
-  const toggleFab = () => {
-    setIsFabOpen(!isFabOpen);
+  const toggleFab = async () => {
+    if (isFabOpen) {
+      setIsFabOpen(false);
+      return;
+    }
+
+    // FAB을 열려고 할 때 권한 확인 및 요청
+    let currentCameraPermission = cameraPermission;
+    let currentPhotoLibraryPermission = photoLibraryPermission;
+
+    if (!currentCameraPermission || !currentPhotoLibraryPermission) {
+      const permissionsToRequest: Permission[] = [];
+      if (!currentCameraPermission) {
+        permissionsToRequest.push(
+          Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA
+        );
+      }
+      if (!currentPhotoLibraryPermission) {
+        permissionsToRequest.push(
+          Platform.OS === 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY :
+          (typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version) >= 33 ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
+        );
+      }
+
+      if (permissionsToRequest.length > 0) {
+        const statuses = await requestMultiple(permissionsToRequest);
+        const cameraStatus = statuses[Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA];
+        const photoStatus = statuses[
+          Platform.OS === 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY :
+          (typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version) >= 33 ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
+        ];
+
+        if (cameraStatus !== undefined) {
+          const granted = cameraStatus === RESULTS.GRANTED;
+          setCameraPermission(granted);
+          currentCameraPermission = granted;
+        }
+        if (photoStatus !== undefined) {
+          const granted = photoStatus === RESULTS.GRANTED;
+          setPhotoLibraryPermission(granted);
+          currentPhotoLibraryPermission = granted;
+        }
+      }
+    }
+
+    if (currentCameraPermission && currentPhotoLibraryPermission) {
+      setIsFabOpen(true);
+    } else {
+      Alert.alert(
+        "권한 필요",
+        "식물 추가 기능을 사용하려면 카메라 및 앨범 접근 권한이 모두 필요합니다. 설정에서 권한을 허용해주세요.",
+        [
+          { text: "취소", style: "cancel" },
+          { text: "설정으로 이동", onPress: () => Linking.openSettings() }
+        ]
+      );
+    }
   };
 
-  const handleCameraPress = () => {
+  const handleCameraPress = async () => {
+    const hasPermission = usePermissionStore.getState().camera;
+    if (!hasPermission) {
+      setIsFabOpen(false); // FAB 닫기
+      Alert.alert(
+        "카메라 권한 필요",
+        "카메라를 사용하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+        [
+          { text: "취소", style: "cancel" },
+          { text: "설정으로 이동", onPress: () => Linking.openSettings() }
+        ]
+      );
+      return;
+    }
+
     setIsFabOpen(false);
     launchCamera({
       mediaType: 'photo',
@@ -119,7 +199,21 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     });
   };
 
-  const handleGalleryPress = () => {
+  const handleGalleryPress = async () => {
+    const hasPermission = usePermissionStore.getState().photoLibrary;
+    if (!hasPermission) {
+      setIsFabOpen(false); // FAB 닫기
+      Alert.alert(
+        "앨범 접근 권한 필요",
+        "앨범에서 사진을 선택하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+        [
+          { text: "취소", style: "cancel" },
+          { text: "설정으로 이동", onPress: () => Linking.openSettings() }
+        ]
+      );
+      return;
+    }
+
     setIsFabOpen(false);
     launchImageLibrary({
       mediaType: 'photo',
