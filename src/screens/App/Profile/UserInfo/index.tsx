@@ -193,7 +193,8 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
                     {/* 닉네임 */}
                     <View className="my-2">
                         <Label text="닉네임" />
-                        <View className="bg-white rounded-lg border border-gray-200 px-4 py-0">
+                        <View className="bg-white rounded-lg border border-gray-200 px-4"
+                        style={{paddingVertical: Platform.OS === 'ios' ? 10 : 0}}>
                             <TextInput
                                 value={nickname}
                                 onChangeText={setNickname}
