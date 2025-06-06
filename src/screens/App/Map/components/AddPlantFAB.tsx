@@ -3,29 +3,25 @@ import { Colors } from '../../../../constants/Colors';
 import CameraIcon from '../../../../../assets/svgs/Camera.svg';
 import ImageAddIcon from '../../../../../assets/svgs/ImageAdd.svg';
 import { TAB_BAR_HEIGHT } from '../../../../constants/TabNavOptions';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { usePermissionStore } from '../../../../store/permissionStore';
-import { useFabAnimation } from '../hooks/useFabAnimation';
+import { useFab } from '../hooks/useFab';
 
 interface AddPlantFABProps {
-  isFabOpen: boolean;
-  onToggleFab: () => void;
   onNavigate: (screen: string, params: any) => void;
 }
 
 export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
-  isFabOpen,
-  onToggleFab,
   onNavigate,
 }) => {
-  const { fabAnimation, animations } = useFabAnimation(isFabOpen);
+  const { isOpen, toggle, close, fabAnimation, animations } = useFab();
   const { cameraButtonTranslateY, galleryButtonTranslateY, buttonScale } = animations;
 
-  const handleCameraPress = async () => {
+  const handleCameraPress = useCallback(async () => {
     const hasPermission = usePermissionStore.getState().camera;
     if (!hasPermission) {
-      onToggleFab(); // FAB 닫기
+      close(); // FAB 닫기
       Alert.alert(
         "카메라 권한 필요",
         "카메라를 사용하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
@@ -37,7 +33,7 @@ export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
       return;
     }
 
-    onToggleFab();
+    close();
     launchCamera({
       mediaType: 'photo',
       quality: 1,
@@ -57,12 +53,12 @@ export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
         Alert.alert('오류', '이미지를 가져올 수 없습니다.');
       }
     });
-  };
+  }, [close, onNavigate]);
 
-  const handleGalleryPress = async () => {
+  const handleGalleryPress = useCallback(async () => {
     const hasPermission = usePermissionStore.getState().photoLibrary;
     if (!hasPermission) {
-      onToggleFab(); // FAB 닫기
+      close(); // FAB 닫기
       Alert.alert(
         "앨범 접근 권한 필요",
         "앨범에서 사진을 선택하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
@@ -74,7 +70,7 @@ export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
       return;
     }
 
-    onToggleFab();
+    close();
     launchImageLibrary({
       mediaType: 'photo',
       quality: 1,
@@ -94,7 +90,7 @@ export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
         Alert.alert('오류', '이미지를 가져올 수 없습니다.');
       }
     });
-  };
+  }, [close, onNavigate]);
 
   return (
     <View className="w-1/2 absolute" style={{ bottom: TAB_BAR_HEIGHT + 20, right: 20 }}>
@@ -139,18 +135,18 @@ export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
       {/* 메인 Extended FAB */}
       <TouchableOpacity
         className="bg-greenTab rounded-full px-6 py-4 flex-row justify-center items-center shadow-lg"
-        style={{opacity: isFabOpen ? 0.7 : 1}}
-        onPress={onToggleFab}
+        style={{opacity: isOpen ? 0.7 : 1}}
+        onPress={toggle}
       >
         <Animated.Text
           className="text-greenActive text-3xl font-bold"
           style={{
-            transform: [{ rotate: isFabOpen ? '45deg' : '0deg' }]
+            transform: [{ rotate: isOpen ? '45deg' : '0deg' }]
           }}
         >
           +
         </Animated.Text>
-        {!isFabOpen && (
+        {!isOpen && (
           <Text className="text-greenActive text-lg font-bold ml-2">발견한 식물 추가하기</Text>
         )}
       </TouchableOpacity>
