@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView, Linking } from "react-native";
 import { useAuthStore } from "../../../store/authStore"; // 경로는 실제 위치에 맞게 수정
 import { Colors } from "../../../constants/Colors";
 import { getUserNickname } from "../../../libs/supabase/supabaseOperations";
@@ -9,6 +9,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ProfileStackParamList } from "../../../nav/stack/Profile";
 import ChevronRight from "../../../../assets/svgs/ChevronRight.svg";
 import { Background } from "../../../components/Background";
+import { FEEDBACK_FORM_URL } from "../../../constants/normal";
+import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 // 프로필 헤더 컴포넌트
@@ -53,11 +55,12 @@ const ProfileHeader = () => {
     </View>
   );
 };
-const ProfileItem = ({title, onPress}: {title: string, onPress: () => void}) => {
+const ProfileItem = ({title, onPress,isLink=false}: {title: string, onPress: () => void,isLink?: boolean}) => {
   return (
     <TouchableOpacity className="flex-row justify-between items-center py-4 px-5 rounded-lg border-b border-greenTab" onPress={onPress}>
       <Text className="text-base text-greenTab">{title}</Text>
-      <ChevronRight style={{width: 20, height: 20, color: Colors.greenTab}}/>
+      {!isLink && <ChevronRight style={{width: 7, height: 12, color: Colors.greenTab}}/>}
+      {isLink && <ArrowUpRight style={{width: 10, height: 12, color: Colors.greenTab}}/>}
     </TouchableOpacity>
   );
 };
@@ -82,7 +85,10 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
           }else{
             Alert.alert("로그인이 필요합니다.")
           }
-        }}/>  
+        }}/>
+               <View className="h-8" />
+
+        <ProfileItem title="건의하기" onPress={() => Linking.openURL(FEEDBACK_FORM_URL)} isLink={true}/>          
        <View className="h-8" />
         {/* 약관 및 정책 */}
           <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
