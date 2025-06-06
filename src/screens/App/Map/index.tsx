@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlantDetailModal } from "./components/PlantDetailModal";
 import { AddPlantFAB } from "./components/AddPlantFAB";
 import { useFoundPlants } from "./hooks/useFoundPlants";
-import { usePermissions } from "./hooks/usePermissions";
 import { useMapMarkers } from "./hooks/useMapMarkers";
 import { getFlowerImageForPlant } from "./utils/markerUtils";
 
@@ -34,7 +33,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       refreshPlants();
-    }, [refreshPlants])
+    }, [showOnlyMyPlants])
   );
 
   const handleTogglePress = useCallback(() => {
