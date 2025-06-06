@@ -118,9 +118,11 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       return;
     }
 
+
     // FAB을 열려고 할 때 권한 확인 및 요청
-    let currentCameraPermission = cameraPermission;
-    let currentPhotoLibraryPermission = photoLibraryPermission;
+    const permissionStore = usePermissionStore.getState();
+    let currentCameraPermission = permissionStore.camera;
+    let currentPhotoLibraryPermission = permissionStore.photoLibrary;
 
     if (!currentCameraPermission || !currentPhotoLibraryPermission) {
       const permissionsToRequest: Permission[] = [];
@@ -137,7 +139,10 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       }
 
       if (permissionsToRequest.length > 0) {
+        console.log('[Map] Requesting permissions:', permissionsToRequest);
         const statuses = await requestMultiple(permissionsToRequest);
+        console.log('[Map] Permission statuses:', statuses);
+
         const cameraStatus = statuses[Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA];
         const photoStatus = statuses[
           Platform.OS === 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY :
@@ -146,16 +151,21 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
 
         if (cameraStatus !== undefined) {
           const granted = cameraStatus === RESULTS.GRANTED;
-          setCameraPermission(granted);
+          permissionStore.setCameraPermission(granted);
           currentCameraPermission = granted;
         }
         if (photoStatus !== undefined) {
           const granted = photoStatus === RESULTS.GRANTED;
-          setPhotoLibraryPermission(granted);
+          permissionStore.setPhotoLibraryPermission(granted);
           currentPhotoLibraryPermission = granted;
         }
       }
     }
+
+    console.log('[Map] Current permissions:', {
+      camera: currentCameraPermission,
+      photoLibrary: currentPhotoLibraryPermission
+    });
 
     if (currentCameraPermission && currentPhotoLibraryPermission) {
       setIsFabOpen(true);
