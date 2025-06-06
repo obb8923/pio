@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image, Animated, Dimensions, RefreshControl, SectionList } from "react-native";
 import { useState, useEffect } from "react";
-import { getCurrentUserFoundPlants, getPlantList } from "../../../libs/supabase/supabaseOperations";
+import { getCurrentUserFoundPlants, getPlantList, getSignedUrls } from "../../../libs/supabase/supabaseOperations";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { useAuthStore } from "../../../store/authStore";
@@ -64,7 +64,13 @@ useEffect(()=>{
       const plants = await getCurrentUserFoundPlants();
       console.log('loadFoundPlants - 받아온 데이터:', plants);
       if (plants) {
-        setFoundPlants(plants);
+        const imageUrls = plants.map(p => p.image_url);
+        const signedUrls = await getSignedUrls(imageUrls);
+        const plantsWithSignedUrls = plants.map((plant, index) => ({
+          ...plant,
+          signed_url: signedUrls[index] || undefined
+        }));
+        setFoundPlants(plantsWithSignedUrls);
       }
     } catch (error) {
       console.error('Error loading found plants:', error);

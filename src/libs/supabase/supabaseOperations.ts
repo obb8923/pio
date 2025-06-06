@@ -207,14 +207,14 @@ export const getFoundPlants = async () => {
  * 발견된 식물들의 위치 정보를 가져옵니다.
  * @returns {Promise<Array<{
  *   id: string;
-  *   lat: number;
-  *   lng: number;
-  *   image_url: string;
-  *   plant_name: string;
-  *   description: string;
-  *   memo: string;
-  * }> | null>} 발견된 식물들의 정보 배열 또는 null (오류 발생 시)
-  */
+ *   lat: number;
+ *   lng: number;
+ *   image_url: string;
+ *   plant_name: string;
+ *   description: string;
+ *   memo: string;
+ * }> | null>} 발견된 식물들의 정보 배열 또는 null (오류 발생 시)
+ */
   try {
     const { data, error } = await supabase
       .from('found_plants')
@@ -236,30 +236,34 @@ export const getFoundPlants = async () => {
   }
 };
 
-export const getSignedImageUrl = async (imagePath: string, bucketName: string): Promise<string | null> => {
-  /**
- * 스토리지의 이미지에 대한 서명된 URL을 생성합니다.
- * @param imagePath 스토리지 내 이미지 경로
- * @param bucketName 버킷 이름
- * @returns {Promise<string | null>} 서명된 URL 또는 null (오류 발생 시)
- */
-  const { userId } = useAuthStore.getState();
-  if (!userId) return null;
-  try {
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .createSignedUrl(imagePath, 3600); // 1시간 유효
-
-    if (error) {
-      console.error('Error creating signed URL:', error);
-      return null;
-    }
-
-    return data.signedUrl;
-  } catch (err) {
-    console.error('getSignedImageUrl function error:', err);
-    return null;
-  }
+export const getSignedUrls = async (imageUrls: string | string[]): Promise<string | (string | null)[]> => {
+  const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+  const signedUrls = await Promise.all(
+    urls.map(async (imageUrl) => {
+      try {
+        const urlParts = imageUrl.split('/');
+        const bucketName = urlParts[urlParts.indexOf('public') + 1];
+        const filePath = urlParts.slice(urlParts.indexOf('public') + 2).join('/');
+        if (!bucketName || !filePath) {
+          console.error('Invalid image URL format:', imageUrl);
+          return null;
+        }
+        // 직접 서명 URL 생성 로직
+        const { data, error } = await supabase.storage
+          .from(bucketName)
+          .createSignedUrl(filePath, 3600); // 1시간 유효
+        if (error) {
+          console.error('Error creating signed URL:', error);
+          return null;
+        }
+        return data.signedUrl || null;
+      } catch (err) {
+        console.error('Error getting signed URL for plant:', err);
+        return null;
+      }
+    })
+  );
+  return Array.isArray(imageUrls) ? signedUrls : (signedUrls[0] || '');
 };
 
 export const getCurrentUserFoundPlants = async () => {
@@ -299,14 +303,20 @@ export const getCurrentUserFoundPlants = async () => {
       data.map(async (plant) => {
         try {
           // image_url에서 버킷 이름과 경로 추출
-          // 예: https://[project-ref].supabase.co/storage/v1/object/public/found-plants/user-id/image.jpg
           const urlParts = plant.image_url.split('/');
           const bucketName = urlParts[urlParts.indexOf('public') + 1];
           const filePath = urlParts.slice(urlParts.indexOf('public') + 2).join('/');
           
           if (bucketName && filePath) {
-            const signedUrl = await getSignedImageUrl(filePath, bucketName);
-            return { ...plant, signed_url: signedUrl || undefined };
+            // 직접 서명 URL 생성 로직
+            const { data: signedData, error: signedError } = await supabase.storage
+              .from(bucketName)
+              .createSignedUrl(filePath, 3600); // 1시간 유효
+            if (signedError) {
+              console.error('Error creating signed URL:', signedError);
+              return { ...plant, signed_url: undefined };
+            }
+            return { ...plant, signed_url: signedData.signedUrl || undefined };
           }
         } catch (err) {
           console.error('Error processing image URL:', err);

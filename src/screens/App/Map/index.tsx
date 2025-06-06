@@ -1,22 +1,24 @@
-import { View, Text, TouchableOpacity, Animated, Alert, ActivityIndicator, Platform, Linking } from "react-native";
+import { View, Text, TouchableOpacity, Animated, Alert, ActivityIndicator, Platform, Linking, Modal, Image, ScrollView } from "react-native";
 import {Background} from "../../../components/Background";
 import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
 import CameraIcon from "../../../../assets/svgs/Camera.svg";
 import ImageAddIcon from "../../../../assets/svgs/ImageAdd.svg";
-import RefreshIcon from "../../../../assets/svgs/Refresh.svg";
 import { Colors } from "../../../constants/Colors";
 import { useState, useRef, useEffect } from "react";
 import {MapStackParamList} from "../../../nav/stack/Map"
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { getFoundPlants } from "../../../libs/supabase/supabaseOperations";
+import { getFoundPlants, getCurrentUserFoundPlants, getSignedUrls } from "../../../libs/supabase/supabaseOperations";
 import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
 import React from "react";
 import { usePermissionStore } from "../../../store/permissionStore";
 import { requestMultiple, PERMISSIONS, RESULTS, Permission } from 'react-native-permissions';
-
+import { useAuthStore } from "../../../store/authStore";
+import { TextToggle } from "../../../components/TextToggle";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CustomButton } from "../../../components/CustomButton";
 type MapScreenProps = NativeStackScreenProps<MapStackParamList,'Map'>
 
 type FoundPlant = {
@@ -27,6 +29,7 @@ type FoundPlant = {
   plant_name: string;
   description: string;
   memo: string;
+  signed_url?: string;
 };
 
 const flowerImages = [
@@ -54,9 +57,13 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [foundPlants, setFoundPlants] = useState<FoundPlant[]>([]);
   const [isLoadingPlants, setIsLoadingPlants] = useState(true);
+  const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
+  const [selectedPlant, setSelectedPlant] = useState<FoundPlant | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const fabAnimation = useRef(new Animated.Value(0)).current;
   const overlayAnimation = useRef(new Animated.Value(0)).current;
-
+  const { userId } = useAuthStore();
+  const insets = useSafeAreaInsets();
   // 권한 상태 가져오기
   const {
     camera: cameraPermission,
@@ -71,7 +78,9 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       const fetchFoundPlants = async () => {
         try {
           setIsLoadingPlants(true);
-          const plants = await getFoundPlants();
+          const plants = showOnlyMyPlants 
+            ? await getCurrentUserFoundPlants()
+            : await getFoundPlants();
           if (plants) {
             setFoundPlants(plants);
           }
@@ -84,7 +93,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       };
 
       fetchFoundPlants();
-    }, [])
+    }, [showOnlyMyPlants])
   );
 
   // FAB 애니메이션
@@ -236,24 +245,26 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     });
   };
 
-  const handleMarkerPress = (plant: FoundPlant) => {
-    //일단 아무 기능 없게 해놓고 나중에 추가할 예정
-    // Alert.alert(
-    //   plant.plant_name || '이름 없는 식물',
-    //   `${plant.description || '설명 없음'}\n\n메모: ${plant.memo || '메모 없음'}`,
-    //   [
-    //     {
-    //       text: '확인',
-    //       style: 'default'
-    //     }
-    //   ]
-    // );
+  const handleMarkerPress = async (plant: FoundPlant) => {
+    try {
+      const signedUrl = await getSignedUrls(plant.image_url);
+      // signedUrl이 배열이면 첫 번째 요소를 사용, 아니면 그대로 사용
+      const finalSignedUrl = Array.isArray(signedUrl) ? signedUrl[0] : signedUrl;
+      setSelectedPlant({ ...plant, signed_url: finalSignedUrl || undefined });
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error('Error getting signed URL:', error);
+      setSelectedPlant(plant);
+      setIsModalVisible(true);
+    }
   };
 
   const handleRefresh = async () => {
     try {
       setIsLoadingPlants(true);
-      const plants = await getFoundPlants();
+      const plants = showOnlyMyPlants 
+        ? await getCurrentUserFoundPlants()
+        : await getFoundPlants();
       if (plants) {
         setFoundPlants(plants);
       }
@@ -263,6 +274,20 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     } finally {
       setIsLoadingPlants(false);
     }
+  };
+
+  const handleTogglePress = () => {
+    if (!showOnlyMyPlants && !userId) {
+      Alert.alert(
+        "로그인 필요",
+        "내 식물을 보려면 로그인이 필요합니다.",
+        [
+          { text: "확인", style: "default" }
+        ]
+      );
+      return;
+    }
+    setShowOnlyMyPlants(!showOnlyMyPlants);
   };
 
   // 애니메이션 값들
@@ -281,20 +306,32 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     outputRange: [0, 1],
   });
 
-  return <Background>
+  return <Background >
     <View className="flex-1">
-      {/* 새로고침 버튼 */}
+      {/* 상단 네비게이션 바 */}
+      <View className="absolute h-10 px-4 z-10 flex-row items-center justify-between w-full" style={{marginTop: insets.top + 10}}>
+         {/* 새로고침 버튼 */}
       <TouchableOpacity
-        className="absolute top-14 left-4 z-10 bg-white rounded-full px-4 py-2 shadow-lg flex-row items-center"
+        className="bg-white rounded-full px-3 py-1.5 shadow-lg flex-row items-center border border-greenTab"
         onPress={handleRefresh}
         disabled={isLoadingPlants}
       >
         {isLoadingPlants ? (
           <ActivityIndicator size="small" color={Colors.greenTab} />
         ) : (
-          <Text className="text-greenTab font-medium">지도 새로고침</Text>
+          <Text className="text-greenTab font-medium text-sm">지도 새로고침</Text>
         )}
       </TouchableOpacity>
+      {/* 필터링 토글 */}
+        <TextToggle
+          isActive={showOnlyMyPlants}
+          activeText="내 식물만"
+          inactiveText="모든 식물"
+          onToggle={handleTogglePress}
+        />
+      </View>
+
+     
 
       <NaverMapView
         style={{ flex: 1 }}
@@ -318,6 +355,57 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       </NaverMapView>
     </View>
     
+    {/* 식물 정보 모달 */}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isModalVisible}
+      onRequestClose={() => setIsModalVisible(false)}
+    >
+      <View className="flex-1 justify-end">
+        <View className="bg-white rounded-t-3xl max-h-[90%] min-h-[50%]">
+          <ScrollView 
+            className="p-6"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{paddingBottom: 100}}
+          >
+            <View className="flex-row justify-start items-center mb-4">
+              <Text className="text-xl font-bold text-gray-800">
+                {selectedPlant?.plant_name || '이름 없는 식물'}
+              </Text>
+            </View>
+            
+            {(selectedPlant?.signed_url || selectedPlant?.image_url) && (
+              <Image
+                source={{ uri: selectedPlant?.signed_url || selectedPlant?.image_url }}
+                className="w-full h-48 rounded-lg mb-4"
+                resizeMode="cover"
+                onError={() => {
+                  console.log('이미지 로드 실패', selectedPlant?.signed_url, 'signed_url', selectedPlant?.image_url, 'image_url');
+                }}
+              />
+            )}
+            
+            <View className="mb-4">
+              <Text className="text-gray-600 mb-2">
+                {selectedPlant?.description || '설명 없음'}
+              </Text>
+              <Text className="text-gray-500">
+                메모: {selectedPlant?.memo || '메모 없음'}
+              </Text>
+            </View>
+          </ScrollView>
+          <View className="absolute bottom-6 left-0 right-0 justify-center items-center">
+            <CustomButton
+              text="닫기"
+              size={60}
+              onPress={() => setIsModalVisible(false)}
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+
     {/* Extended FAB */}
     <View className="w-1/2 absolute" style={{ bottom: TAB_BAR_HEIGHT + 20, right: 20 }}>
       {/* 갤러리 버튼 */}
