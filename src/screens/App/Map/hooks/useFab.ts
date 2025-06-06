@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Animated, Alert, Linking } from 'react-native';
-import { usePermissions } from './usePermissions';
+import { useCameraPermissions } from '../../../../libs/hooks/useCameraPermissions';
 
 export const useFab = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { checkAndRequestPermissions } = usePermissions();
+  const { checkAndRequestPermissions } = useCameraPermissions();
 
   // 애니메이션 값
   const fabAnimation = useRef(new Animated.Value(0)).current;

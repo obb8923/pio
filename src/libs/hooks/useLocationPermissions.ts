@@ -3,7 +3,7 @@ import { Platform, PermissionsAndroid } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { usePermissionStore } from '../../store/permissionStore';
 
-export const usePermissions = () => {
+export const useLocationPermissions = () => {
   const { 
     camera, 
     photoLibrary, 
