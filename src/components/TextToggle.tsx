@@ -82,7 +82,7 @@ export const TextToggle = ({
               {/* 활성화 텍스트 */}
               <Animated.View style={{ opacity: activeTextOpacity }}
               className="absolute left-0 px-2">
-                <Text className={`text-white`}>
+                <Text className={`text-white text-sm`}>
                   {activeText}
                 </Text>
               </Animated.View>
@@ -90,7 +90,7 @@ export const TextToggle = ({
               {/* 비활성화 텍스트 */}
               <Animated.View style={{ opacity: inactiveTextOpacity }}
               className="absolute right-0 px-2">
-                <Text className={`text-gray600`}>
+                <Text className={`text-gray600 text-sm`}>
                   {inactiveText}
                 </Text>
               </Animated.View>

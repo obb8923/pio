@@ -3,10 +3,10 @@ import {Background} from "../../../components/Background";
 import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
 import { Colors } from "../../../constants/Colors";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {MapStackParamList} from "../../../nav/stack/Map"
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useFocusEffect } from "@react-navigation/native";
+import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import React from "react";
 import { useAuthStore } from "../../../store/authStore";
 import { TextToggle } from "../../../components/TextToggle";
@@ -16,19 +16,37 @@ import { AddPlantFAB } from "./components/AddPlantFAB";
 import { useFoundPlants } from "./hooks/useFoundPlants";
 import { useMapMarkers } from "./hooks/useMapMarkers";
 import { getFlowerImageForPlant } from "./utils/markerUtils";
+import { usePermissionStore } from "../../../store/permissionStore";
+import { useVisitStore } from "../../../store/visitStore";
+import { RootStackParamList } from "../../../nav/stack/Root";
 
-type MapScreenProps = NativeStackScreenProps<MapStackParamList,'Map'>
-
+type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>
+type RootStack = NativeStackScreenProps<RootStackParamList>
+type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
 export const MapScreen = ({navigation}:MapScreenProps) => {
   const { latitude, longitude } = useLocationStore();
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const { userId } = useAuthStore();
   const insets = useSafeAreaInsets();
-
+  const { camera, photoLibrary, location, isInitialized } = usePermissionStore();
+  const { isFirstVisit, setFirstVisit } = useVisitStore();
   // 커스텀 훅 사용
   const { foundPlants, isLoading: isLoadingPlants, refreshPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, handleMarkerPress, closeModal } = useMapMarkers();
-
+  
+  useEffect(() => {
+    if (isFirstVisit && isInitialized) {
+      setFirstVisit(false);
+      console.log('isInitialized',isInitialized);
+      console.log('camera',camera);
+      console.log('photoLibrary',photoLibrary);
+      console.log('location',location);
+      console.log('isFirstVisit',isFirstVisit);
+      if (!camera || !photoLibrary || !location) {
+        navigation.navigate('PermissionScreen');
+      }
+    }
+  }, [isInitialized, camera, photoLibrary, location]);
   // 화면이 포커스될 때마다 식물 데이터 가져오기
   useFocusEffect(
     useCallback(() => {
@@ -49,7 +67,6 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     }
     setShowOnlyMyPlants(!showOnlyMyPlants);
   }, [showOnlyMyPlants, userId]);
-
   return <Background >
     <View className="flex-1">
       {/* 상단 네비게이션 바 */}
