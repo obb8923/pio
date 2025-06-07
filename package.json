@@ -45,6 +45,7 @@
     "react-native-svg-transformer": "^1.5.1",
     "react-native-tcp-socket": "^6.3.0",
     "react-native-url-polyfill": "^2.0.0",
+    "react-native-webview": "^13.14.1",
     "readable-stream": "^4.7.0",
     "stream-http": "^3.2.0",
     "util": "^0.12.5",

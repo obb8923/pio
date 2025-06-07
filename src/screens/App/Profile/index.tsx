@@ -88,7 +88,9 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
         }}/>
                <View className="h-8" />
 
-        <ProfileItem title="건의하기" onPress={() => Linking.openURL(FEEDBACK_FORM_URL)} isLink={true}/>          
+        <ProfileItem title="건의하기" onPress={() => navigation.navigate('WebView', {
+          url: FEEDBACK_FORM_URL,
+        })} isLink={true}/>          
        <View className="h-8" />
         {/* 약관 및 정책 */}
           <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
