@@ -9,8 +9,9 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ProfileStackParamList } from "../../../nav/stack/Profile";
 import ChevronRight from "../../../../assets/svgs/ChevronRight.svg";
 import { Background } from "../../../components/Background";
-import { FEEDBACK_FORM_URL } from "../../../constants/normal";
+import { FEEDBACK_FORM_URL, GOOGLE_PLAY_URL, MAIL_ADDRESS } from "../../../constants/normal";
 import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
+import Mail from "../../../../assets/svgs/Mail.svg";
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 // 프로필 헤더 컴포넌트
@@ -55,12 +56,13 @@ const ProfileHeader = () => {
     </View>
   );
 };
-const ProfileItem = ({title, onPress,isLink=false}: {title: string, onPress: () => void,isLink?: boolean}) => {
+const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: () => void,type?: 'default' | 'link'|'mail'}) => {
   return (
     <TouchableOpacity className="flex-row justify-between items-center py-4 px-5 rounded-lg border-b border-greenTab" onPress={onPress}>
       <Text className="text-base text-greenTab">{title}</Text>
-      {!isLink && <ChevronRight style={{width: 7, height: 12, color: Colors.greenTab}}/>}
-      {isLink && <ArrowUpRight style={{width: 10, height: 12, color: Colors.greenTab}}/>}
+      {type === 'default' && <ChevronRight style={{width: 7, height: 12, color: Colors.greenTab}}/>}
+      {type === 'link' && <ArrowUpRight style={{width: 10, height: 12, color: Colors.greenTab}}/>}
+      {type === 'mail' && <Mail style={{width: 16, height: 12, color: Colors.greenTab,transform:[{translateX:2}]}}/>}
     </TouchableOpacity>
   );
 };
@@ -87,12 +89,16 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
           }
         }}/>
                <View className="h-8" />
-
+        <ProfileItem title="문의하기" onPress={()=>{
+          Linking.openURL(`mailto:${MAIL_ADDRESS}`);
+        }} type="mail"/>
         <ProfileItem title="건의하기" onPress={() => navigation.navigate('WebView', {
           url: FEEDBACK_FORM_URL,
-        })} isLink={true}/>          
+        })} type="link"/>   
+
        <View className="h-8" />
         {/* 약관 및 정책 */}
+        <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>          
           <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
           <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
       </ScrollView>
