@@ -34,20 +34,13 @@ export const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
       <View className="flex-1 justify-end">
         <View className="bg-white rounded-t-3xl max-h-[90%] min-h-[50%]">
           <ScrollView 
-            className="p-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 100}}
-          >
-            <View className="flex-row justify-start items-center mb-4">
-              <Text className="text-xl font-bold text-gray-800">
-                {selectedPlant?.plant_name || '이름 없는 식물'}
-              </Text>
-            </View>
-            
+          >  
             {(selectedPlant?.signed_url || selectedPlant?.image_url) && (
               <Image
                 source={{ uri: selectedPlant?.signed_url || selectedPlant?.image_url }}
-                className="w-full h-48 rounded-lg mb-4"
+                className="w-full h-[300px] rounded-t-lg mb-1"
                 resizeMode="cover"
                 onError={() => {
                   console.log('이미지 로드 실패', selectedPlant?.signed_url, 'signed_url', selectedPlant?.image_url, 'image_url');
@@ -55,7 +48,12 @@ export const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
               />
             )}
             
-            <View className="mb-4">
+            <View className="mb-4 p-4">
+            <View className="flex-row justify-start items-center mb-4">
+              <Text className="text-xl font-bold text-gray-800">
+                {selectedPlant?.plant_name || '이름 없는 식물'}
+              </Text>
+            </View>
               <Text className="text-gray-600 mb-2">
                 {selectedPlant?.description || '설명 없음'}
               </Text>

@@ -16,4 +16,5 @@ export const Colors = {
   greenTab900: '#0C3941',
   greenInactive: '#6AE3D0',
   greenActive: '#ADFDAD',
+  greenInput: '#E4F3E5',
 }
