@@ -25,6 +25,7 @@ module.exports = {
         'bluegray': '#F1F2F4',
         'greenActive': '#ADFDAD',
         'greenInactive': '#6AE3D0',
+        'greenInput': '#E4F3E5',
         'greenTab': '#1C8597',
         'greenTab900': '#0C3941',
        

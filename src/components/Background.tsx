@@ -25,7 +25,7 @@ export const Background = ({children,isStatusBarGap=false,type='green',isTabBarG
     {type === 'white' && <View className="flex-1 mx-2 absolute top-0 left-0 right-0 bottom-0 bg-white opacity-90"/>}
     <View 
     className={`flex-1 ${props.className}`} 
-    style={[{paddingBottom: isTabBarGap ? TAB_BAR_HEIGHT : 0}, props.style]}>
+    style={[{paddingBottom: TAB_BAR_HEIGHT}, props.style]}>
       {children}
     </View>    
     </View>    
