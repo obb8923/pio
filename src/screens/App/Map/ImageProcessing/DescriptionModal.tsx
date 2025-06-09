@@ -31,7 +31,7 @@ export const DescriptionModal = ({
           </View>
           {/* 텍스트 인풋 */}
           <TextInput
-            className="flex-1 text-gray-700 p-4 rounded-lg bg-greenInput"
+            className="flex-1 text-gray-700 p-4 rounded-lg bg-gray-50"
             multiline
             value={description}
             onChangeText={onDescriptionChange}
