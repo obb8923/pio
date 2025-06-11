@@ -3,16 +3,19 @@ import "./global.css"
 import { SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'react-native'; 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from './src/store/authStore';
 import SplashScreen from "react-native-splash-screen";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from '@env';
 import { RootStack } from "./src/nav/stack/Root";
 import { usePermissionStore } from "./src/store/permissionStore";
+import { type MaintenanceResponse, checkMaintenance } from "./src/libs/supabase/operations/normal/checkMaintenance";
+import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
 function App(): React.JSX.Element {
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized } = usePermissionStore();
+  const [maintenanceData, setMaintenanceData] = useState<MaintenanceResponse | null>(null);
   useEffect(() => {
     // Google Sign-In 설정
     try {
@@ -34,6 +37,15 @@ function App(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
+    const maintenance = async () => {
+      const maintenanceData: MaintenanceResponse | null = await checkMaintenance();
+      if(maintenanceData) setMaintenanceData(maintenanceData);
+      console.log('maintenanceData', maintenanceData);
+    }
+    maintenance();
+  }, []);
+
+  useEffect(() => {
     const initializeApp = async () => {
       try {
         await checkLoginStatus();
@@ -46,7 +58,16 @@ function App(): React.JSX.Element {
     initializeApp();
   }, [checkLoginStatus]);
 
-
+  //점검 중일 때 유지보수 화면 표시
+  if(maintenanceData && maintenanceData.is_maintenance) {
+    return (
+      <SafeAreaProvider>
+          <SafeAreaView style={{flex:1}} edges={[ 'left', 'right']} >
+            <MaintenanceScreen maintenanceData={maintenanceData}/>
+          </SafeAreaView>
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>
