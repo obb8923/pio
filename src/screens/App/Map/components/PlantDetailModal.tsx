@@ -1,16 +1,17 @@
-import { View, Text, Modal, Image, ScrollView } from 'react-native';
+import { View, Text, Modal, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { CustomButton } from '../../../../components/CustomButton';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Colors } from '../../../../constants/Colors';
+import { getSignedUrls } from '../../../../libs/supabase/operations/image/getSignedUrls';
 
 type FoundPlant = {
   id: string;
   lat: number;
   lng: number;
-  image_url: string;
+  image_path: string;
   plant_name: string;
   description: string;
   memo: string;
-  signed_url?: string;
 };
 
 interface PlantDetailModalProps {
@@ -19,11 +20,36 @@ interface PlantDetailModalProps {
   selectedPlant: FoundPlant | null;
 }
 
-export const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
+export const PlantDetailModal = ({
   isVisible,
   onClose,
   selectedPlant,
-}) => {
+}: PlantDetailModalProps) => {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSignedUrl = async () => {
+      if (!selectedPlant) {
+        setSignedUrl(null);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const url = await getSignedUrls(selectedPlant.image_path);
+        setSignedUrl(Array.isArray(url) ? url[0] : url);
+      } catch (err) {
+        console.error('Error fetching signed URL:', err);
+        setSignedUrl(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSignedUrl();
+  }, [selectedPlant]);
+
   return (
     <Modal
       animationType="slide"
@@ -37,16 +63,22 @@ export const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 100}}
           >  
-            {(selectedPlant?.signed_url || selectedPlant?.image_url) && (
-              <Image
-                source={{ uri: selectedPlant?.signed_url || selectedPlant?.image_url }}
-                className="w-full h-[300px] rounded-t-lg mb-1"
-                resizeMode="cover"
-                onError={() => {
-                  console.log('이미지 로드 실패', selectedPlant?.signed_url, 'signed_url', selectedPlant?.image_url, 'image_url');
-                }}
-              />
-            )}
+            <View className="w-full h-[300px] rounded-t-xl mb-1 bg-gray-100">
+              {isLoading ? (
+                <View className="w-full h-full justify-center items-center">
+                  <ActivityIndicator size="large" color={Colors.greenTab} />
+                </View>
+              ) : signedUrl ? (
+                <Image
+                  source={{ uri: signedUrl }}
+                  className="w-full h-full rounded-t-xl"
+                  resizeMode="cover"
+                  onError={() => {
+                    console.log('이미지 로드 실패', signedUrl);
+                  }}
+                />
+              ) : null}
+            </View>
             
             <View className="mb-4 p-4">
             <View className="flex-row justify-start items-center mb-4">
@@ -55,10 +87,10 @@ export const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
               </Text>
             </View>
               <Text className="text-gray-600 mb-2">
-                {selectedPlant?.description || '설명 없음'}
+                {selectedPlant?.description || '설명이 없습니다.'}
               </Text>
               <Text className="text-gray-500">
-                메모: {selectedPlant?.memo || '메모 없음'}
+                메모: {selectedPlant?.memo || '메모가 없습니다.'}
               </Text>
             </View>
           </ScrollView>

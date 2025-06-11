@@ -6,3 +6,5 @@ export const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdZNH
 
 export const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.jeong.pio';
 export const MAIL_ADDRESS = 'companyjeong25@gmail.com';
+
+export const BUCKET_NAME = 'found-plants';

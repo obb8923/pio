@@ -1,5 +1,5 @@
 import { View,Text, ScrollView, Image, Platform } from "react-native"
-import { FoundPlant } from ".."
+import { type FoundPlant } from "../../../../libs/hooks/useFoundPlants"
 import { useRoute } from "@react-navigation/native"
 import { NaverMapView,NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
 import { Colors } from "../../../../constants/Colors"
@@ -13,13 +13,14 @@ type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
 export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const route = useRoute();
     const insets = useSafeAreaInsets();
-    const {id,signed_url,plant_name,description,memo,lat,lng} = route.params as FoundPlant   
+    const {plant,signedUrl} = route.params as {plant:FoundPlant,signedUrl:string}   
+    const {id,plant_name,description,memo,lat,lng} = plant
     return (
       <Background isStatusBarGap={false} isTabBarGap={false}>
           {/* 사진 영역 */}
        <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
           <Image
-            source={{ uri: signed_url }}
+            source={{ uri: signedUrl }}
             className="w-full h-full rounded-3xl"
             resizeMode="cover"
           />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView, Linking } from "react-native";
 import { useAuthStore } from "../../../store/authStore"; // 경로는 실제 위치에 맞게 수정
 import { Colors } from "../../../constants/Colors";
-import { getUserNickname } from "../../../libs/supabase/supabaseOperations";
+import { getUserNickname } from "../../../libs/supabase/operations/user/getUserNickname";
 import GoogleIcon from "../../../../assets/svgs/GoogleLogo.svg"
 import { Skeleton } from "../../../components/Skeleton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -99,8 +99,8 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
        <View className="h-8" />
         {/* 약관 및 정책 */}
         <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>          
-          <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
-          <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
+        <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
+        <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
       </ScrollView>
     </Background>
   );

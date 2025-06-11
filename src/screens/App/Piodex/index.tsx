@@ -1,25 +1,15 @@
-import { View, Text, TouchableOpacity, Image, Animated, Dimensions, RefreshControl, SectionList } from "react-native";
+import { View, Text, TouchableOpacity, Image, Animated, Dimensions, RefreshControl, SectionList, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
-import { getCurrentUserFoundPlants, getPlantList, getSignedUrls } from "../../../libs/supabase/supabaseOperations";
+import { getPlantList } from "../../../libs/supabase/operations/foundPlants/getPlantList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { useAuthStore } from "../../../store/authStore";
 import { Background } from "../../../components/Background";
 import { Colors } from "../../../constants/Colors";
-type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
+import { useFoundPlants, FoundPlant } from "../../../libs/hooks/useFoundPlants";
+import { useSignedUrls } from "../../../libs/hooks/useSignedUrls";
 
-// 식물 데이터 타입 정의
-export interface FoundPlant {
-  id: string;
-  created_at: string;
-  image_url: string;
-  plant_name: string;
-  description: string;
-  memo: string;
-  lat: number;
-  lng: number;
-  signed_url?: string;
-}
+type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 // 식물 사전 데이터 타입 정의
 interface PlantListItem {
@@ -32,53 +22,27 @@ interface PlantListItem {
 
 export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   const [activeTab, setActiveTab] = useState<'piodex' | 'plant'>('piodex');
-  const [foundPlants, setFoundPlants] = useState<FoundPlant[]>([]);
   const [plantList, setPlantList] = useState<PlantListItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [plantListLoading, setPlantListLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const slideAnim = useState(new Animated.Value(0))[0];
   const { isLoggedIn } = useAuthStore();
   const [containerWidth, setContainerWidth] = useState(0);
+  const { foundPlants, isLoading: loading, fetchPlants } = useFoundPlants(true);
+  const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(foundPlants);
+  
   // 화면 너비 가져오기
   const screenWidth = Dimensions.get('window').width;
   const tabWidth = (screenWidth - 32) / 2; // 전체 너비에서 좌우 패딩(32) 제외 후 2로 나눔
-useEffect(()=>{
-  console.log("foundPlants",foundPlants)
-},[foundPlants])
-  // 발견된 식물 데이터 로드
+
+  // 화면이 마운트될 때 데이터 로드
   useEffect(() => {
-    if(isLoggedIn && foundPlants.length === 0) {
-      loadFoundPlants();
-    } else if (!isLoggedIn) {
-      setFoundPlants([]);
-      setLoading(false);
-    }
+    if(isLoggedIn) fetchPlants();
   }, [isLoggedIn]);
 
-  const loadFoundPlants = async () => {
-    if(!isLoggedIn) return;
-    try {
-      console.log('loadFoundPlants - 시작');
-      if (foundPlants.length === 0) setLoading(true);
-      const plants = await getCurrentUserFoundPlants();
-      console.log('loadFoundPlants - 받아온 데이터:', plants);
-      if (plants) {
-        const imageUrls = plants.map(p => p.image_url);
-        const signedUrls = await getSignedUrls(imageUrls);
-        const plantsWithSignedUrls = plants.map((plant, index) => ({
-          ...plant,
-          signed_url: signedUrls[index] || undefined
-        }));
-        setFoundPlants(plantsWithSignedUrls);
-      }
-    } catch (error) {
-      console.error('Error loading found plants:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-      console.log('loadFoundPlants - 완료');
-    }
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchPlants().finally(() => setRefreshing(false));
   };
 
   const handleTabChange = (tab: 'piodex' | 'plant') => {
@@ -133,11 +97,6 @@ useEffect(()=>{
     return sections;
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    loadFoundPlants();
-  };
-
   const renderContent = () => {
     // 로그인 상태 체크
     if(!isLoggedIn) return (
@@ -147,10 +106,11 @@ useEffect(()=>{
     );
 
     // 로딩 상태 체크
-    if (loading || plantListLoading) {
+    if (loading) {
       return (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-500">로딩 중...</Text>
+          <ActivityIndicator size="large" color={Colors.greenTab} />
+          <Text className="text-gray-500 mt-2">데이터를 불러오는 중...</Text>
         </View>
       );
     }
@@ -159,12 +119,21 @@ useEffect(()=>{
     if(activeTab === 'piodex') {
       // 데이터가 없을 때
       if(!foundPlants || foundPlants.length === 0) {
-        console.log("foundPlants",foundPlants)
         return (
-          <View className="flex-1 justify-center items-center">
-            <Text className="text-gray-500 text-center text-lg mb-2">아직 발견한 식물이 없습니다.</Text>
-            <Text className="text-gray-400 text-center">식물을 발견해보세요!</Text>
-          </View>
+          <SectionList
+            sections={[{ title: '', data: [[]] }]}
+            renderItem={() => (
+              <View className="flex-1 justify-center items-center py-20">
+                <Text className="text-gray-500 text-center text-lg mb-2">아직 발견한 식물이 없습니다.</Text>
+                <Text className="text-gray-400 text-center">식물을 발견해보세요!</Text>
+              </View>
+            )}
+            renderSectionHeader={() => null}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.greenTab]} />
+            }
+            contentContainerStyle={{ flexGrow: 1 }}
+          />
         );
       }
 
@@ -173,7 +142,7 @@ useEffect(()=>{
         <SectionList
           sections={groupPlantsByDate(foundPlants)}
           keyExtractor={(item, index) => `section-${index}`}
-          renderItem={({ item: plantsInDate }) => ( // item은 이제 해당 날짜의 모든 식물 배열입니다.
+          renderItem={({ item: plantsInDate }) => (
             <View 
               className="flex-row flex-wrap justify-start px-1"
               onLayout={(event) => {
@@ -184,20 +153,27 @@ useEffect(()=>{
               }}
             > 
               {plantsInDate.map((plant) => {
-                const itemWidth = containerWidth > 0 ? (containerWidth - 8) / 4 : 125; // 8은 패딩 고려 (px-1 * 2 + gap)
+                const itemWidth = containerWidth > 0 ? (containerWidth - 8) / 4 : 125;
+                const signedUrl = signedUrls[foundPlants.findIndex(p => p.id === plant.id)];
                 return (
                   <TouchableOpacity
                     key={plant.id}
-                    onPress={() => navigation.navigate('Detail', plant)}
-                    className=" p-1 mb-1"
-                    style={{ width: itemWidth, height: itemWidth +30 }}
+                    onPress={() => navigation.navigate('Detail', { plant, signedUrl })}
+                    className="p-1 mb-1"
+                    style={{ width: itemWidth, height: itemWidth + 30 }}
                   >
-                    <View className="w-full h-full rounded-sm overflow-hidden">
-                      <Image
-                        source={{ uri: plant.signed_url }}
-                        className="w-full h-full"
-                        resizeMode="cover"
-                      />
+                    <View className="w-full h-full rounded-sm overflow-hidden bg-gray-100">
+                      {isLoadingImages && !signedUrl ? (
+                        <View className="w-full h-full justify-center items-center">
+                          <ActivityIndicator size="small" color={Colors.greenTab} />
+                        </View>
+                      ) : (
+                        <Image
+                          source={{ uri: signedUrl || plant.image_path }}
+                          className="w-full h-full"
+                          resizeMode="cover"
+                        />
+                      )}
                     </View>
                   </TouchableOpacity>
                 );
@@ -205,17 +181,15 @@ useEffect(()=>{
             </View>
           )}
           renderSectionHeader={({ section: { title } }) => (
-            <Text className=" font-semibold py-2 my-2 rounded-md">{title}</Text>
+            <Text className="font-semibold py-2 my-2 rounded-md">{title}</Text>
           )}
           stickySectionHeadersEnabled={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.greenTab]} />
           }
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16,paddingBottom: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
         />
       );
-      
-
     }
 
     // 식물 사전 탭

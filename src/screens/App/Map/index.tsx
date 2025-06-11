@@ -13,16 +13,18 @@ import { TextToggle } from "../../../components/TextToggle";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlantDetailModal } from "./components/PlantDetailModal";
 import { AddPlantFAB } from "./components/AddPlantFAB";
-import { useFoundPlants } from "./hooks/useFoundPlants";
+import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";
 import { useMapMarkers } from "./hooks/useMapMarkers";
 import { getFlowerImageForPlant } from "./utils/markerUtils";
 import { usePermissionStore } from "../../../store/permissionStore";
 import { useVisitStore } from "../../../store/visitStore";
 import { RootStackParamList } from "../../../nav/stack/Root";
+import { type FoundPlant } from "../../../libs/hooks/useFoundPlants";
 
 type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>
 type RootStack = NativeStackScreenProps<RootStackParamList>
 type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
+
 export const MapScreen = ({navigation}:MapScreenProps) => {
   const { latitude, longitude } = useLocationStore();
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
@@ -30,27 +32,24 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const insets = useSafeAreaInsets();
   const { camera, photoLibrary, location, isInitialized } = usePermissionStore();
   const { isFirstVisit, setFirstVisit } = useVisitStore();
+ 
   // 커스텀 훅 사용
-  const { foundPlants, isLoading: isLoadingPlants, refreshPlants } = useFoundPlants(showOnlyMyPlants);
+  const { foundPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, handleMarkerPress, closeModal } = useMapMarkers();
   
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
       setFirstVisit(false);
-      console.log('isInitialized',isInitialized);
-      console.log('camera',camera);
-      console.log('photoLibrary',photoLibrary);
-      console.log('location',location);
-      console.log('isFirstVisit',isFirstVisit);
       if (!camera || !photoLibrary || !location) {
         navigation.navigate('PermissionScreen');
       }
     }
   }, [isInitialized, camera, photoLibrary, location]);
+
   // 화면이 포커스될 때마다 식물 데이터 가져오기
   useFocusEffect(
     useCallback(() => {
-      refreshPlants();
+      fetchPlants();
     }, [showOnlyMyPlants])
   );
 
@@ -67,6 +66,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     }
     setShowOnlyMyPlants(!showOnlyMyPlants);
   }, [showOnlyMyPlants, userId]);
+  
   return <Background >
     <View className="flex-1">
       {/* 상단 네비게이션 바 */}
@@ -74,7 +74,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
          {/* 새로고침 버튼 */}
       <TouchableOpacity
         className="bg-white rounded-full px-3 py-1.5 shadow-lg flex-row items-center border border-greenTab"
-        onPress={refreshPlants}
+        onPress={fetchPlants}
         disabled={isLoadingPlants}
       >
         {isLoadingPlants ? (
@@ -117,7 +117,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     <PlantDetailModal
       isVisible={isModalVisible}
       onClose={closeModal}
-      selectedPlant={selectedPlant}
+      selectedPlant={selectedPlant as FoundPlant | null}
     />
 
     <AddPlantFAB

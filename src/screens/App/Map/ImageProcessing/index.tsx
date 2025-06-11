@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {MapStackParamList} from "../../../../nav/stack/Map"
-import { uploadImageAndGetUrl, saveFoundPlant } from '../../../../libs/supabase/supabaseOperations';
+import { saveFoundPlant } from '../../../../libs/supabase/operations/foundPlants/saveFoundPlant';
+import { uploadImageAndGetPath } from '../../../../libs/supabase/operations/image/uploadImage';
 import { Colors } from '../../../../constants/Colors';
 import { CustomButton } from '../../../../components/CustomButton';
 import { getAIResponseWithImage } from '../../../../libs/utils/AI';
@@ -13,6 +14,7 @@ import { Background } from '../../../../components/Background';
 import { MapModal } from './MapModal';
 import { DescriptionModal } from './DescriptionModal';
 import { MemoModal } from './MemoModal';
+import { BUCKET_NAME } from '../../../../constants/normal';
 type ImageProcessingScreenProps =NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
 // AI 응답 객체 타입 정의
@@ -86,8 +88,8 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         return;
       }
 
-      const imageUrl = await uploadImageAndGetUrl(imageUri, 'found-plants');
-      if (!imageUrl) {
+      const imagePath = await uploadImageAndGetPath(imageUri, BUCKET_NAME);
+      if (!imagePath) {
         console.error('이미지 업로드 또는 URL 가져오기 실패');
         // 사용자에게 오류 메시지를 표시할 수 있습니다.
         setIsProcessing(false);
@@ -96,7 +98,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
 
       const plantData = {
         userId,
-        imageUrl,
+        imagePath,
         memo: memo || null,
         lat: center.latitude,
         lng: center.longitude,
