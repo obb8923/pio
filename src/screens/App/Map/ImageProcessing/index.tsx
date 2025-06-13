@@ -11,20 +11,26 @@ import { CustomButton } from '../../../../components/CustomButton';
 import { getAIResponseWithImage } from '../../../../libs/utils/AI';
 import { useAuthStore } from '../../../../store/authStore';
 import { Background } from '../../../../components/Background';
-import { MapModal } from './MapModal';
-import { DescriptionModal } from './DescriptionModal';
-import { MemoModal } from './MemoModal';
+import { MapModal } from './components/MapModal';
+import { DescriptionModal } from './components/DescriptionModal';
+import { MemoModal } from './components/MemoModal';
 import { BUCKET_NAME } from '../../../../constants/normal';
+import { plantTypeImages } from '../constants/images';
+import Line from './components/line';
+import { PlantType, PlantTypeCode } from '../../../../libs/supabase/operations/foundPlants/type';
 type ImageProcessingScreenProps =NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
 // AI 응답 객체 타입 정의
 interface AiResponseType {
-  code: "success" | "error" | "not_plant";
+  code: "success" | "error" | "not_plant" | "low_confidence";
   name?: string;
+  type?: PlantType;
+  type_code?: PlantTypeCode;
   description?: string;
+  activity_curve?: number[];
+  activity_notes?: string;
   error?: string;
 }
-
 export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) => {
   const route = useRoute();
   const { userId } = useAuthStore.getState();
@@ -47,7 +53,16 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
   const { imageUri } = route.params as {
     imageUri: string;
   };
-  const [aiResponse, setAiResponse] = useState<AiResponseType | null>(null);
+  const [aiResponse, setAiResponse] = useState<AiResponseType | null>({
+    code: "success",
+    name: "달맞이꽃",
+    type: "꽃",
+    type_code: 1,
+    description: "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물입니다.",
+    activity_curve: [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],
+    activity_notes: "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물입니다.",
+  });
+
   // 초기 위치에서 변경되었는지 확인하는 함수
   const isLocationSelected = center.latitude !== 37.5666102 || center.longitude !== 126.9783881;
 
@@ -104,6 +119,9 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         lng: center.longitude,
         description: description || null,
         plantName: plantName,
+        type_code: aiResponse?.type_code ?? 0,
+        activity_curve: aiResponse?.activity_curve ?? [],
+        activity_notes: aiResponse?.activity_notes ?? '',
       };
 
       const { success, error } = await saveFoundPlant(plantData);
@@ -130,10 +148,14 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
       const response = await getAIResponseWithImage(imageUri);
       if (response) {
         // response의 code가 유효한 값인지 확인
-        if (response.code === "success" || response.code === "error" || response.code === "not_plant") {
+        if (response.code === "success" || response.code === "error" || response.code === "not_plant" || response.code === "low_confidence") {
           setAiResponse(response as AiResponseType);
-          if (response.code === "error" || response.code === "not_plant") {
+          if (response.code === "error") {
             setAiError(response.error || "AI 처리 중 오류가 발생했습니다.");
+          } else if (response.code === "not_plant") {
+            setAiError("식물이 아닌 것으로 판단되었습니다.");
+          } else if (response.code === "low_confidence") {
+            setAiError("식물을 정확하게 인식하지 못했습니다. 다시 시도해주세요.");
           }
         } else {
           setAiError("예상치 못한 응답 형식입니다. 다시 시도해주세요.");
@@ -212,7 +234,20 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
                 onChangeText={setPlantName}
               />
             </View>
-
+            {/* 식물 종류 및 활동 곡선 영역 */}
+            <View className="flex-row items-center">
+              {/* 식물 종류 영역 */}
+              <View className="h-[60px] justify-center items-center" style={{width: '30%'}}>
+              <Image source={plantTypeImages[aiResponse?.type_code ?? 0]} className="w-[32px] h-[32px]" />
+              <Text className="text-[#333] text-sm mt-2">{aiResponse?.type}</Text>
+              </View>
+              {/* 구분선 */}
+              <View className="h-[40px] w-0.5 bg-gray-200"/>
+              {/* 활동 곡선 영역 */}
+              <View className=" justify-center items-center" style={{width: '70%'}}>
+              <Line data={aiResponse?.activity_curve ?? []} width={200} height={80}  />
+                </View>
+            </View>
             {/* 설명 영역 */}
             <TouchableOpacity onPress={() => setIsDescriptionModalVisible(true)}>
               <Text

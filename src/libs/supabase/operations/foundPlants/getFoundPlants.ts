@@ -1,7 +1,8 @@
 import { supabase } from "../../supabase";
 import { useAuthStore } from "../../../../store/authStore";
+import { found_plants_columns } from "./type";
 
-export const getFoundPlants = async (userId?: string) => {
+export const getFoundPlants = async (userId?: string): Promise<found_plants_columns[] | null> => {
     /**
    * 발견된 식물들의 정보를 가져옵니다.
    * @param {string} [userId] - 특정 사용자의 식물만 가져오려면 사용자 ID를 전달
@@ -30,7 +31,7 @@ export const getFoundPlants = async (userId?: string) => {
     try {
       let query = supabase
         .from('found_plants')
-        .select('id, created_at, lat, lng, image_path, plant_name, description, memo')
+        .select('id, created_at, lat, lng, image_path, plant_name, description, memo, type_code, activity_curve, activity_notes')
         .order('created_at', { ascending: false });
 
       // userId가 제공된 경우 해당 사용자의 식물만 필터링

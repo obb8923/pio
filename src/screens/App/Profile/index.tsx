@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView, Linking } from "react-native";
 import { useAuthStore } from "../../../store/authStore"; // 경로는 실제 위치에 맞게 수정
 import { Colors } from "../../../constants/Colors";
-import { getUserNickname } from "../../../libs/supabase/operations/user/getUserNickname";
+import { getUserNickname } from "../../../libs/supabase/operations/users/getUserNickname";
 import GoogleIcon from "../../../../assets/svgs/GoogleLogo.svg"
 import { Skeleton } from "../../../components/Skeleton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";

@@ -1,20 +1,19 @@
 import { View,Text, ScrollView, Image, Platform } from "react-native"
-import { type FoundPlant } from "../../../../libs/hooks/useFoundPlants"
 import { useRoute } from "@react-navigation/native"
 import { NaverMapView,NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
-import { Colors } from "../../../../constants/Colors"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { CustomButton } from "../../../../components/CustomButton"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { PiodexStackParamList } from "../../../../nav/stack/Piodex"
 import { Background } from "../../../../components/Background"
-
+import { found_plants_columns } from "../../../../libs/supabase/operations/foundPlants/type"
+import Line from "../../Map/ImageProcessing/components/line"
+import { plantTypeImages } from "../../Map/constants/images"
+import { PlantTypeMap } from "../../../../libs/supabase/operations/foundPlants/type"
 type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
 export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const route = useRoute();
-    const insets = useSafeAreaInsets();
-    const {plant,signedUrl} = route.params as {plant:FoundPlant,signedUrl:string}   
-    const {id,plant_name,description,memo,lat,lng} = plant
+    const {plant,signedUrl} = route.params as {plant:found_plants_columns,signedUrl:string}   
+    const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
     return (
       <Background isStatusBarGap={false} isTabBarGap={false}>
           {/* 사진 영역 */}
@@ -37,7 +36,20 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
                 className="rounded-lg p-3 text-center bg-white text-2xl"
               >{plant_name}</Text>
             </View>
-
+    {/* 식물 종류 및 활동 곡선 영역 */}
+    <View className="flex-row items-center">
+              {/* 식물 종류 영역 */}
+              <View className="h-[60px] justify-center items-center" style={{width: '30%'}}>
+              <Image source={plantTypeImages[type_code ?? 0]} className="w-[32px] h-[32px]" />
+              <Text className="text-[#333] text-sm mt-2">{PlantTypeMap[type_code ?? 0]}</Text>
+              </View>
+              {/* 구분선 */}
+              <View className="h-[40px] w-0.5 bg-gray-200"/>
+              {/* 활동 곡선 영역 */}
+              <View className=" justify-center items-center" style={{width: '70%'}}>
+              <Line data={activity_curve ?? []} width={200} height={80}  />
+                </View>
+            </View>
             {/* 설명 영역 */}
               <Text
                 className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               

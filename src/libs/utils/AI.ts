@@ -2,10 +2,17 @@ import { supabase } from '../supabase/supabase';
 import { SUPABASE_REF, SUPABASE_ANON_KEY } from '@env';
 import * as RNFS from 'react-native-fs';
 
+export type PlantType = "기타" | "꽃" | "관목" | "나무" | "선인장/다육" | "수중식물" | "덩굴식물" | "잔디류";
+export type PlantTypeCode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
 export interface AIResponse {
-  code: "success" | "error" | "not_plant";
+  code: "success" | "error" | "not_plant" | "low_confidence";
   name?: string;
+  type?: PlantType;
+  type_code?: PlantTypeCode;
   description?: string;
+  activity_curve?: number[];
+  activity_notes?: string;
   error?: string;
 }
 

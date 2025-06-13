@@ -29,27 +29,60 @@ serve(async (req) => {
         },
       },
       { text: `
-        이 사진에 있는 식물(또는 꽃)의 정보를 알려줘.
-        이름(name)과 설명(description)을 포함해서 아래와 같은 JSON 형식으로 응답해줘.
-        설명은 간단한 설명,학명, 과,속,종, 추가 설명 순서로 작성해줘 
-        아래 예시와 같은 형식으로 응답해줘
-{
-  "code": "success",
-  "name": "해바라기",
-  "description": "해바라기는 밝은 노란색 꽃잎과 큰 꽃머리가 특징인 한해살이 식물입니다. 학명은 Helianthus annuus이며, 국화과(Asteraceae)에 속하는 해바라기속(Helianthus)의 아누우스종(annuus)입니다. 씨앗은 식용 및 기름 생산에 널리 사용되고, 햇빛을 따라 움직이는 특성이 있습니다."
-}
-만약 식물 사진이 아니라면,  아래와 같은 형식으로 응답해줘
-{
-  "code": "not_plant",
-  "error": "식물 사진이 아닙니다. 다시 시도해주세요."
-}
-이미지 처리에 문제가 있다면, 아래와 같은 형식으로 응답해줘
-{
-  "code": "error",
-  "error": "이미지 처리에 문제가 있습니다. 다시 시도해주세요."
-} 
+너는 식물 도감 역할을 맡은 식물 전문가야.  
+사용자가 올린 식물 사진을 분석해서 아래 JSON 형식으로 결과를 반환해줘.  
+
+- 사진에 여러 식물이 있을 경우, 사진의 중앙에서 가장 가까운 식물을 우선 분석해줘.  
+- 반드시 다음 항목들을 포함해줘:  
+  - 식물 이름(name)  
+  - 식물 형태(type) 및 대응 코드(type_code)  
+  - 설명(description): 간단한 설명, 학명, 과, 속, 종, 추가 설명 순서로 쉼표 또는 괄호로 구분된 하나의 문장으로 작성  
+  - 활동성 곡선(activity_curve): 1월부터 12월까지 각 달의 활동성을 0~1 범위로 표현한 배열 (인덱스 0=1월, 1=2월, ..., 11=12월)  
+  - 활동성 노트(activity_notes): 활동성 곡선에 대한 간단한 설명  
+
+- 'type' 값은 반드시 아래 7가지 중 하나를 정확히 사용하고, 해당하는 'type_code'도 정확히 매칭해줘:  
+  - 기타 (0)  
+  - 꽃 (1)  
+  - 관목 (2)  
+  - 나무 (3)  
+  - 선인장/다육 (4)  
+  - 수중식물 (5)  
+  - 덩굴식물 (6)  
+  - 잔디류 (7)  
+
+식물일 경우 예시 응답:  
+{  
+  "code": "success",  
+  "name": "달맞이꽃",  
+  "type": "꽃",  
+  "type_code": 1,  
+  "description": "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물이며, 학명은 Oenothera biennis, 과는 물레나물과(Onagraceae), 속은 Oenothera, 종은 biennis입니다. 주로 6~7월에 개화하고 9~10월에 결실합니다.",  
+  "activity_curve": [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],  
+  "activity_notes": "6~7월 개화, 9~10월 결실 후 한해살이 종료"  
+}  
+
+식물이 아닐 경우 예시 응답:  
+{  
+  "code": "not_plant",  
+  "error": "식물 사진이 아닙니다. 다시 시도해주세요."  
+}  
+
+판단이 불확실한 경우 예시 응답:  
+{  
+  "code": "low_confidence",  
+  "error": "식물로 보이나 정확한 종류를 식별하기 어렵습니다. 다른 각도의 사진을 시도해보세요."  
+}  
+
+기타 문제 발생 시 예시 응답:  
+{  
+  "code": "error",  
+  "error": "이미지 처리에 문제가 있습니다. 다시 시도해주세요."  
+}  
+
 ` },
     ];
+
+    
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: contents,
@@ -73,7 +106,7 @@ serve(async (req) => {
       const responseData = JSON.parse(jsonText);
       
       // 응답 형식 검증
-      if (!responseData.code || !["success", "error", "not_plant"].includes(responseData.code)) {
+      if (!responseData.code || !["success", "error", "not_plant", "low_confidence"].includes(responseData.code)) {
         return new Response(
           JSON.stringify({
             code: "error",
@@ -85,7 +118,9 @@ serve(async (req) => {
 
       // 성공 케이스 검증
       if (responseData.code === "success") {
-        if (!responseData.name || !responseData.description) {
+        if (!responseData.name || !responseData.description || 
+            !responseData.type || !responseData.type_code || 
+            !responseData.activity_curve || !responseData.activity_notes) {
           return new Response(
             JSON.stringify({
               code: "error",
@@ -94,10 +129,36 @@ serve(async (req) => {
             { headers }
           );
         }
+
+        // type_code 유효성 검사
+        if (typeof responseData.type_code !== 'number' || 
+            responseData.type_code < 0 || 
+            responseData.type_code > 7) {
+          return new Response(
+            JSON.stringify({
+              code: "error",
+              error: "식물 유형 코드가 유효하지 않습니다. 다시 시도해주세요."
+            }),
+            { headers }
+          );
+        }
+
+        // activity_curve 유효성 검사
+        if (!Array.isArray(responseData.activity_curve) || 
+            responseData.activity_curve.length !== 12 || 
+            !responseData.activity_curve.every(val => typeof val === 'number' && val >= 0 && val <= 1)) {
+          return new Response(
+            JSON.stringify({
+              code: "error",
+              error: "활동성 곡선 데이터가 유효하지 않습니다. 다시 시도해주세요."
+            }),
+            { headers }
+          );
+        }
       }
 
       // 에러 케이스 검증
-      if ((responseData.code === "error" || responseData.code === "not_plant") && !responseData.error) {
+      if ((responseData.code === "error" || responseData.code === "not_plant" || responseData.code === "low_confidence") && !responseData.error) {
         return new Response(
           JSON.stringify({
             code: "error",

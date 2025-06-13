@@ -1,6 +1,6 @@
 import { NaverMapView, NaverMapMarkerOverlay, Camera } from "@mj-studio/react-native-naver-map"
 import { View, Text, Modal } from "react-native"
-import { CustomButton } from "../../../../components/CustomButton";
+import { CustomButton } from "../../../../../components/CustomButton";
 
 interface MapModalProps {
   isVisible: boolean;
@@ -36,7 +36,7 @@ export const MapModal = ({ isVisible, onClose, onComplete, center, onCameraChang
             <NaverMapMarkerOverlay 
               latitude={center.latitude}
               longitude={center.longitude}
-              image={require('../../../../../assets/pngs/flowers/flower1.png')}
+              image={require('../../../../../../assets/pngs/flowers/flower1.png')}
               width={24}
               height={24}
             />

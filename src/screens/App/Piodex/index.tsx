@@ -6,7 +6,8 @@ import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { useAuthStore } from "../../../store/authStore";
 import { Background } from "../../../components/Background";
 import { Colors } from "../../../constants/Colors";
-import { useFoundPlants, FoundPlant } from "../../../libs/hooks/useFoundPlants";
+import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";
+import { found_plants_columns } from "../../../libs/supabase/operations/foundPlants/type";
 import { useSignedUrls } from "../../../libs/hooks/useSignedUrls";
 
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
@@ -74,19 +75,19 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   };
 
   // 날짜별로 식물을 그룹화하는 함수 (flex-wrap 렌더링용)
-  const groupPlantsByDate = (plants: FoundPlant[]) => {
+  const groupPlantsByDate = (plants: found_plants_columns[]) => {
     if (!plants || plants.length === 0) {
       return [];
     }
     // 날짜별로 그룹화
-    const groupedByDate: { [key: string]: FoundPlant[] } = plants.reduce((acc, plant) => {
+    const groupedByDate: { [key: string]: found_plants_columns[] } = plants.reduce((acc, plant) => {
       const date = formatDate(plant.created_at);
       if (!acc[date]) {
         acc[date] = [];
       }
       acc[date].push(plant);
       return acc;
-    }, {} as { [key: string]: FoundPlant[] });
+    }, {} as { [key: string]: found_plants_columns[] });
 
     // 각 날짜의 전체 식물 배열을 하나의 데이터 아이템으로 만들기
     const sections = Object.keys(groupedByDate).map(date => ({
