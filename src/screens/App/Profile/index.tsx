@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView, Linking } from "react-native";
-import { useAuthStore } from "../../../store/authStore"; // 경로는 실제 위치에 맞게 수정
+import { useAuthStore } from "../../../store/authStore";
 import { Colors } from "../../../constants/Colors";
 import { getUserNickname } from "../../../libs/supabase/operations/users/getUserNickname";
 import GoogleIcon from "../../../../assets/svgs/GoogleLogo.svg"
@@ -12,6 +12,7 @@ import { Background } from "../../../components/Background";
 import { FEEDBACK_FORM_URL, GOOGLE_PLAY_URL, MAIL_ADDRESS } from "../../../constants/normal";
 import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
 import Mail from "../../../../assets/svgs/Mail.svg";
+import VersionCheck from 'react-native-version-check';
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 // 프로필 헤더 컴포넌트
@@ -56,6 +57,53 @@ const ProfileHeader = () => {
     </View>
   );
 };
+
+const VersionItem = () => {
+  const [currentVersion, setCurrentVersion] = useState<string>('');
+  const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
+  const [storeUrl, setStoreUrl] = useState<string>('');
+
+  useEffect(() => {
+    const checkVersion = async () => {
+      try {
+        const version = await VersionCheck.getCurrentVersion();
+        setCurrentVersion(version);
+
+        console.log(version,"##")
+        const updateInfo = await VersionCheck.needUpdate({ provider: 'playStore' });
+        setNeedsUpdate(updateInfo?.isNeeded ?? false);
+        const url = await VersionCheck.getStoreUrl({ provider: 'playStore' });
+        setStoreUrl(url);
+      } catch (error) {
+        console.error('Version check failed:', error);
+        setNeedsUpdate(false);
+      }
+    };
+    checkVersion();
+  }, []);
+
+
+  return (
+    <TouchableOpacity 
+      className="flex-row justify-between items-center py-4 px-5 rounded-lg border-b border-greenTab" 
+      onPress={()=>{
+        if (needsUpdate && storeUrl) {
+          Linking.openURL(storeUrl);
+        }
+      }}
+    >
+      <Text className="text-base text-greenTab">버전정보</Text>
+      <View className="flex-row items-center">
+        <Text className="text-base text-greenTab mr-2">v{currentVersion}</Text>
+        <Text className="text-sm text-greenTab">
+          {needsUpdate ? '업데이트하기' : '최신버전'}
+        </Text>
+        {needsUpdate && <ArrowUpRight style={{width: 10, height: 12, color: Colors.greenTab,marginLeft:10}}/>}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: () => void,type?: 'default' | 'link'|'mail'}) => {
   return (
     <TouchableOpacity className="flex-row justify-between items-center py-4 px-5 rounded-lg border-b border-greenTab" onPress={onPress}>
@@ -66,12 +114,12 @@ const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: (
     </TouchableOpacity>
   );
 };
+
 export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
   const { isLoggedIn } = useAuthStore();
 
   return (
     <Background type="white" isStatusBarGap={true} className="pt-4">
-
       <Text className="text-2xl font-bold text-greenTab ml-9 mb-4">프로필</Text>
       
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
@@ -88,7 +136,7 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
             Alert.alert("로그인이 필요합니다.")
           }
         }}/>
-               <View className="h-8" />
+        <View className="h-8" />
         <ProfileItem title="문의하기" onPress={()=>{
           Linking.openURL(`mailto:${MAIL_ADDRESS}`);
         }} type="mail"/>
@@ -101,6 +149,7 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
         <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>          
         <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
+        <VersionItem />
       </ScrollView>
     </Background>
   );
