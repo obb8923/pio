@@ -1399,8 +1399,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-get-random-values (1.11.0):
-    - React-Core
   - react-native-image-picker (8.2.1):
     - DoubleConversion
     - glog
@@ -1506,6 +1504,8 @@ PODS:
     - React-Core
   - react-native-tcp-socket (6.3.0):
     - CocoaAsyncSocket
+    - React-Core
+  - react-native-version-check (3.5.0):
     - React-Core
   - react-native-webview (13.14.1):
     - DoubleConversion
@@ -2246,12 +2246,12 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
-  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-image-resizer (from `../node_modules/react-native-image-resizer`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
   - react-native-tcp-socket (from `../node_modules/react-native-tcp-socket`)
+  - react-native-version-check (from `../node_modules/react-native-version-check`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -2388,8 +2388,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
-  react-native-get-random-values:
-    :path: "../node_modules/react-native-get-random-values"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-image-resizer:
@@ -2400,6 +2398,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-splash-screen"
   react-native-tcp-socket:
     :path: "../node_modules/react-native-tcp-socket"
+  react-native-version-check:
+    :path: "../node_modules/react-native-version-check"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -2533,12 +2533,12 @@ SPEC CHECKSUMS:
   React-Mapbuffer: c04fcda1c6281fc0a6824c7dcc1633dd217ac1ec
   React-microtasksnativemodule: ca2804a25fdcefffa0aa942aa23ab53b99614a34
   react-native-geolocation: 2cd348a829e84fff7bbb98b6e66b0093a3aa8e1a
-  react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: c73e6edfdbc2bbc1c12b3fe9c2149441fa08f149
   react-native-image-resizer: d9fb629a867335bdc13230ac2a58702bb8c8828f
   react-native-safe-area-context: dc279397abf103b0577f48c548630b7e639646a7
   react-native-splash-screen: 4312f786b13a81b5169ef346d76d33bc0c6dc457
   react-native-tcp-socket: feb47ef87c6f598ec2a85b7534a279282ce6f925
+  react-native-version-check: 54a471d70dadf0f72fc142e70f16e4bf473a91a5
   react-native-webview: 035b24e1cfc1216f7a72cc2bb312989a644bcd57
   React-NativeModulesApple: 452b86b29fae99ed0a4015dca3ad9cd222f88abf
   React-oscompat: ef5df1c734f19b8003e149317d041b8ce1f7d29c
