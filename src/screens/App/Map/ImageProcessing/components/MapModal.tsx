@@ -1,6 +1,7 @@
 import { NaverMapView, NaverMapMarkerOverlay, Camera } from "@mj-studio/react-native-naver-map"
 import { View, Text, Modal } from "react-native"
 import { CustomButton } from "../../../../../components/CustomButton";
+import { plantTypeImages } from "../../constants/images";
 
 interface MapModalProps {
   isVisible: boolean;
@@ -8,9 +9,10 @@ interface MapModalProps {
   onComplete: () => void;
   center: Camera;
   onCameraChange: (camera: Camera) => void;
+  plantTypeImageCode: number;
 }
 
-export const MapModal = ({ isVisible, onClose, onComplete, center, onCameraChange }: MapModalProps) => {
+export const MapModal = ({ isVisible, onClose, onComplete, center, onCameraChange, plantTypeImageCode }: MapModalProps) => {
   return (
     <Modal
       visible={isVisible}
@@ -36,7 +38,7 @@ export const MapModal = ({ isVisible, onClose, onComplete, center, onCameraChang
             <NaverMapMarkerOverlay 
               latitude={center.latitude}
               longitude={center.longitude}
-              image={require('../../../../../../assets/pngs/flowers/flower1.png')}
+              image={plantTypeImages[plantTypeImageCode]}
               width={24}
               height={24}
             />

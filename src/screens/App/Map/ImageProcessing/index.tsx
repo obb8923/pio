@@ -314,6 +314,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         onComplete={handleLocationSelect}
         center={center}
         onCameraChange={handleCameraChange}
+        plantTypeImageCode={aiResponse?.type_code ?? 0}
       />
 
       {/* 설명 모달 */}

@@ -78,9 +78,9 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
               ><NaverMapMarkerOverlay
               latitude={lat}
               longitude={lng}
-              image={require('../../../../../assets/pngs/flowers/flower1.png')}
-              width={16}
-              height={16}
+              image={plantTypeImages[type_code ?? 0]}
+              width={32}
+              height={32}
 
               />
               </NaverMapView>  
