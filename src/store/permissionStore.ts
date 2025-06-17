@@ -1,41 +1,83 @@
+// zustand를 이용한 권한 상태 관리 스토어
+// 플랫폼별 권한 요청/확인 로직을 일관성 있게 관리합니다.
+
 import { create } from 'zustand';
 import { requestMultiple, PERMISSIONS, RESULTS, check } from 'react-native-permissions';
 import { Platform } from 'react-native';
 
+// 1. 권한 상태 타입 정의
+// 앱에서 사용할 권한 관련 상태와 메서드 타입을 정의합니다.
 interface PermissionState {
-  camera: boolean;
-  photoLibrary: boolean;
-  location: boolean;
+  camera: boolean; // 카메라 권한
+  photoLibrary: boolean; // 갤러리(사진) 권한
+  location: boolean; // 위치 권한
   setCameraPermission: (granted: boolean) => void;
   setPhotoLibraryPermission: (granted: boolean) => void;
   setLocationPermission: (granted: boolean) => void;
-  requestAllPermissions: () => Promise<boolean>;
-  hasAllPermission: () => boolean;
-  isInitialized: boolean;
-  initPermissions: () => Promise<void>;
+  requestAllPermissions: () => Promise<boolean>; // 모든 권한 요청
+  hasAllPermission: () => boolean; // 모든 권한 허용 여부
+  isInitialized: boolean; // 권한 초기화 여부
+  initPermissions: () => Promise<void>; // 권한 상태 초기화
 }
 
+// 2. 플랫폼별 권한 → 상태 매핑 객체
+// 복잡한 조건문 없이, 각 permission이 어떤 상태(camera, photoLibrary, location)에 해당하는지 명확히 매핑합니다.
+const PERMISSION_MAPPING = {
+  ios: {
+    [PERMISSIONS.IOS.CAMERA]: 'camera',
+    [PERMISSIONS.IOS.PHOTO_LIBRARY]: 'photoLibrary',
+    [PERMISSIONS.IOS.LOCATION_WHEN_IN_USE]: 'location',
+  },
+  android: {
+    [PERMISSIONS.ANDROID.CAMERA]: 'camera',
+    [PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE]: 'photoLibrary',
+    [PERMISSIONS.ANDROID.READ_MEDIA_IMAGES]: 'photoLibrary',
+    [PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]: 'location',
+  },
+} as const;
+
+// 3. Android 버전에 따라 갤러리 권한 상수 결정 함수 - Android 13 이상은 READ_MEDIA_IMAGES, 그 이하는 READ_EXTERNAL_STORAGE 사용
+const getGalleryPermission = () => {
+  const version = typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version;
+  return version >= 33 ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+};
+
+// 4. 권한 상태 업데이트 함수
+// 매핑 객체를 활용해 permission에 해당하는 상태(camera, photoLibrary, location)를 일관성 있게 업데이트합니다.
+const updatePermissionState = (permission: string, isGranted: boolean, set: any) => {
+  const platform = Platform.OS as 'ios' | 'android';
+  const permissionMapping = PERMISSION_MAPPING[platform];
+  const permissionKey = permissionMapping[permission as keyof typeof permissionMapping];
+  // permissionKey가 존재하면 해당 상태를 업데이트
+  if (permissionKey) {
+    set({ [permissionKey]: isGranted });
+  }
+};
+
+// 5. zustand 스토어 생성
+// 앱 전체에서 권한 상태를 관리하고, 권한 요청/초기화 메서드를 제공합니다.
 export const usePermissionStore = create<PermissionState>((set, get) => ({
-  camera: false,
-  photoLibrary: false,
-  location: false,
-  isInitialized: false,
+  camera: false, // 카메라 권한 상태
+  photoLibrary: false, // 갤러리(사진) 권한 상태
+  location: false, // 위치 권한 상태
+  isInitialized: false, // 권한 초기화 여부
   setCameraPermission: (granted) => set({ camera: granted }),
   setPhotoLibraryPermission: (granted) => set({ photoLibrary: granted }),
   setLocationPermission: (granted) => set({ location: granted }),
+  // 6. 모든 권한이 허용되었는지 확인
   hasAllPermission: () => {
     const state = get();
     return state.camera && state.photoLibrary && state.location;
   },
 
+  // 7. 권한 상태 초기화 함수
+  // 앱 실행 시 권한 상태를 확인하고, 각 권한별로 상태를 업데이트합니다.
   initPermissions: async () => {
     try {
-      let galleryPermission;
-      if (Platform.OS === 'android') {
-        const version = typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version;
-        galleryPermission = version >= 33 ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
-      }
+      // Android의 경우 버전에 따라 갤러리 권한 결정
+      const galleryPermission = Platform.OS === 'android' ? getGalleryPermission() : null;
 
+      // 플랫폼별 체크할 권한 목록
       const permissionsToCheck = Platform.select({
         ios: [
           PERMISSIONS.IOS.CAMERA,
@@ -55,29 +97,13 @@ export const usePermissionStore = create<PermissionState>((set, get) => ({
         return;
       }
 
+      // 각 권한별로 상태를 확인하고 업데이트
       for (const permission of permissionsToCheck) {
         if (!permission) continue;
         try {
           const status = await check(permission);
           const isGranted = status === RESULTS.GRANTED;
-
-          if (Platform.OS === 'ios') {
-            if (permission === PERMISSIONS.IOS.CAMERA) {
-              set({ camera: isGranted });
-            } else if (permission === PERMISSIONS.IOS.PHOTO_LIBRARY) {
-              set({ photoLibrary: isGranted });
-            } else if (permission === PERMISSIONS.IOS.LOCATION_WHEN_IN_USE) {
-              set({ location: isGranted });
-            }
-          } else if (Platform.OS === 'android') {
-            if (permission === PERMISSIONS.ANDROID.CAMERA) {
-              set({ camera: isGranted });
-            } else if (permission === PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE || permission === PERMISSIONS.ANDROID.READ_MEDIA_IMAGES) {
-              set({ photoLibrary: isGranted });
-            } else if (permission === PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION) {
-              set({ location: isGranted });
-            }
-          }
+          updatePermissionState(permission, isGranted, set);
         } catch (error) {
           console.error(`[PermissionStore] Error checking permission ${permission}:`, error);
         }
@@ -89,13 +115,13 @@ export const usePermissionStore = create<PermissionState>((set, get) => ({
     }
   },
   
+  // 8. 권한 요청 함수
+  // 각 권한을 사용자에게 요청하고, 결과에 따라 상태를 업데이트합니다.
   requestAllPermissions: async () => {
     try {
-      let galleryPermission;
-      if (Platform.OS === 'android') {
-        const version = typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version;
-        galleryPermission = version >= 33 ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
-      }
+      const galleryPermission = Platform.OS === 'android' ? getGalleryPermission() : null;
+      
+      // 플랫폼별 요청할 권한 목록
       const permissionsToRequest = Platform.select({
         ios: [
           PERMISSIONS.IOS.CAMERA,
@@ -117,30 +143,15 @@ export const usePermissionStore = create<PermissionState>((set, get) => ({
         return false;
       }
 
-      // 각 권한을 개별적으로 요청
+      // 각 권한을 개별적으로 요청하고 상태 업데이트
       for (const permission of permissionsToRequest) {
         if (!permission) continue;
         try {
           const status = await requestMultiple([permission]);
           console.log(`[PermissionStore] Permission ${permission} status:`, status);
           
-          if (Platform.OS === 'ios') {
-            if (permission === PERMISSIONS.IOS.CAMERA) {
-              set({ camera: status[permission] === RESULTS.GRANTED });
-            } else if (permission === PERMISSIONS.IOS.PHOTO_LIBRARY) {
-              set({ photoLibrary: status[permission] === RESULTS.GRANTED });
-            } else if (permission === PERMISSIONS.IOS.LOCATION_WHEN_IN_USE) {
-              set({ location: status[permission] === RESULTS.GRANTED });
-            }
-          } else if (Platform.OS === 'android') {
-            if (permission === PERMISSIONS.ANDROID.CAMERA) {
-              set({ camera: status[permission] === RESULTS.GRANTED });
-            } else if (permission === PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE || permission === PERMISSIONS.ANDROID.READ_MEDIA_IMAGES) {
-              set({ photoLibrary: status[permission] === RESULTS.GRANTED });
-            } else if (permission === PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION) {
-              set({ location: status[permission] === RESULTS.GRANTED });
-            }
-          }
+          const isGranted = status[permission] === RESULTS.GRANTED;
+          updatePermissionState(permission, isGranted, set);
         } catch (error) {
           console.error(`[PermissionStore] Error requesting permission ${permission}:`, error);
         }
