@@ -19,7 +19,7 @@ import { getFlowerImageForPlant } from "./utils/markerUtils";
 import { usePermissionStore } from "../../../store/permissionStore";
 import { useVisitStore } from "../../../store/visitStore";
 import { RootStackParamList } from "../../../nav/stack/Root";
-import { type FoundPlant } from "../../../libs/hooks/useFoundPlants";
+import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type';
 
 type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>
 type RootStack = NativeStackScreenProps<RootStackParamList>
@@ -117,7 +117,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     <PlantDetailModal
       isVisible={isModalVisible}
       onClose={closeModal}
-      selectedPlant={selectedPlant as FoundPlant | null}
+      selectedPlant={selectedPlant as found_plants_columns | null}
     />
 
     <AddPlantFAB

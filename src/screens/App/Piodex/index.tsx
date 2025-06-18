@@ -9,7 +9,7 @@ import { Colors } from "../../../constants/Colors";
 import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";
 import { found_plants_columns } from "../../../libs/supabase/operations/foundPlants/type";
 import { useSignedUrls } from "../../../libs/hooks/useSignedUrls";
-
+import { Skeleton } from "../../../components/Skeleton";
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 // 식물 사전 데이터 타입 정의
@@ -165,9 +165,7 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
                   >
                     <View className="w-full h-full rounded-sm overflow-hidden bg-gray-100">
                       {isLoadingImages && !signedUrl ? (
-                        <View className="w-full h-full justify-center items-center">
-                          <ActivityIndicator size="small" color={Colors.greenTab} />
-                        </View>
+                        <Skeleton width={itemWidth} height={itemWidth + 30} />
                       ) : (
                         <Image
                           source={{ uri: signedUrl || plant.image_path }}

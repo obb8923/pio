@@ -1,23 +1,15 @@
-import { View, Text, Modal, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, Image, ScrollView } from 'react-native';
 import { CustomButton } from '../../../../components/CustomButton';
+import { Skeleton } from '../../../../components/Skeleton';
 import React, { useEffect, useState } from 'react';
 import { Colors } from '../../../../constants/Colors';
 import { getSignedUrls } from '../../../../libs/supabase/operations/image/getSignedUrls';
-
-type FoundPlant = {
-  id: string;
-  lat: number;
-  lng: number;
-  image_path: string;
-  plant_name: string;
-  description: string;
-  memo: string;
-};
+import { found_plants_columns } from '../../../../libs/supabase/operations/foundPlants/type';
 
 interface PlantDetailModalProps {
   isVisible: boolean;
   onClose: () => void;
-  selectedPlant: FoundPlant | null;
+  selectedPlant: found_plants_columns | null;
 }
 
 export const PlantDetailModal = ({
@@ -65,9 +57,12 @@ export const PlantDetailModal = ({
           >  
             <View className="w-full h-[300px] rounded-t-xl mb-1 bg-gray-100">
               {isLoading ? (
-                <View className="w-full h-full justify-center items-center">
-                  <ActivityIndicator size="large" color={Colors.greenTab} />
-                </View>
+                <Skeleton 
+                  width="100%" 
+                  height={300} 
+                  borderRadius={12}
+                  className="rounded-t-xl"
+                />
               ) : signedUrl ? (
                 <Image
                   source={{ uri: signedUrl }}
