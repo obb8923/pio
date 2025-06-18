@@ -2,14 +2,6 @@ import { supabase } from "../../supabase";
 import { BUCKET_NAME } from "../../../../constants/normal";
 
 export const getSignedUrls = async (imagePaths: string | string[]): Promise<string | (string | null)[]> => {
-  if(__DEV__) console.log('[Function]getSignedUrls');
-if(Array.isArray(imagePaths)) {
-  imagePaths.map(path=>{
-    console.log('typeof path',typeof path,'path',path)
-  })
-}
-
-
   try {
     const paths = Array.isArray(imagePaths) ? imagePaths : [imagePaths];
     const signedUrls = await Promise.all(

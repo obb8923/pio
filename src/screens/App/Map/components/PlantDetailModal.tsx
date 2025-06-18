@@ -129,13 +129,6 @@ export const PlantDetailModal = ({
     }
   }, [isVisible, markerPositionAtScreen]);
 
-  // 스크린 위치가 있으면 로그 출력
-  useEffect(() => {
-    if (markerPositionAtScreen) {
-      console.log('[PlantDetailModal] Marker position at screen:', markerPositionAtScreen);
-    }
-  }, [markerPositionAtScreen]);
-
   return (
     <Modal
       animationType="none"
