@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator, GestureResponderEvent } from "react-native";
 import {Background} from "../../../components/Background";
-import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
+import { NaverMapMarkerOverlay, NaverMapView, Point } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
 import { Colors } from "../../../constants/Colors";
 import { useState, useCallback, useEffect } from "react";
@@ -20,7 +20,6 @@ import { usePermissionStore } from "../../../store/permissionStore";
 import { useVisitStore } from "../../../store/visitStore";
 import { RootStackParamList } from "../../../nav/stack/Root";
 import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type';
-
 type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>
 type RootStack = NativeStackScreenProps<RootStackParamList>
 type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
@@ -35,8 +34,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
  
   // 커스텀 훅 사용
   const { foundPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
-  const { selectedPlant, isModalVisible, handleMarkerPress, closeModal } = useMapMarkers();
-  
+  const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
       setFirstVisit(false);
@@ -92,32 +90,35 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
         />
       </View>
 
-      <NaverMapView
-        style={{ flex: 1 }}
-        initialCamera={{
-          latitude: latitude || 37.5666102,
-          longitude: longitude || 126.9783881,
-          zoom: 12,
-        }}
-      >
-        {foundPlants.map((plant) => (
-          <NaverMapMarkerOverlay
-            key={plant.id}
-            latitude={plant.lat}
-            longitude={plant.lng}
-            onTap={() => handleMarkerPress(plant)}
-            image={getFlowerImageForPlant(plant.id)}
-            width={16}
-            height={16}
-          />
-        ))}
-      </NaverMapView>
+     
+        <NaverMapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          initialCamera={{
+            latitude: latitude || 37.5666102,
+            longitude: longitude || 126.9783881,
+            zoom: 12,
+          }}
+        >
+          {foundPlants.map((plant) => (
+            <NaverMapMarkerOverlay
+              key={plant.id}
+              latitude={plant.lat}
+              longitude={plant.lng}
+              onTap={() => handleMarkerPress(plant)}
+              image={getFlowerImageForPlant(plant.id)}
+              width={16}
+              height={16}
+            />
+          ))}
+        </NaverMapView>     
     </View>
     
     <PlantDetailModal
       isVisible={isModalVisible}
       onClose={closeModal}
       selectedPlant={selectedPlant as found_plants_columns | null}
+      markerPositionAtScreen={screenPosition}
     />
 
     <AddPlantFAB

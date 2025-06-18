@@ -1,24 +1,72 @@
-import { View, Text, Modal, Image, ScrollView } from 'react-native';
+import { View, Text, Modal, Image, ScrollView, Animated } from 'react-native';
 import { CustomButton } from '../../../../components/CustomButton';
 import { Skeleton } from '../../../../components/Skeleton';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Colors } from '../../../../constants/Colors';
 import { getSignedUrls } from '../../../../libs/supabase/operations/image/getSignedUrls';
 import { found_plants_columns } from '../../../../libs/supabase/operations/foundPlants/type';
+import { DEVICE_WIDTH_HALF, DEVICE_HEIGHT_HALF } from '../../../../constants/normal';
 
 interface PlantDetailModalProps {
   isVisible: boolean;
   onClose: () => void;
   selectedPlant: found_plants_columns | null;
+  markerPositionAtScreen: { x: number; y: number };
 }
 
 export const PlantDetailModal = ({
   isVisible,
   onClose,
   selectedPlant,
+  markerPositionAtScreen,
 }: PlantDetailModalProps) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // 애니메이션 값들
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const translateXAnim = useRef(new Animated.Value(0)).current;
+  const translateYAnim = useRef(new Animated.Value(0)).current;
+  const backgroundOpacityAnim = useRef(new Animated.Value(0)).current;
+
+  // 닫기 애니메이션 함수
+  const handleCloseWithAnimation = () => {
+    if (markerPositionAtScreen) {
+      // 마커 위치에서 중앙까지의 거리 계산
+      const translateX = markerPositionAtScreen.x - DEVICE_WIDTH_HALF;
+      const translateY = markerPositionAtScreen.y - DEVICE_HEIGHT_HALF;
+
+      // 닫기 애니메이션 실행
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 0,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateXAnim, {
+          toValue: translateX,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateYAnim, {
+          toValue: translateY,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.timing(backgroundOpacityAnim, {
+          toValue: 0,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // 애니메이션 완료 후 모달 닫기
+        onClose();
+      });
+    } else {
+      // markerPositionAtScreen이 없으면 바로 닫기
+      onClose();
+    }
+  };
 
   useEffect(() => {
     const fetchSignedUrl = async () => {
@@ -42,15 +90,79 @@ export const PlantDetailModal = ({
     fetchSignedUrl();
   }, [selectedPlant]);
 
+  // 모달이 표시될 때 애니메이션 시작
+  useEffect(() => {
+    if (isVisible && markerPositionAtScreen) {
+      // 마커 위치에서 중앙까지의 거리 계산
+      const translateX = markerPositionAtScreen.x - DEVICE_WIDTH_HALF;
+      const translateY = markerPositionAtScreen.y - DEVICE_HEIGHT_HALF;
+
+      // 초기 위치 설정
+      translateXAnim.setValue(translateX);
+      translateYAnim.setValue(translateY);
+      scaleAnim.setValue(0);
+      backgroundOpacityAnim.setValue(0);
+
+      // 애니메이션 실행
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateXAnim, {
+          toValue: 0,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateYAnim, {
+          toValue: 0,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(backgroundOpacityAnim, {
+          toValue: 1,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isVisible, markerPositionAtScreen]);
+
+  // 스크린 위치가 있으면 로그 출력
+  useEffect(() => {
+    if (markerPositionAtScreen) {
+      console.log('[PlantDetailModal] Marker position at screen:', markerPositionAtScreen);
+    }
+  }, [markerPositionAtScreen]);
+
   return (
     <Modal
-      animationType="slide"
+      animationType="none"
       transparent={true}
       visible={isVisible}
-      onRequestClose={onClose}
+      onRequestClose={handleCloseWithAnimation}
     >
-      <View className="flex-1 justify-end">
-        <View className="bg-white rounded-t-3xl max-h-[90%] min-h-[50%]">
+      <View className="flex-1 justify-center items-center">
+        {/* 백그라운드 오버레이 */}
+        <Animated.View 
+          className="absolute inset-0 bg-black/50"
+          style={{
+            opacity: backgroundOpacityAnim,
+          }}
+          onTouchEnd={handleCloseWithAnimation}
+        />
+        
+        <Animated.View 
+          className="bg-white rounded-3xl max-h-[90%] min-h-[50%] w-[90%]"
+          style={{
+            transform: [
+              { translateX: translateXAnim },
+              { translateY: translateYAnim },
+              { scale: scaleAnim },
+            ],
+          }}
+        >
           <ScrollView 
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 100}}
@@ -85,7 +197,7 @@ export const PlantDetailModal = ({
                 {selectedPlant?.description || '설명이 없습니다.'}
               </Text>
               <Text className="text-gray-500">
-                메모: {selectedPlant?.memo || '메모가 없습니다.'}
+                {selectedPlant?.memo || ''}
               </Text>
             </View>
           </ScrollView>
@@ -93,10 +205,10 @@ export const PlantDetailModal = ({
             <CustomButton
               text="닫기"
               size={60}
-              onPress={onClose}
+              onPress={handleCloseWithAnimation}
             />
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
