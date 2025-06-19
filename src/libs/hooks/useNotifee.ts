@@ -46,8 +46,8 @@ const notifeeMessages = [
   }
 ];
 const notifeeTime = {
-  hour: 13,
-  minute: 30
+  hour: 11,
+  minute: 57
 }
 export const useNotifee = () => {
   const [notifeeAvailable, setNotifeeAvailable] = useState(false);
