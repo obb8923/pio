@@ -12,10 +12,17 @@ import { RootStack } from "./src/nav/stack/Root";
 import { usePermissionStore } from "./src/store/permissionStore";
 import { type MaintenanceResponse, checkMaintenance } from "./src/libs/supabase/operations/normal/checkMaintenance";
 import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
+import { useNotifee } from './src/libs/hooks/useNotifee';
+
+
 function App(): React.JSX.Element {
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized } = usePermissionStore();
   const [maintenanceData, setMaintenanceData] = useState<MaintenanceResponse | null>(null);
+
+  // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
+  useNotifee();
+
   useEffect(() => {
     // Google Sign-In 설정
     try {
