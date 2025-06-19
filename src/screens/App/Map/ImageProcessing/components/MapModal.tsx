@@ -2,6 +2,7 @@ import { NaverMapView, NaverMapMarkerOverlay, Camera } from "@mj-studio/react-na
 import { View, Text, Modal } from "react-native"
 import { CustomButton } from "../../../../../components/CustomButton";
 import { plantTypeImages } from "../../constants/images";
+import { useModalBackground } from '../../../../../libs/hooks/useModalBackground';
 
 interface MapModalProps {
   isVisible: boolean;
@@ -13,14 +14,14 @@ interface MapModalProps {
 }
 
 export const MapModal = ({ isVisible, onClose, onComplete, center, onCameraChange, plantTypeImageCode }: MapModalProps) => {
+  useModalBackground(isVisible);
   return (
     <Modal
       visible={isVisible}
       animationType="slide"
       transparent={true}
     >
-      {/* 배경 검은색 오버레이 */}
-      <View className="flex-1 bg-black/50">
+ 
         {/* 내부 영역*/}
         <View className="flex-1 relative mx-4 my-20 pt-20 pb-20 border border-greenTab900 rounded-3xl bg-greenTab">
           <View className="absolute top-0 left-0 right-0 h-20 items-start justify-end px-4 py-2">
@@ -49,7 +50,7 @@ export const MapModal = ({ isVisible, onClose, onComplete, center, onCameraChang
             <CustomButton text="완료" size={70} onPress={onComplete}/>
           </View>
         </View>
-      </View>
+      
     </Modal>
   )
 }

@@ -1,5 +1,6 @@
 import { View, TextInput, Modal, Text, Dimensions } from "react-native";
 import { CustomButton } from "../../../../../components/CustomButton";
+import { useModalBackground } from '../../../../../libs/hooks/useModalBackground';
 
 interface MemoModalProps {
   isVisible: boolean;
@@ -15,14 +16,14 @@ export const MemoModal = ({
   onMemoChange 
 }: MemoModalProps) => {
   const height = Dimensions.get('window').height;
+  useModalBackground(isVisible);
   return (
     <Modal
       visible={isVisible}
       animationType="slide"
       transparent={true}
     >
-      {/* 배경 검은색 오버레이 */}
-      <View className="flex-1 bg-black/50">
+   
         {/* 내부 영역*/}
         <View className="flex-1 relative mx-4 mt-20 mb-16 pt-4 pb-2 border border-greenTab900 rounded-3xl bg-greenTab">
           {/* 타이틀 */}
@@ -43,7 +44,6 @@ export const MemoModal = ({
             <CustomButton text="완료" size={height/15} onPress={onClose}/>
           </View>
         </View>
-      </View>
     </Modal>
   );
 }; 

@@ -13,7 +13,7 @@ import { usePermissionStore } from "./src/store/permissionStore";
 import { type MaintenanceResponse, checkMaintenance } from "./src/libs/supabase/operations/normal/checkMaintenance";
 import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
 import { useNotifee } from './src/libs/hooks/useNotifee';
-
+import { ModalBackground} from './src/components/ModalBackground';
 
 function App(): React.JSX.Element {
   const { checkLoginStatus } = useAuthStore();
@@ -84,6 +84,7 @@ function App(): React.JSX.Element {
               <StatusBar barStyle="dark-content" translucent={true}/>
               <RootStack/>             
             </NavigationContainer>
+            <ModalBackground/>
         </SafeAreaView>
       </GestureHandlerRootView>
     </SafeAreaProvider>

@@ -15,3 +15,8 @@ export const DEVICE_WIDTH = Dimensions.get('window').width;
 export const DEVICE_HEIGHT = Dimensions.get('window').height;
 export const DEVICE_WIDTH_HALF = DEVICE_WIDTH/2;
 export const DEVICE_HEIGHT_HALF = DEVICE_HEIGHT/2;
+
+export const MODAL_ANIMATION_DURATION_OPEN = 300;
+export const MODAL_ANIMATION_DURATION_CLOSE = 200;
+export const MODAL_ANIMATION_DURATION_OPEN_LONG = 450;
+export const MODAL_ANIMATION_DURATION_CLOSE_LONG = 350;
