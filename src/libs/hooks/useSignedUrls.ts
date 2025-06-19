@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getSignedUrls } from '../supabase/operations/image/getSignedUrls';
-import { FoundPlant } from './useFoundPlants';
+import { found_plants_columns } from '../supabase/operations/foundPlants/type';
 
-export const useSignedUrls = (plants: FoundPlant[]) => {
+export const useSignedUrls = (plants: found_plants_columns[]) => {
   const [signedUrls, setSignedUrls] = useState<(string | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
