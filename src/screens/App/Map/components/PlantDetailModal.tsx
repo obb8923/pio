@@ -81,6 +81,15 @@ export const PlantDetailModal = React.memo(({
   const translateXAnim = useRef(new Animated.Value(0)).current;
   const translateYAnim = useRef(new Animated.Value(0)).current;
 
+  // Animated.View 스타일을 useMemo로 최적화
+  const animatedViewStyle = useMemo(() => ({
+    transform: [
+      { translateX: translateXAnim },
+      { translateY: translateYAnim },
+      { scale: scaleAnim },
+    ],
+  }), [translateXAnim, translateYAnim, scaleAnim]);
+
   // 닫기 애니메이션 함수를 useMemo로 최적화
   const handleCloseWithAnimation = useMemo(() => () => {
     // 모달 배경 먼저 닫기 (애니메이션 동시 시작)
@@ -183,13 +192,7 @@ export const PlantDetailModal = React.memo(({
       <View className="flex-1 justify-center items-center">    
         <Animated.View 
           className="bg-white rounded-3xl max-h-[90%] min-h-[50%] w-[90%]"
-          style={{
-            transform: [
-              { translateX: translateXAnim },
-              { translateY: translateYAnim },
-              { scale: scaleAnim },
-            ],
-          }}
+          style={animatedViewStyle}
         >
           <ScrollView 
             showsVerticalScrollIndicator={false}
