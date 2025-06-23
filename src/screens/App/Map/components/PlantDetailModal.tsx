@@ -122,6 +122,7 @@ export const PlantDetailModal = React.memo(({
     });
   }, [closeModalBackground, markerPositionAtScreen, scaleAnim, translateXAnim, translateYAnim, onClose]);
 
+  // 이미지 로딩을 모달이 뜨기 전에 미리 처리
   useEffect(() => {
     const fetchSignedUrl = async () => {
       if (!selectedPlant) {
@@ -141,6 +142,7 @@ export const PlantDetailModal = React.memo(({
       }
     };
 
+    // selectedPlant가 변경될 때마다 즉시 이미지 로딩 시작
     fetchSignedUrl();
   }, [selectedPlant]);
 
