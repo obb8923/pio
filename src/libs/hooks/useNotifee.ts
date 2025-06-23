@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { requestNotificationPermission } from '../utils/notifee/permission';
-import { getScheduledNotifications, scheduleSpecificTimeNotification } from '../utils/notifee/schedule';
+import { cancelAllScheduledNotifications, getScheduledNotifications, scheduleSpecificTimeNotification } from '../utils/notifee/schedule';
 import { initializeNotifee, isNotifeeAvailable } from '../utils/notifee';
 
 const notifeeMessages = [
@@ -55,6 +55,7 @@ export const useNotifee = () => {
   useEffect(() => {
     const initializeNotifications = async () => {
       try {
+        await cancelAllScheduledNotifications();
         await initializeNotifee();
         const available = await isNotifeeAvailable();
         setNotifeeAvailable(available);
