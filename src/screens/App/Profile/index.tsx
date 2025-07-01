@@ -146,10 +146,10 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
 
        <View className="h-8" />
         {/* 약관 및 정책 */}
-        <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>          
+        {/* <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>           */}
         <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
-        <VersionItem />
+        {/* <VersionItem /> */}
       </ScrollView>
     </Background>
   );
