@@ -12,7 +12,6 @@ import { ProfileStackParamList } from "../../../../nav/stack/Profile"
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from "react-native"
 import React from 'react'
-
 type UserInfoScreenProps = NativeStackScreenProps<ProfileStackParamList,'UserInfo'>
 
 const GENDER_OPTIONS = ["남성", "여성", "선택안함"] as const
@@ -183,7 +182,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
     }
 
     return (
-        <Background isStatusBarGap={false} type="background">
+        <Background isStatusBarGap={true} type="background">
             <ScrollView className="flex-1">
                 <View className="p-4">
                     {/* 이름 */}
