@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { Background } from "../../../components/Background";
 import { PiodexTab } from "./components/PiodexTab";
-import { PlantTab } from "./components/PlantTab";
+import { DictionaryTab } from "./components/DictionaryTab";
 import { DEVICE_WIDTH } from "../../../constants/normal";
 
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
@@ -70,7 +70,7 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
         {/* 콘텐츠 영역 */}
         <View className="flex-1">
          {
-          activeTab === 'piodex' ? <PiodexTab navigation={navigation} /> : <PlantTab />
+          activeTab === 'piodex' ? <PiodexTab navigation={navigation} /> : <DictionaryTab />
          }
         </View>
       </View>
