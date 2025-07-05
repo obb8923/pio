@@ -106,7 +106,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
               latitude={plant.lat}
               longitude={plant.lng}
               onTap={() => handleMarkerPress(plant)}
-              image={getFlowerImageForPlant(plant.id)}
+              image={getFlowerImageForPlant(plant.type_code,plant.id)}
               width={16}
               height={16}
             />
