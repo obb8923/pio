@@ -33,7 +33,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const { isFirstVisit, setFirstVisit } = useVisitStore();
  
   // 커스텀 훅 사용
-  const { foundPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
+  const { myPlants, allPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
@@ -100,7 +100,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
             zoom: 12,
           }}
         >
-          {foundPlants.map((plant) => (
+          {(showOnlyMyPlants ? myPlants : allPlants).map((plant: found_plants_columns) => (
             <NaverMapMarkerOverlay
               key={plant.id}
               latitude={plant.lat}

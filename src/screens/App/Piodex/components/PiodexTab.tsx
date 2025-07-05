@@ -18,17 +18,18 @@ interface PiodexTabProps {
 
 export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   const [containerWidth, setContainerWidth] = useState(0);
-  const { foundPlants, isLoading: loading, fetchPlants } = useFoundPlants(true);
-  const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(foundPlants);
+  const { myPlants, isLoading: loading,setIsLoading, fetchPlants } = useFoundPlants(true);
+  const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
   const [refreshing, setRefreshing] = useState(false);
   const { isLoggedIn } = useAuthStore();
 
-  // 컴포넌트가 마운트될 때 자동으로 데이터 가져오기
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchPlants();
-    }
-  }, [isLoggedIn]);
+    useEffect(() => {
+        if (isLoggedIn && myPlants.length === 0) {
+            fetchPlants();
+        }else{
+            setIsLoading(false);
+        }
+    }, [isLoggedIn, myPlants.length]);
 
   // 새로고침 핸들러
   const onRefresh = () => {
@@ -88,7 +89,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   }
 
   // 데이터가 없을 때
-  if(!foundPlants || foundPlants.length === 0) {
+  if(!myPlants || myPlants.length === 0) {
     return (
       <SectionList
         sections={[{ title: '', data: [[]] }]}
@@ -110,7 +111,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   // 데이터가 있을 때
   return (
     <SectionList
-      sections={groupPlantsByDate(foundPlants)}
+      sections={groupPlantsByDate(myPlants)}
       keyExtractor={(item, index) => `section-${index}`}
       renderItem={({ item: plantsInDate }) => (
         <View 
@@ -124,8 +125,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
         > 
           {plantsInDate.map((plant: found_plants_columns) => {
             const itemWidth = containerWidth > 0 ? (containerWidth - 8) / 4 : 125;
-            const signedUrl = signedUrls[foundPlants.findIndex((p: found_plants_columns) => p.id === plant.id)];
-            console.log('signedUrl:', signedUrl, 'plant.image_path:', plant.image_path);
+            const signedUrl = signedUrls[myPlants.findIndex((p: found_plants_columns) => p.id === plant.id)];
             return (
               <TouchableOpacity
                 key={plant.id}
