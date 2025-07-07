@@ -129,7 +129,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
             return (
               <TouchableOpacity
                 key={plant.id}
-                onPress={() => navigation.navigate('Detail', { plant, signedUrl })}
+                onPress={() => navigation.navigate('Detail', { plant, image_url:signedUrl })}
                 className="p-1 mb-1"
                 style={{ width: itemWidth, height: itemWidth + 30 }}
               >

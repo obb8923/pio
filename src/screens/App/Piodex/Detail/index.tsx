@@ -9,24 +9,36 @@ import { found_plants_columns } from "../../../../libs/supabase/operations/found
 import Line from "../../Map/ImageProcessing/components/line"
 import { plantTypeImages } from "../../Map/constants/images"
 import { PlantTypeMap } from "../../../../libs/supabase/operations/foundPlants/type"
-
-
+import { useEffect, useState } from "react"
+import ImageX from '../../../../../assets/svgs/ImageX.svg'
+import {Colors} from "../../../../constants/Colors"
 type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
 export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const route = useRoute();
-    const {plant,signedUrl} = route.params as {plant:found_plants_columns,signedUrl:string}   
+    const {plant,image_url} = route.params as {plant:found_plants_columns,image_url:string}   
+    const [imageError, setImageError] = useState(false);
     const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
+
+    useEffect(()=>{
+console.log(plant)
+console.log(image_url)
+    },[plant])
     return (
       <Background isStatusBarGap={false} isTabBarGap={false}>
           {/* 사진 영역 */}
        <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
-         
-          <Image
-            source={{ uri: signedUrl }}
-            className="w-full h-full rounded-3xl"
-            resizeMode="cover"
-          />
-        
+         {imageError ? (
+           <View className="w-full h-full rounded-3xl bg-gray-100 justify-center items-center opacity-50" >
+            <ImageX width="36" height="36" stroke={Colors.greenTab}/>
+            </View>
+         ) : (
+           <Image
+             source={{ uri: image_url }}
+             className="w-full h-full rounded-3xl"
+             resizeMode="cover"
+             onError={() => setImageError(true)}
+           />
+         )}
         </View>
         <ScrollView 
          className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg " 
@@ -58,15 +70,17 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
               <Text
                 className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               
               >{description?description:'설명이 없습니다.'}</Text>
-
+            {(memo || (lng&&lat)) &&
             <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
-
+            }
             {/* 메모 영역 */}
+            {memo &&
               <Text
                 className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
               >{memo?memo:'메모가 없습니다.'}</Text>
-              
+            }
              {/* 지도 영역 */}
+             {lat && lng &&
             <View className="w-full h-64 my-8">
               <NaverMapView
                 style={{ width: '100%', height: '100%' }}
@@ -89,6 +103,7 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
                 <Text className="text-lg font-bold text-greenTab">발견한 위치</Text>
               </View>
             </View>
+            }
            </View>
          </ScrollView>  
 
