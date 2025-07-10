@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView, Linking } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Linking } from "react-native";
 import { useAuthStore } from "../../../store/authStore";
 import { Colors } from "../../../constants/Colors";
 import { getUserNickname } from "../../../libs/supabase/operations/users/getUserNickname";
-import GoogleIcon from "../../../../assets/svgs/GoogleLogo.svg"
 import { Skeleton } from "../../../components/Skeleton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ProfileStackParamList } from "../../../nav/stack/Profile";
 import ChevronRight from "../../../../assets/svgs/ChevronRight.svg";
 import { Background } from "../../../components/Background";
-import { FEEDBACK_FORM_URL, GOOGLE_PLAY_URL, MAIL_ADDRESS } from "../../../constants/normal";
+import { FEEDBACK_FORM_URL, MAIL_ADDRESS } from "../../../constants/normal";
 import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
 import Mail from "../../../../assets/svgs/Mail.svg";
 import VersionCheck from 'react-native-version-check';
+import { AuthButton } from "../../../components/AuthButton";
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 // 프로필 헤더 컴포넌트
@@ -46,14 +46,10 @@ const ProfileHeader = () => {
   return (
     <View className="items-center py-8 rounded-lg">
       <Text className="text-base text-gray-700 mb-2">로그인이 필요합니다</Text>
-      <TouchableOpacity 
-        className="p-4 rounded-full flex-row items-center border border-gray-300"
-        onPress={handleGoogleLogin}
-        disabled={isLoading}
-      >
-        {!isLoading && <GoogleIcon style={{width: 20, height: 20}}/>}
-        {isLoading && <ActivityIndicator size="small" color={Colors.greenTab} />}
-      </TouchableOpacity>
+      <View className="flex-row justify-between items-center gap-4">
+     <AuthButton type="Google"/>
+     <AuthButton type="Apple"/>
+     </View>
     </View>
   );
 };

@@ -2,6 +2,10 @@ import { create } from 'zustand';
 import { supabase } from '../libs/supabase/supabase'; // supabase 클라이언트 경로 확인 필요
 import { GoogleSignin, User } from '@react-native-google-signin/google-signin';
 import { Alert } from 'react-native';
+import { appleAuth } from "@invertase/react-native-apple-authentication";
+// @ts-ignore
+import { v4 as uuidv4 } from 'uuid';
+import { sha256 } from 'js-sha256';
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -11,6 +15,7 @@ interface AuthState {
   login: () => void;
   logout: () => Promise<void>;
   handleGoogleLogin: () => Promise<void>;
+  handleAppleLogin: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -133,6 +138,59 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       set({ isLoggedIn: false });
     } finally {
+      set({ isLoading: false });
+    }
+  },
+  handleAppleLogin: async () => {
+    set({ isLoading: true });
+    try {
+      // 1. nonce 생성
+      const rawNonce = uuidv4();
+      const hashedNonce = sha256(rawNonce);
+
+      // 2. Apple 인증 요청 (nonce 포함)
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
+        nonce:hashedNonce,
+      });
+      console.log('Apple identityToken:', appleAuthRequestResponse.identityToken);
+      // 3. identityToken 획득 후 Supabase로 전달 (nonce 포함)
+      if (appleAuthRequestResponse.identityToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: appleAuthRequestResponse.identityToken,
+          options: { nonce:rawNonce},
+        });
+        if (error) {
+          // 로그인 실패 처리
+          console.error('Apple 로그인 에러:', error);
+          Alert.alert('Apple 로그인 오류', error.message);
+          set({ isLoggedIn: false });
+        } else if (data.session) {
+          // 로그인 성공 처리
+          set({
+            isLoggedIn: true,
+            userId: data.user.id,
+          });
+          if (__DEV__) {
+            console.log('[AuthStore] isLoggedIn set to true in handleAppleLogin()');
+          }
+        }
+      } else {
+        // 인증 토큰이 없는 경우
+        const errMsg = 'Apple 인증 토큰이 없습니다.';
+        console.error(errMsg);
+        Alert.alert('Apple 로그인 오류', errMsg);
+        set({ isLoggedIn: false });
+      }
+    } catch (e: any) {
+      // 예외 처리
+      console.error('Apple 로그인 예외:', e);
+      Alert.alert('Apple 로그인 오류', e instanceof Error ? e.message : String(e));
+      set({ isLoggedIn: false });
+    } finally {
+      // 로딩 상태 해제
       set({ isLoading: false });
     }
   },
