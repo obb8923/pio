@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Linking } from "react-native";
+import { View, Text, TouchableOpacity, Alert, ScrollView, Linking } from "react-native";
 import { useAuthStore } from "../../../store/authStore";
 import { Colors } from "../../../constants/Colors";
 import { getUserNickname } from "../../../libs/supabase/operations/users/getUserNickname";
