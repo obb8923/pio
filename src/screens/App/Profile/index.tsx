@@ -8,7 +8,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ProfileStackParamList } from "../../../nav/stack/Profile";
 import ChevronRight from "../../../../assets/svgs/ChevronRight.svg";
 import { Background } from "../../../components/Background";
-import { FEEDBACK_FORM_URL, MAIL_ADDRESS } from "../../../constants/normal";
+import { FEEDBACK_FORM_URL, MAIL_ADDRESS,GOOGLE_PLAY_URL } from "../../../constants/normal";
 import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
 import Mail from "../../../../assets/svgs/Mail.svg";
 import VersionCheck from 'react-native-version-check';
@@ -142,10 +142,10 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
 
        <View className="h-8" />
         {/* 약관 및 정책 */}
-        {/* <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>           */}
+        <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>          
         <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
-        {/* <VersionItem /> */}
+        <VersionItem />
       </ScrollView>
     </Background>
   );

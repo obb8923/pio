@@ -144,23 +144,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   handleAppleLogin: async () => {
     set({ isLoading: true });
     try {
-      // 1. nonce 생성
+      // base64url 인코딩 함수 (React Native 호환)
+      function base64urlEncode(bytes: number[]) {
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        // @ts-ignore
+        return btoa(binary)
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
+      }
+      // 1. nonce 생성 및 해시
       const rawNonce = uuidv4();
-      const hashedNonce = sha256(rawNonce);
+      const hashedNonce = sha256(rawNonce); // hex string
 
-      // 2. Apple 인증 요청 (nonce 포함)
+      console.log('rawNonce:', rawNonce);
+      console.log('hashedNonce:', hashedNonce);
+      // 2. Apple 인증 요청 (base64url 인코딩된 nonce 포함)
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
-        nonce:hashedNonce,
+        nonce: hashedNonce,
       });
       console.log('Apple identityToken:', appleAuthRequestResponse.identityToken);
-      // 3. identityToken 획득 후 Supabase로 전달 (nonce 포함)
+      // 3. identityToken 획득 후 Supabase로 전달 (rawNonce 포함)
       if (appleAuthRequestResponse.identityToken) {
+        // @ts-ignore
         const { data, error } = await supabase.auth.signInWithIdToken({
           provider: 'apple',
           token: appleAuthRequestResponse.identityToken,
-          options: { nonce:rawNonce},
+          options: { nonce: rawNonce },
         });
         if (error) {
           // 로그인 실패 처리
