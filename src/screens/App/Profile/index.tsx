@@ -17,7 +17,7 @@ type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'
 
 // 프로필 헤더 컴포넌트
 const ProfileHeader = () => {
-  const { isLoggedIn, handleGoogleLogin, isLoading } = useAuthStore();
+  const { isLoggedIn } = useAuthStore();
   const [nickname, setNickname] = useState<string | null>(null);
   const [nicknameLoading, setNicknameLoading] = useState(false);
   useEffect(() => {
