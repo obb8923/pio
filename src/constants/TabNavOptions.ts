@@ -3,7 +3,7 @@ import { Colors } from './Colors';
 const isIOS = Platform.OS === 'ios';
 
 // 탭바 높이 상수 export
-export const TAB_BAR_HEIGHT = isIOS ? 100 : 78;
+export const TAB_BAR_HEIGHT = isIOS ? 88 : 78;
 
 export const TabBarStyle = {
   borderTopColor: 'transparent',
@@ -20,7 +20,7 @@ export const TabBarStyleNone = {  display: 'none' as const}
 export const TabNavOptions = {
     headerShown: false,
     tabBarStyle: TabBarStyle,
-    tabBarItemStyle: {flex: 1},
+    tabBarItemStyle: {flex: 1 ,height:78,padding:0,backgroundColor:'trandparent'},
     tabBarIconStyle: {flex: 1},
     tabBarLabelStyle: {
       flex: 1,
