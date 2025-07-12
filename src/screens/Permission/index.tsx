@@ -73,7 +73,7 @@ export const PermissionScreen = ({navigation}:PermissionScreenProps) => {
   const [isRequesting, setIsRequesting] = useState(false);
   useEffect(() => {
     if (isInitialized && camera && photoLibrary && location) {
-      navigation.navigate('AppTab');
+      navigation.goBack();
     }
   }, [isInitialized, camera, photoLibrary, location, navigation]);
   // const [DEBUG, setDEBUG] = useState(false);
