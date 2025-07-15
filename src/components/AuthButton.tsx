@@ -22,7 +22,7 @@ export const AuthButton = ({ type }: AuthButtonProps) => {
       disabled={isLoading}
     >
       {!isLoading && type === 'Google' && <GoogleLogo width= '20' height= '20' />}
-      {!isLoading && type === 'Apple' && <AppleLogo width='20' height= '20'/>}
+      {!isLoading && type === 'Apple' && <AppleLogo width='20' height= '20' fill='#000'/>}
       {isLoading && <ActivityIndicator size="small" color={Colors.greenTab} />}
     </TouchableOpacity>
   );
