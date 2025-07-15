@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Alert, ScrollView, Linking } from "react-native";
+import { View, Text, TouchableOpacity, Alert, ScrollView, Linking,Platform } from "react-native";
 import { useAuthStore } from "../../../store/authStore";
 import { Colors } from "../../../constants/Colors";
 import { getUserNickname } from "../../../libs/supabase/operations/users/getUserNickname";
@@ -48,7 +48,7 @@ const ProfileHeader = () => {
       <Text className="text-base text-gray-700 mb-2">로그인이 필요합니다</Text>
       <View className="flex-row justify-between items-center gap-4">
      <AuthButton type="Google"/>
-     <AuthButton type="Apple"/>
+     {Platform.OS === 'ios' && <AuthButton type="Apple"/>}
      </View>
     </View>
   );
@@ -142,10 +142,10 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
 
        <View className="h-8" />
         {/* 약관 및 정책 */}
-        <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>          
+        {/* <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>           */}
         <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
-        <VersionItem />
+        {/* <VersionItem /> */}
       </ScrollView>
     </Background>
   );
