@@ -12,6 +12,8 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		C6BDCDB8D9081E2B1C6A6CFC /* libPods-pio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 74BB2D99035AF3047CD4A650 /* libPods-pio.a */; };
 		CE2480FA2DE566BE00027B05 /* tmp.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2480F92DE566BE00027B05 /* tmp.m */; };
+		CEEDCE312E269498008E88AC /* AppleSignInModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEEDCE302E269498008E88AC /* AppleSignInModule.swift */; };
+		CEEDCE332E2694A2008E88AC /* AppleSignInModule.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEDCE322E2694A2008E88AC /* AppleSignInModule.m */; };
 		F83CF5E3DB59970A9DE81567 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +30,8 @@
 		CE2480F82DE566BE00027B05 /* pio-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "pio-Bridging-Header.h"; sourceTree = "<group>"; };
 		CE2480F92DE566BE00027B05 /* tmp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = tmp.m; path = pio/tmp.m; sourceTree = "<group>"; };
 		CEEC49A12E1D211600B582EB /* pio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = pio.entitlements; path = pio/pio.entitlements; sourceTree = "<group>"; };
+		CEEDCE302E269498008E88AC /* AppleSignInModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInModule.swift; sourceTree = "<group>"; };
+		CEEDCE322E2694A2008E88AC /* AppleSignInModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppleSignInModule.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -49,6 +53,8 @@
 				CEEC49A12E1D211600B582EB /* pio.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				CEEDCE322E2694A2008E88AC /* AppleSignInModule.m */,
+				CEEDCE302E269498008E88AC /* AppleSignInModule.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -254,6 +260,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				CEEDCE312E269498008E88AC /* AppleSignInModule.swift in Sources */,
+				CEEDCE332E2694A2008E88AC /* AppleSignInModule.m in Sources */,
 				CE2480FA2DE566BE00027B05 /* tmp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
