@@ -12,6 +12,7 @@ interface AuthState {
   logout: () => Promise<void>;
   handleGoogleLogin: () => Promise<void>;
   handleAppleLogin: () => Promise<void>;
+  handleEmailLogin: (email: string, password: string) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -171,6 +172,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error: any) {
       Alert.alert('Apple 로그인 오류', error.message || '알 수 없는 오류가 발생했습니다.');
       set({ isLoggedIn: false });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  handleEmailLogin: async (email: string, password: string) => {
+    set({ isLoading: true });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        let errorMessage = '로그인 중 오류가 발생했습니다.';
+        if (error.status === 400) {
+          errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
+        } else if (error.status === 429) {
+          errorMessage = '로그인 시도 횟수가 너무 많습니다. 잠시 후 다시 시도해주세요.';
+        } else if (error.status === 500) {
+          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+        Alert.alert('이메일 로그인 오류', errorMessage);
+        set({ isLoggedIn: false });
+        return false;
+      } else if (data.session) {
+        set({
+          isLoggedIn: true,
+          userId: data.user.id,
+        });
+        if (__DEV__) {
+          console.log('[AuthStore] isLoggedIn set to true in handleEmailLogin()');
+        }
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      Alert.alert('이메일 로그인 오류', error.message || '알 수 없는 오류가 발생했습니다.');
+      set({ isLoggedIn: false });
+      return false;
     } finally {
       set({ isLoading: false });
     }

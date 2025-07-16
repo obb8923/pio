@@ -1,4 +1,4 @@
-import { View, Animated } from "react-native";
+import { Animated } from "react-native";
 import { useModalBackgroundStore } from "../store/modalStore";
 import { useEffect, useRef } from "react";
 import { MODAL_ANIMATION_DURATION_OPEN, MODAL_ANIMATION_DURATION_CLOSE } from "../constants/normal";

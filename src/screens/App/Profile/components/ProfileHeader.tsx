@@ -1,6 +1,6 @@
 import { useState,useEffect } from "react";
 import { View,Text,Platform } from "react-native";
-import { AuthButton } from "../../../../components/AuthButton";
+import { AuthButton } from "./AuthButton";
 import { Skeleton } from "../../../../components/Skeleton";
 import { useAuthStore } from "../../../../store/authStore";
 import { getUserNickname } from "../../../../libs/supabase/operations/users/getUserNickname";
@@ -39,6 +39,8 @@ export const ProfileHeader = () => {
         <View className="flex-row justify-between items-center gap-4">
        <AuthButton type="Google"/>
        {Platform.OS === 'ios' && <AuthButton type="Apple"/>}
+       <AuthButton type="Email"/>
+
        </View>
       </View>
     );
