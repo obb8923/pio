@@ -47,13 +47,13 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>카메라 접근 권한이 필요합니다.</string>
+	<string>식물 사진을 촬영하여 식별 및 기록 기능을 제공하기 위해 카메라 접근 권한이 필요합니다. 사용자가 직접 식물의 사진을 찍어 식물 도감에 추가할 수 있습니다.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>위치 접근 권한이 필요합니다.</string>
+	<string>식물 발견 위치를 지도에 기록하고, 주변 식물 정보를 제공하기 위해 위치 정보 접근 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>사진 라이브러리 접근 권한이 필요합니다.</string>
+	<string>사용자가 이미 촬영한 식물 사진을 선택하여 도감에 등록하기 위해 사진 라이브러리 접근 권한이 필요합니다. 갤러리에서 식물 사진을 선택해 업로드할 수 있습니다.</string>
 	<key>NSUserNotificationUsageDescription</key>
-	<string>알림 권한이 필요합니다.</string>
+	<string>식물 관리 알림을 제공하기 위해 알림 권한이 필요합니다.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
