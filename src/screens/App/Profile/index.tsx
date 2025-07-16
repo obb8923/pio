@@ -32,7 +32,7 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
       <Text className="text-2xl font-bold text-greenTab ml-9 mb-4">프로필</Text>
       
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* 프로필 헤더 */}
+        {/* 프로필 헤더 - 로그인 또는 이름*/}
         <ProfileHeader />
         
         <View className="h-8" />
