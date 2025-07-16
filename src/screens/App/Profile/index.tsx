@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Alert, ScrollView, Linking } from "react-native";
 import { useAuthStore } from "../../../store/authStore";
 import { Colors } from "../../../constants/Colors";
@@ -9,55 +8,10 @@ import { Background } from "../../../components/Background";
 import { FEEDBACK_FORM_URL, MAIL_ADDRESS,GOOGLE_PLAY_URL } from "../../../constants/normal";
 import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
 import Mail from "../../../../assets/svgs/Mail.svg";
-import VersionCheck from 'react-native-version-check';
 import { ProfileHeader } from "./components/ProfileHeader";
+import { VersionItem } from "./components/VersionItem";
+
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
-
-const VersionItem = () => {
-  const [currentVersion, setCurrentVersion] = useState<string>('');
-  const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
-  const [storeUrl, setStoreUrl] = useState<string>('');
-
-  useEffect(() => {
-    const checkVersion = async () => {
-      try {
-        const version = await VersionCheck.getCurrentVersion();
-        setCurrentVersion(version);
-
-        console.log(version,"##")
-        const updateInfo = await VersionCheck.needUpdate({ provider: 'playStore' });
-        setNeedsUpdate(updateInfo?.isNeeded ?? false);
-        const url = await VersionCheck.getStoreUrl({ provider: 'playStore' });
-        setStoreUrl(url);
-      } catch (error) {
-        console.error('Version check failed:', error);
-        setNeedsUpdate(false);
-      }
-    };
-    checkVersion();
-  }, []);
-
-
-  return (
-    <TouchableOpacity 
-      className="flex-row justify-between items-center py-4 px-5 rounded-lg border-b border-greenTab" 
-      onPress={()=>{
-        if (needsUpdate && storeUrl) {
-          Linking.openURL(storeUrl);
-        }
-      }}
-    >
-      <Text className="text-base text-greenTab">버전정보</Text>
-      <View className="flex-row items-center">
-        <Text className="text-base text-greenTab mr-2">v{currentVersion}</Text>
-        <Text className="text-sm text-greenTab">
-          {needsUpdate ? '업데이트하기' : '최신버전'}
-        </Text>
-        {needsUpdate && <ArrowUpRight style={{width: 10, height: 12, color: Colors.greenTab,marginLeft:10}}/>}
-      </View>
-    </TouchableOpacity>
-  );
-};
 
 const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: () => void,type?: 'default' | 'link'|'mail'}) => {
   return (
@@ -104,7 +58,7 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
         {/* <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>           */}
         <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
-        {/* <VersionItem /> */}
+        <VersionItem />
       </ScrollView>
     </Background>
   );
