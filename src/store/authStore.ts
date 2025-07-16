@@ -143,7 +143,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // 네이티브 모듈에서 idToken 받아오기
       const { signInWithAppleNative } = await import('../libs/native/AppleSignIn');
       const idToken = await signInWithAppleNative();
-      console.log('Apple idToken:',idToken)
+      // console.log('Apple idToken:',idToken)
       if (!idToken) {
         Alert.alert('Apple 로그인 오류', 'idToken을 받아오지 못했습니다.');
         set({ isLoggedIn: false });
@@ -154,7 +154,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         provider: 'apple',
         token: idToken,
       });
-      console.log('data: ',data)
+      // console.log('data: ',data)
 
       if (error) {
         Alert.alert('Apple 로그인 오류', error.message || '로그인 중 오류가 발생했습니다.');
