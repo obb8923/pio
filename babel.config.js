@@ -11,7 +11,7 @@ module.exports = function(api) {
         allowUndefined: false,
         verbose: false,
       }],
-      'react-native-reanimated/plugin',
+      'react-native-reanimated/plugin',// 반드시 마지막에
     ],
   };
 };
