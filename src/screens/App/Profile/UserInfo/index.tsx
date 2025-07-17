@@ -169,7 +169,12 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
                             const result = await requestAccountDeletion()
                             if (result.success) {
                                 logout() // 로컬 상태 업데이트
-                                Alert.alert("완료", "회원탈퇴가 완료되었습니다.")
+                                Alert.alert("완료", "회원탈퇴가 완료되었습니다.",[
+                                    {
+                                        text:'확인',
+                                        onPress: ()=>navigation.goBack()
+                                    }
+                                ])
                             } else {
                                 Alert.alert("오류", result.error?.message || "회원탈퇴 중 오류가 발생했습니다.")
                             }
