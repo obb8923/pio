@@ -1,21 +1,28 @@
-import { NavigationContainer} from "@react-navigation/native";
-import "./global.css"
-import { SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar } from 'react-native'; 
-import { useEffect, useState } from 'react';
-import { useAuthStore } from './src/store/authStore';
+// 외부 라이브러리
+import { useState,useEffect } from "react";
+import { StatusBar } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import SplashScreen from "react-native-splash-screen";
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from '@env';
-import { RootStack } from "./src/nav/stack/Root";
-import { usePermissionStore } from "./src/store/permissionStore";
-import { type MaintenanceResponse, checkMaintenance } from "./src/libs/supabase/operations/normal/checkMaintenance";
-import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
-import { useNotifee } from './src/libs/hooks/useNotifee';
-import { ModalBackground} from './src/components/ModalBackground';
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-function App(): React.JSX.Element {
+// 글로벌 스타일
+import "./global.css";
+// 환경 변수
+import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from "@env";
+
+// 내부 네비게이션/컴포넌트
+import { RootStack } from "./src/nav/stack/Root";
+import { ModalBackground } from "./src/components/ModalBackground";
+import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
+// 내부 스토어/훅/유틸
+import { useAuthStore } from "./src/store/authStore";
+import { usePermissionStore } from "./src/store/permissionStore";
+import { useNotifee } from "./src/libs/hooks/useNotifee";
+import { type MaintenanceResponse, checkMaintenance } from "./src/libs/supabase/operations/normal/checkMaintenance";
+
+function App() {
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized } = usePermissionStore();
   const [maintenanceData, setMaintenanceData] = useState<MaintenanceResponse | null>(null);
