@@ -76,7 +76,7 @@ export const useNotifee = () => {
             // 예약된 알림들을 확인
             setTimeout(async () => {
               const scheduledNotifications = await getScheduledNotifications();
-              console.log('현재 예약된 알림 개수:', scheduledNotifications.length);
+              // console.log('현재 예약된 알림 개수:', scheduledNotifications.length);
             }, 1000);
           }
         }

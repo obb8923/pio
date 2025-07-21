@@ -54,7 +54,7 @@ export async function cancelAllScheduledNotifications() {
 export async function getScheduledNotifications() {
   try {
     const notifications = await notifee.getTriggerNotifications();
-    console.log('현재 예약된 알림들:', notifications);
+    // console.log('현재 예약된 알림들:', notifications);
     return notifications;
   } catch (error) {
     console.error('예약된 알림 조회 실패:', error);
