@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Animated, Alert, Linking } from 'react-native';
-import { useCameraPermissions } from '../../../../libs/hooks/useCameraPermissions';
+import { Animated } from 'react-native';
 
 export const useFab = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { checkAndRequestPermissions } = useCameraPermissions();
 
   // 애니메이션 값
   const fabAnimation = useRef(new Animated.Value(0)).current;
@@ -43,27 +41,9 @@ export const useFab = () => {
   };
 
   // FAB 토글 핸들러
-  const toggle = useCallback(async () => {
-    if (isOpen) {
-      setIsOpen(false);
-      return;
-    }
-
-    const { hasAllPermissions } = await checkAndRequestPermissions();
-    
-    if (hasAllPermissions) {
-      setIsOpen(true);
-    } else {
-      Alert.alert(
-        "권한 필요",
-        "식물 추가 기능을 사용하려면 카메라 및 앨범 접근 권한이 모두 필요합니다. 설정에서 권한을 허용해주세요.",
-        [
-          { text: "취소", style: "cancel" },
-          { text: "설정으로 이동", onPress: () => Linking.openSettings() }
-        ]
-      );
-    }
-  }, [isOpen, checkAndRequestPermissions]);
+  const toggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
 
   // FAB 닫기 핸들러
   const close = useCallback(() => {

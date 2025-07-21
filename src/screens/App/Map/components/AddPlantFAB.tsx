@@ -6,21 +6,19 @@ import { TAB_BAR_HEIGHT } from '../../../../constants/TabNavOptions';
 import React, { useCallback } from 'react';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { usePermissionStore } from '../../../../store/permissionStore';
+import { usePermissions } from '../../../../libs/hooks/usePermissions';
 import { useFab } from '../hooks/useFab';
 
 interface AddPlantFABProps {
   onNavigate: (screen: string, params: any) => void;
 }
 
-export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
-  onNavigate,
-}) => {
+export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
   const { isOpen, toggle, close, fabAnimation, animations } = useFab();
   const { cameraButtonTranslateY, galleryButtonTranslateY, buttonScale } = animations;
-
+  const {cameraPermission,photoLibraryPermission } = usePermissions();
   const handleCameraPress = useCallback(async () => {
-    const hasPermission = usePermissionStore.getState().camera;
-    if (!hasPermission) {
+    if (!cameraPermission) {
       close(); // FAB 닫기
       Alert.alert(
         "카메라 권한 필요",
@@ -56,8 +54,7 @@ export const AddPlantFAB: React.FC<AddPlantFABProps> = ({
   }, [close, onNavigate]);
 
   const handleGalleryPress = useCallback(async () => {
-    const hasPermission = usePermissionStore.getState().photoLibrary;
-    if (!hasPermission) {
+    if (!photoLibraryPermission) {
       close(); // FAB 닫기
       Alert.alert(
         "앨범 접근 권한 필요",

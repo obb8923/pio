@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, Alert, ActivityIndicator, GestureResponderEvent } from "react-native";
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import {Background} from "../../../components/Background";
-import { NaverMapMarkerOverlay, NaverMapView, Point } from '@mj-studio/react-native-naver-map';
+import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 import { useLocationStore } from "../../../store/locationStore";
 import { Colors } from "../../../constants/Colors";
 import { useState, useCallback, useEffect } from "react";
@@ -17,6 +17,7 @@ import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";
 import { useMapMarkers } from "./hooks/useMapMarkers";
 import { getFlowerImageForPlant } from "./utils/markerUtils";
 import { usePermissionStore } from "../../../store/permissionStore";
+import {usePermissions} from '../../../libs/hooks/usePermissions'
 import { useVisitStore } from "../../../store/visitStore";
 import { RootStackParamList } from "../../../nav/stack/Root";
 import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type';
@@ -29,20 +30,25 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const { userId } = useAuthStore();
   const insets = useSafeAreaInsets();
-  const { camera, photoLibrary, location, isInitialized } = usePermissionStore();
+  const {isInitialized } = usePermissionStore();
+  const {checkAndRequestLocationPermission} = usePermissions();
+
   const { isFirstVisit, setFirstVisit } = useVisitStore();
  
   // 커스텀 훅 사용
   const { myPlants, allPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
+  
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
       setFirstVisit(false);
-      if (!camera || !photoLibrary || !location) {
-        navigation.navigate('PermissionScreen');
-      }
+
+      checkAndRequestLocationPermission();
+      // if (!camera || !photoLibrary || !location) {
+      //   navigation.navigate('PermissionScreen');
+      // }
     }
-  }, [isInitialized, camera, photoLibrary, location]);
+  }, [isInitialized]);
 
   // 화면이 포커스될 때마다 식물 데이터 가져오기
   useFocusEffect(

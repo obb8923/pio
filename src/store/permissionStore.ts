@@ -8,31 +8,35 @@ import { Platform } from 'react-native';
 // 1. 권한 상태 타입 정의
 // 앱에서 사용할 권한 관련 상태와 메서드 타입을 정의합니다.
 interface PermissionState {
-  camera: boolean; // 카메라 권한
-  photoLibrary: boolean; // 갤러리(사진) 권한
-  location: boolean; // 위치 권한
+  cameraPermission: boolean; // 카메라 권한
+  photoLibraryPermission: boolean; // 갤러리(사진) 권한
+  locationPermission: boolean; // 위치 권한
   setCameraPermission: (granted: boolean) => void;
   setPhotoLibraryPermission: (granted: boolean) => void;
   setLocationPermission: (granted: boolean) => void;
+  
   requestAllPermissions: () => Promise<boolean>; // 모든 권한 요청
   hasAllPermission: () => boolean; // 모든 권한 허용 여부
   isInitialized: boolean; // 권한 초기화 여부
   initPermissions: () => Promise<void>; // 권한 상태 초기화
+  requestCameraPermission: () => Promise<boolean>; // 카메라 권한 요청
+  requestPhotoLibraryPermission: () => Promise<boolean>; // 앨범(갤러리) 권한 요청
+  requestLocationPermission: () => Promise<boolean>; // 위치 권한 요청
 }
 
 // 2. 플랫폼별 권한 → 상태 매핑 객체
 // 복잡한 조건문 없이, 각 permission이 어떤 상태(camera, photoLibrary, location)에 해당하는지 명확히 매핑합니다.
 const PERMISSION_MAPPING = {
   ios: {
-    [PERMISSIONS.IOS.CAMERA]: 'camera',
-    [PERMISSIONS.IOS.PHOTO_LIBRARY]: 'photoLibrary',
-    [PERMISSIONS.IOS.LOCATION_WHEN_IN_USE]: 'location',
+    [PERMISSIONS.IOS.CAMERA]: 'cameraPermission',
+    [PERMISSIONS.IOS.PHOTO_LIBRARY]: 'photoLibraryPermission',
+    [PERMISSIONS.IOS.LOCATION_WHEN_IN_USE]: 'locationPermission',
   },
   android: {
-    [PERMISSIONS.ANDROID.CAMERA]: 'camera',
-    [PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE]: 'photoLibrary',
-    [PERMISSIONS.ANDROID.READ_MEDIA_IMAGES]: 'photoLibrary',
-    [PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]: 'location',
+    [PERMISSIONS.ANDROID.CAMERA]: 'cameraPermission',
+    [PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE]: 'photoLibraryPermission',
+    [PERMISSIONS.ANDROID.READ_MEDIA_IMAGES]: 'photoLibraryPermission',
+    [PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]: 'locationPermission',
   },
 } as const;
 
@@ -57,17 +61,17 @@ const updatePermissionState = (permission: string, isGranted: boolean, set: any)
 // 5. zustand 스토어 생성
 // 앱 전체에서 권한 상태를 관리하고, 권한 요청/초기화 메서드를 제공합니다.
 export const usePermissionStore = create<PermissionState>((set, get) => ({
-  camera: false, // 카메라 권한 상태
-  photoLibrary: false, // 갤러리(사진) 권한 상태
-  location: false, // 위치 권한 상태
+  cameraPermission: false, // 카메라 권한 상태
+  photoLibraryPermission: false, // 갤러리(사진) 권한 상태
+  locationPermission: false, // 위치 권한 상태
   isInitialized: false, // 권한 초기화 여부
-  setCameraPermission: (granted) => set({ camera: granted }),
-  setPhotoLibraryPermission: (granted) => set({ photoLibrary: granted }),
-  setLocationPermission: (granted) => set({ location: granted }),
+  setCameraPermission: (granted) => set({ cameraPermission: granted }),
+  setPhotoLibraryPermission: (granted) => set({ photoLibraryPermission: granted }),
+  setLocationPermission: (granted) => set({ locationPermission: granted }),
   // 6. 모든 권한이 허용되었는지 확인
   hasAllPermission: () => {
     const state = get();
-    return state.camera && state.photoLibrary && state.location;
+    return state.cameraPermission && state.photoLibraryPermission && state.locationPermission;
   },
 
   // 7. 권한 상태 초기화 함수
@@ -115,53 +119,73 @@ export const usePermissionStore = create<PermissionState>((set, get) => ({
     }
   },
   
-  // 8. 권한 요청 함수
-  // 각 권한을 사용자에게 요청하고, 결과에 따라 상태를 업데이트합니다.
+  // 카메라 권한 요청 함수
+  requestCameraPermission: async () => {
+    try {
+      const permission = Platform.select({
+        ios: PERMISSIONS.IOS.CAMERA,
+        android: PERMISSIONS.ANDROID.CAMERA,
+        default: undefined,
+      });
+      if (!permission) return false;
+      const status = await requestMultiple([permission]);
+      const isGranted = status[permission] === RESULTS.GRANTED;
+      updatePermissionState(permission, isGranted, set);
+      return isGranted;
+    } catch (error) {
+      console.error('[PermissionStore] Error requesting camera permission:', error);
+      return false;
+    }
+  },
+
+  // 앨범(갤러리) 권한 요청 함수
+  requestPhotoLibraryPermission: async () => {
+    try {
+      let permission: typeof PERMISSIONS.IOS.PHOTO_LIBRARY | typeof PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE | typeof PERMISSIONS.ANDROID.READ_MEDIA_IMAGES | null = null;
+      if (Platform.OS === 'ios') {
+        permission = PERMISSIONS.IOS.PHOTO_LIBRARY;
+      } else if (Platform.OS === 'android') {
+        permission = getGalleryPermission();
+      }
+      if (!permission) return false;
+      const status = await requestMultiple([permission]);
+      const isGranted = status[permission] === RESULTS.GRANTED;
+      updatePermissionState(permission, isGranted, set);
+      return isGranted;
+    } catch (error) {
+      console.error('[PermissionStore] Error requesting photo library permission:', error);
+      return false;
+    }
+  },
+
+  // 위치 권한 요청 함수
+  requestLocationPermission: async () => {
+    try {
+      const permission = Platform.select({
+        ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+        android: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+        default: undefined,
+      });
+      if (!permission) return false;
+      const status = await requestMultiple([permission]);
+      const isGranted = status[permission] === RESULTS.GRANTED;
+      updatePermissionState(permission, isGranted, set);
+      return isGranted;
+    } catch (error) {
+      console.error('[PermissionStore] Error requesting location permission:', error);
+      return false;
+    }
+  },
+
+  // 8. 권한 요청 함수 (각 권한별 요청 함수 결합)
   requestAllPermissions: async () => {
     try {
-      const galleryPermission = Platform.OS === 'android' ? getGalleryPermission() : null;
-      
-      // 플랫폼별 요청할 권한 목록
-      const permissionsToRequest = Platform.select({
-        ios: [
-          PERMISSIONS.IOS.CAMERA,
-          PERMISSIONS.IOS.PHOTO_LIBRARY,
-          PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-        ],
-        android: [
-          PERMISSIONS.ANDROID.CAMERA,
-          galleryPermission,
-          PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-        ],
-        default: [],
-      });
-
-      console.log('[PermissionStore] Requesting permissions:', permissionsToRequest);
-
-      if (!permissionsToRequest || permissionsToRequest.length === 0) {
-        console.log('[PermissionStore] No permissions to request');
-        return false;
-      }
-
-      // 각 권한을 개별적으로 요청하고 상태 업데이트
-      for (const permission of permissionsToRequest) {
-        if (!permission) continue;
-        try {
-          const status = await requestMultiple([permission]);
-          console.log(`[PermissionStore] Permission ${permission} status:`, status);
-          
-          const isGranted = status[permission] === RESULTS.GRANTED;
-          updatePermissionState(permission, isGranted, set);
-        } catch (error) {
-          console.error(`[PermissionStore] Error requesting permission ${permission}:`, error);
-        }
-      }
-
-      // 모든 권한이 승인되었는지 확인
-      const state = get();
-      return state.camera && state.photoLibrary && state.location;
+      const cameraGranted = await get().requestCameraPermission();
+      const photoLibraryGranted = await get().requestPhotoLibraryPermission();
+      const locationGranted = await get().requestLocationPermission();
+      return cameraGranted && photoLibraryGranted && locationGranted;
     } catch (error) {
-      console.error("[PermissionStore] Error during permission request: ", error);
+      console.error('[PermissionStore] Error during permission request: ', error);
       return false;
     }
   },
