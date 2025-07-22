@@ -16,10 +16,12 @@ interface AddPlantFABProps {
 export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
   const { isOpen, toggle, close, fabAnimation, animations } = useFab();
   const { cameraButtonTranslateY, galleryButtonTranslateY, buttonScale } = animations;
-  const {cameraPermission,photoLibraryPermission } = usePermissions();
+  const {cameraPermission,photoLibraryPermission,checkAndRequestCameraPermission,checkAndRequestPhotoLibraryPermission } = usePermissions();
   const handleCameraPress = useCallback(async () => {
     if (!cameraPermission) {
       close(); // FAB 닫기
+      const permissionGranted = await checkAndRequestCameraPermission();
+      if(!permissionGranted){
       Alert.alert(
         "카메라 권한 필요",
         "카메라를 사용하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
@@ -28,6 +30,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
           { text: "설정으로 이동", onPress: () => Linking.openSettings() }
         ]
       );
+      }
       return;
     }
 
@@ -56,6 +59,8 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
   const handleGalleryPress = useCallback(async () => {
     if (!photoLibraryPermission) {
       close(); // FAB 닫기
+      const permissionGranted = await checkAndRequestPhotoLibraryPermission();
+      if(!permissionGranted){
       Alert.alert(
         "앨범 접근 권한 필요",
         "앨범에서 사진을 선택하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
@@ -64,6 +69,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
           { text: "설정으로 이동", onPress: () => Linking.openSettings() }
         ]
       );
+    }
       return;
     }
 

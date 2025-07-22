@@ -122,11 +122,13 @@ export const usePermissionStore = create<PermissionState>((set, get) => ({
   // 카메라 권한 요청 함수
   requestCameraPermission: async () => {
     try {
+
       const permission = Platform.select({
         ios: PERMISSIONS.IOS.CAMERA,
         android: PERMISSIONS.ANDROID.CAMERA,
         default: undefined,
       });
+
       if (!permission) return false;
       const status = await requestMultiple([permission]);
       const isGranted = status[permission] === RESULTS.GRANTED;
