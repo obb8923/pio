@@ -21,7 +21,7 @@ export const Background = ({children,isStatusBarGap=false,type='green',isTabBarG
   }
   return (
     <View className="flex-1" style={{paddingTop: isStatusBarGap ? insets.top : 0}}>
-    <Image source={require('../../assets/pngs/BackgroundGreen.png')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
+    <Image source={require('../../assets/webps/BackgroundGreen.webp')} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
     {type === 'white' && <View className="flex-1 mx-2 absolute top-0 left-0 right-0 bottom-0 bg-white opacity-90"/>}
     <View 
     className={`flex-1 ${props.className}`} 
