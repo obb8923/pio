@@ -14,19 +14,24 @@ import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from "@env";
 
 // 내부 네비게이션/컴포넌트
 import { RootStack } from "./src/nav/stack/Root";
+import { OnboardingStack } from "./src/nav/stack/Onboarding";
 import { ModalBackground } from "./src/components/ModalBackground";
 import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
 // 내부 스토어/훅/유틸
 import { useAuthStore } from "./src/store/authStore";
 import { usePermissionStore } from "./src/store/permissionStore";
 import { useNotifee } from "./src/libs/hooks/useNotifee";
+import { useOnboarding } from "./src/libs/hooks/useOnboarding";
 import { type MaintenanceResponse, checkMaintenance } from "./src/libs/supabase/operations/normal/checkMaintenance";
 
 function App() {
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized } = usePermissionStore();
   const [maintenanceData, setMaintenanceData] = useState<MaintenanceResponse | null>(null);
-
+  const { isOnboardingCompleted, isLoading:isOnboardingLoading } = useOnboarding();
+  useEffect(()=>{
+    console.log(isOnboardingCompleted,isOnboardingLoading)
+  },[isOnboardingCompleted,isOnboardingLoading])
   // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
   useNotifee();
 
@@ -82,7 +87,19 @@ function App() {
       </SafeAreaProvider>
     );
   }
-
+  if(!isOnboardingCompleted){
+    return(
+      <SafeAreaProvider>
+        <SafeAreaView style={{flex:1}} edges={[ 'left', 'right']} >
+            <NavigationContainer>
+              <StatusBar barStyle="dark-content" translucent={true}/>
+              <OnboardingStack/>             
+            </NavigationContainer>
+            <ModalBackground/>
+        </SafeAreaView>
+    </SafeAreaProvider>
+    )
+  }
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{flex:1}}>
