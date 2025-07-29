@@ -10,7 +10,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage, // React Native 환경에서는 AsyncStorage 사용
+    storage: AsyncStorage, // 세션 유지용 세션 데이터를 저장할 저장소 지정, React Native 환경에서는 AsyncStorage 사용
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,// React Native에서는 일반적으로 false로 설정합니다.
