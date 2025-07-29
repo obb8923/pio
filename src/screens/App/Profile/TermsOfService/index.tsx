@@ -7,7 +7,7 @@ import { ProfileStackParamList } from "../../../../nav/stack/Profile"
 type TermsOfServiceScreenProps = NativeStackScreenProps<ProfileStackParamList, 'TermsOfService'>;
 export const TermsOfServiceScreen = ({navigation}:TermsOfServiceScreenProps) => {
     return (
-        <Background isStatusBarGap={true} type="background">
+        <Background isStatusBarGap={true} type="solid">
             <AppBar navigation={navigation} />
             <ScrollView className="flex-1 p-4"
             contentContainerStyle={{paddingBottom: 50}}
