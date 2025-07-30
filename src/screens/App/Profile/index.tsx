@@ -1,15 +1,15 @@
-import { View, Text, TouchableOpacity, Alert, ScrollView, Linking } from "react-native";
+import { View, Text, TouchableOpacity, Alert, ScrollView, Linking,Platform } from "react-native";
 import { useAuthStore } from "../../../store/authStore";
 import { Colors } from "../../../constants/Colors";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ProfileStackParamList } from "../../../nav/stack/Profile";
 import ChevronRight from "../../../../assets/svgs/ChevronRight.svg";
 import { Background } from "../../../components/Background";
-import { FEEDBACK_FORM_URL, MAIL_ADDRESS,GOOGLE_PLAY_URL } from "../../../constants/normal";
+import { FEEDBACK_FORM_URL, MAIL_ADDRESS,GOOGLEPLAY_URL ,APPSTORE_URL} from "../../../constants/normal";
 import ArrowUpRight from "../../../../assets/svgs/ArrowUpRight.svg";
 import Mail from "../../../../assets/svgs/Mail.svg";
 import { ProfileHeader } from "./components/ProfileHeader";
-// import { VersionItem } from "./components/VersionItem";
+import { VersionItem } from "./components/VersionItem";
 
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
@@ -26,7 +26,7 @@ const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: (
 
 export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
   const { isLoggedIn } = useAuthStore();
-
+ const storeUrl = Platform.OS==='ios'?APPSTORE_URL:GOOGLEPLAY_URL; 
   return (
     <Background type="white" isStatusBarGap={true} className="pt-4">
       <Text className="text-2xl font-bold text-greenTab ml-9 mb-4">프로필</Text>
@@ -55,10 +55,10 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
 
        <View className="h-8" />
         {/* 약관 및 정책 */}
-        {/* <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(GOOGLE_PLAY_URL)} type="link"/>           */}
+        <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(storeUrl)} type="link"/>          
         <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
-        {/* <VersionItem /> */}
+        <VersionItem />
       </ScrollView>
     </Background>
   );
