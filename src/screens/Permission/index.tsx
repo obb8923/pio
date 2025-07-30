@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Linking, Platform, Alert } from 'react-native';
 import { usePermissionStore } from '../../store/permissionStore';
+import { usePermissions } from '../../libs/hooks/usePermissions';
 import { useLocationStore } from '../../store/locationStore';
 import Animated, { FadeInDown, FadeInUp, useAnimatedStyle, withSpring, withTiming, useSharedValue } from 'react-native-reanimated';
 import { Background } from '../../components/Background';
@@ -68,14 +69,15 @@ const PermissionItem = ({
 
 type PermissionScreenProps = NativeStackScreenProps<RootStackParamList,'PermissionScreen'>
 export const PermissionScreen = ({navigation}:PermissionScreenProps) => {
-  const { requestAllPermissions, camera, photoLibrary, location, isInitialized } = usePermissionStore();
+  const { requestAllPermissions, isInitialized } = usePermissionStore();
+  const {cameraPermission,photoLibraryPermission,locationPermission} = usePermissions();
   const { fetchLocation } = useLocationStore();
   const [isRequesting, setIsRequesting] = useState(false);
   useEffect(() => {
-    if (isInitialized && camera && photoLibrary && location) {
+    if (isInitialized && cameraPermission && photoLibraryPermission && locationPermission) {
       navigation.goBack();
     }
-  }, [isInitialized, camera, photoLibrary, location, navigation]);
+  }, [isInitialized, cameraPermission, photoLibraryPermission, locationPermission, navigation]);
   // const [DEBUG, setDEBUG] = useState(false);
   const openSettings = async () => {
     try {
@@ -99,9 +101,9 @@ export const PermissionScreen = ({navigation}:PermissionScreenProps) => {
       } else {
         // 거부된 권한 목록 생성
         const deniedPermissions = [];
-        if (!location) deniedPermissions.push('위치');
-        if (!camera) deniedPermissions.push('카메라');
-        if (!photoLibrary) deniedPermissions.push('갤러리');
+        if (!locationPermission) deniedPermissions.push('위치');
+        if (!cameraPermission) deniedPermissions.push('카메라');
+        if (!photoLibraryPermission) deniedPermissions.push('갤러리');
 
         Alert.alert(
           '권한 설정 필요',
@@ -144,17 +146,17 @@ export const PermissionScreen = ({navigation}:PermissionScreenProps) => {
           <PermissionItem
             title="카메라"
             description="사진 촬영 및 이미지 업로드를 위해 필요해요"
-            isGranted={camera}
+            isGranted={cameraPermission}
           />
           <PermissionItem
             title="갤러리"
             description="이미지 선택 및 업로드를 위해 필요해요"
-            isGranted={photoLibrary}
+            isGranted={photoLibraryPermission}
           />
            <PermissionItem
             title="위치 정보"
             description="주변 정보를 확인하고 현재 위치 기반 서비스를 제공하기 위해 필요해요"
-            isGranted={location}
+            isGranted={locationPermission}
           />
           {/* <PermissionItem
             title="DEBUG"
