@@ -6,7 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { PiodexStackParamList } from "../../../../nav/stack/Piodex"
 import { Background } from "../../../../components/Background"
 import { found_plants_columns } from "../../../../libs/supabase/operations/foundPlants/type"
-import Line from "../../Map/ImageProcessing/components/line"
+import {Line} from "../../../../components/Line"
 import { plantTypeImages } from "../../Map/constants/images"
 import { PlantTypeMap } from "../../../../libs/supabase/operations/foundPlants/type"
 import { useEffect, useState } from "react"
@@ -19,10 +19,11 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const [imageError, setImageError] = useState(false);
     const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
 
-    useEffect(()=>{
-console.log(plant)
-console.log(image_url)
-    },[plant])
+//     useEffect(()=>{
+// console.log(plant)
+// console.log(image_url)
+//     },[plant])
+
     return (
       <Background isStatusBarGap={false} isTabBarGap={false}>
           {/* 사진 영역 */}

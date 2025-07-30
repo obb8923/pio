@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import Svg, { Path, Circle, Defs, LinearGradient, Stop, Rect, Text } from "react-native-svg";
-import {Colors} from "../../../../../constants/Colors";
+import {Colors} from "../constants/Colors";
 /**
  * Line 컴포넌트
  * 데이터를 받아서 곡선 그래프를 그리는 컴포넌트입니다.
@@ -9,7 +9,7 @@ import {Colors} from "../../../../../constants/Colors";
  * @param height - 그래프의 전체 높이
  * @param data - 12개의 데이터 포인트를 포함하는 배열
  */
-const Line = ({ width, height, data }: { width: number, height: number, data: number[] }) => {
+export const Line = ({ width, height, data }: { width: number, height: number, data: number[] }) => {
   // 데이터가 없거나 12개의 포인트가 아닌 경우 렌더링하지 않음
   if (!data || data.length !== 12) return null;
 
@@ -125,5 +125,3 @@ const Line = ({ width, height, data }: { width: number, height: number, data: nu
     </View>
   );
 };
-
-export default Line;

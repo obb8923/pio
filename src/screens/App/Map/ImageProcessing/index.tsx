@@ -16,7 +16,7 @@ import { DescriptionModal } from './components/DescriptionModal';
 import { MemoModal } from './components/MemoModal';
 import { BUCKET_NAME } from '../../../../constants/normal';
 import { plantTypeImages } from '../constants/images';
-import Line from './components/line';
+import {Line} from '../../../../components/Line';
 import { PlantType, PlantTypeCode } from '../../../../libs/supabase/operations/foundPlants/type';
 type ImageProcessingScreenProps =NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
