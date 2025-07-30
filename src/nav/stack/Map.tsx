@@ -10,9 +10,11 @@ export type MapStackParamList = {
 
 export const MapStack = () => {
   return (
-    <Stack.Navigator >
-            <Stack.Screen name="Map" component={MapScreen} options={{headerShown:false}}/>
-            <Stack.Screen name="ImageProcessing" component={ImageProcessingScreen} options={{headerShown:false}}/>
+    <Stack.Navigator 
+    screenOptions={{headerShown:false}}
+    initialRouteName="Map">
+            <Stack.Screen name="Map" component={MapScreen}/>
+            <Stack.Screen name="ImageProcessing" component={ImageProcessingScreen}/>
            </Stack.Navigator>
   );
 };
