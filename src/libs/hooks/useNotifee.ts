@@ -55,11 +55,13 @@ export const useNotifee = () => {
   useEffect(() => {
     const initializeNotifications = async () => {
       try {
+        // 기존 예약된 모든 알림 취소 - 앱이 재시작되거나 초기화될 때 중복 알림 방지
         await cancelAllScheduledNotifications();
+        // Notifee 라이브러리의 기본 설정 및 초기화 / 알림 채널 생성, 기본 설정 등을 처리
         await initializeNotifee();
+        // 현재 디바이스에서 Notifee가 정상 작동하는지 검사
         const available = await isNotifeeAvailable();
         setNotifeeAvailable(available);
-        
         // notifee가 사용 가능하면 자동으로 테스트 알림 설정
         if (available) {
           // 랜덤하게 메시지 선택
@@ -71,14 +73,13 @@ export const useNotifee = () => {
             notifeeTime.hour, 
             notifeeTime.minute
           );
-          
-          if(__DEV__) {
-            // 예약된 알림들을 확인
-            setTimeout(async () => {
-              const scheduledNotifications = await getScheduledNotifications();
-              // console.log('현재 예약된 알림 개수:', scheduledNotifications.length);
-            }, 1000);
-          }
+          // if(__DEV__) {
+          //   // 예약된 알림들을 확인
+          //   setTimeout(async () => {
+          //     const scheduledNotifications = await getScheduledNotifications();
+          //     console.log('현재 예약된 알림 개수:', scheduledNotifications.length);
+          //   }, 1000);
+          // }
         }
       } catch (error) {
         console.error('알림 초기화 실패:', error);
