@@ -1,28 +1,37 @@
+// React & React Native 기본 모듈
 import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
-import {Background} from "../../../components/Background";
-import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
-import { useLocationStore } from "../../../store/locationStore";
-import { Colors } from "../../../constants/Colors";
 import { useState, useCallback, useEffect } from "react";
-import {MapStackParamList} from "../../../nav/stack/Map"
+// 네비게이션 & 안전 영역 관리
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
-import React from "react";
-import { useAuthStore } from "../../../store/authStore";
+// 외부 라이브러리
+import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
+// 내부 컴포넌트
+import { Background } from "../../../components/Background";
 import { TextToggle } from "../../../components/TextToggle";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlantDetailModal } from "./components/PlantDetailModal";
 import { AddPlantFAB } from "./components/AddPlantFAB";
-import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";
-import { useMapMarkers } from "./hooks/useMapMarkers";
-import { getFlowerImageForPlant } from "./utils/markerUtils";
-import { usePermissionStore } from "../../../store/permissionStore";
-import {usePermissions} from '../../../libs/hooks/usePermissions'
-import { useVisitStore } from "../../../store/visitStore";
+// 상수 & 네비게이션 타입
+import { Colors } from "../../../constants/Colors";
+import { MapStackParamList } from "../../../nav/stack/Map";
 import { RootStackParamList } from "../../../nav/stack/Root";
-import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type';
-type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>
-type RootStack = NativeStackScreenProps<RootStackParamList>
+// 상태 관리 스토어 (Zustand)
+import { useLocationStore } from "../../../store/locationStore";      // 위치 정보 관리
+import { useAuthStore } from "../../../store/authStore";              // 사용자 인증 관리
+import { usePermissionStore } from "../../../store/permissionStore";  // 앱 권한 관리
+import { useVisitStore } from "../../../store/visitStore";            // 방문 기록 관리
+// 커스텀 훅스 & 유틸리티 & 데이터베이스 타입
+import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";  // 발견한 식물 데이터 관리
+import { useMapMarkers } from "./hooks/useMapMarkers";                // 지도 마커 관리
+import { usePermissions } from '../../../libs/hooks/usePermissions';  // 권한 요청 및 확인
+import { useNotifee } from "../../../libs/hooks/useNotifee";          // 알림 관리
+import { getFlowerImageForPlant } from "./utils/markerUtils";                           // 식물별 꽃 이미지 가져오기
+import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type'; // Supabase 테이블 타입 정의
+
+
+type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>;
+type RootStack = NativeStackScreenProps<RootStackParamList>;
 type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
 
 export const MapScreen = ({navigation}:MapScreenProps) => {
@@ -38,7 +47,8 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   // 커스텀 훅 사용
   const { myPlants, allPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
-  
+    // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
+    useNotifee();
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
       setFirstVisit(false);
