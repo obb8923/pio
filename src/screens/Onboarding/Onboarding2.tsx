@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Background } from '../../components/Background';
 import { CustomButton } from '../../components/CustomButton';
 import { View, Image, Text } from 'react-native';
 import { flowerImages, plantTypeImages } from '../App/Map/constants/images';
+import { useOnboarding } from '../../libs/hooks/useOnboarding'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,6 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export const Onboarding2Screen = () => {
+  const { completeOnboarding } = useOnboarding();
   // 애니메이션 값들
   const textTranslateY = useSharedValue(-30);
   const buttonOpacity = useSharedValue(0);
@@ -124,6 +126,7 @@ export const Onboarding2Screen = () => {
   };
 
   const handleNextPress = () => {
+    completeOnboarding();
     console.log('다음 화면으로 이동');
   };
 
@@ -206,7 +209,7 @@ export const Onboarding2Screen = () => {
         {/* 다음 버튼 */}
         <View className="w-full h-1/6 flex-row justify-end items-center px-4">
           <Animated.View style={buttonAnimatedStyle}>
-            <CustomButton text="다음" size={60} onPress={handleNextPress} />
+            <CustomButton text="확인" size={60} onPress={handleNextPress} />
           </Animated.View>
         </View>
       </View>

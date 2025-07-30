@@ -28,10 +28,8 @@ function App() {
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized } = usePermissionStore();
   const [maintenanceData, setMaintenanceData] = useState<MaintenanceResponse | null>(null);
-  const { isOnboardingCompleted, isLoading:isOnboardingLoading } = useOnboarding();
-  useEffect(()=>{
-    console.log(isOnboardingCompleted,isOnboardingLoading)
-  },[isOnboardingCompleted,isOnboardingLoading])
+  const { isOnboardingCompleted } = useOnboarding();
+ 
   // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
   useNotifee();
 
@@ -76,43 +74,27 @@ function App() {
     }
     initializeApp();
   }, [checkLoginStatus]);
-
-  //점검 중일 때 유지보수 화면 표시
-  if(maintenanceData && maintenanceData.is_maintenance) {
-    return (
-      <SafeAreaProvider>
-          <SafeAreaView style={{flex:1}} edges={[ 'left', 'right']} >
-            <MaintenanceScreen maintenanceData={maintenanceData}/>
-          </SafeAreaView>
-      </SafeAreaProvider>
-    );
-  }
-  if(!isOnboardingCompleted){
-    return(
-      <SafeAreaProvider>
-        <SafeAreaView style={{flex:1}} edges={[ 'left', 'right']} >
-            <NavigationContainer>
-              <StatusBar barStyle="dark-content" translucent={true}/>
-              <OnboardingStack/>             
-            </NavigationContainer>
-            <ModalBackground/>
-        </SafeAreaView>
-    </SafeAreaProvider>
-    )
-  }
+  
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{flex:1}}>
         <SafeAreaView style={{flex:1}} edges={[ 'left', 'right']} >
-            <NavigationContainer>
-              <StatusBar barStyle="dark-content" translucent={true}/>
-              <RootStack/>             
-            </NavigationContainer>
-            <ModalBackground/>
+          <NavigationContainer>
+            <StatusBar barStyle="dark-content" translucent={true}/>
+            {maintenanceData?.is_maintenance ? (
+              <MaintenanceScreen maintenanceData={maintenanceData}/>
+            ) : !isOnboardingCompleted ? (
+              <OnboardingStack/>
+            ) : (
+              <RootStack/>
+            )}
+          </NavigationContainer>
+          <ModalBackground/>
         </SafeAreaView>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );
+  
 }
 
 export default App;
