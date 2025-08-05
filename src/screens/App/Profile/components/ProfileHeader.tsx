@@ -39,7 +39,7 @@ export const ProfileHeader = () => {
         <View className="flex-row justify-between items-center gap-4">
        <AuthButton type="Google"/>
        {Platform.OS === 'ios' && <AuthButton type="Apple"/>}
-       <AuthButton type="Email"/>
+       {Platform.OS === 'ios' && <AuthButton type="Email"/>}
 
        </View>
       </View>
