@@ -1,23 +1,31 @@
-import { View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, Animated, Alert, Platform, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View,Text,Image,TouchableOpacity,TextInput,ActivityIndicator,Animated,Alert,Platform,ScrollView} from 'react-native';
+// 외부 라이브러리 - Navigation
 import { useRoute } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
-import React from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {MapStackParamList} from "../../../../nav/stack/Map"
+// Navigation
+import { MapStackParamList } from "../../../../nav/stack/Map";
+// libs
 import { saveFoundPlant } from '../../../../libs/supabase/operations/foundPlants/saveFoundPlant';
 import { uploadImageAndGetPath } from '../../../../libs/supabase/operations/image/uploadImage';
-import { Colors } from '../../../../constants/Colors';
-import { CustomButton } from '../../../../components/CustomButton';
 import { getAIResponseWithImage } from '../../../../libs/utils/AI';
+import { useReview } from '../../../../libs/hooks/useReview';
+// 스토어 & 상태관리
 import { useAuthStore } from '../../../../store/authStore';
+// 컴포넌트
 import { Background } from '../../../../components/Background';
+import { CustomButton } from '../../../../components/CustomButton';
+import { Line } from '../../../../components/Line';
 import { MapModal } from './components/MapModal';
 import { DescriptionModal } from './components/DescriptionModal';
 import { MemoModal } from './components/MemoModal';
+import { ReviewRequestModal } from './components/ReviewRequestModal';
+// 상수 & 타입
+import { Colors } from '../../../../constants/Colors';
 import { BUCKET_NAME } from '../../../../constants/normal';
 import { plantTypeImages } from '../constants/images';
-import {Line} from '../../../../components/Line';
 import { PlantType, PlantTypeCode } from '../../../../libs/supabase/operations/foundPlants/type';
+
 type ImageProcessingScreenProps =NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
 // AI 응답 객체 타입 정의
@@ -42,6 +50,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
   const [isMapModalVisible, setIsMapModalVisible] = useState(false);
+  const [isReviewRequestModalVisible, setIsReviewRequestModalVisible] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [center, setCenter] = useState({
     latitude: 37.5666102,
@@ -53,6 +62,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
   const { imageUri } = route.params as {
     imageUri: string;
   };
+  const {isReviewedInYear,setReviewedInYear,isLoading,lastReviewDate} = useReview();
   const [aiResponse, setAiResponse] = useState<AiResponseType | null>({
     code: "success",
     name: "달맞이꽃",
@@ -127,8 +137,12 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
       const { success, error } = await saveFoundPlant(plantData);
 
       if (success) {
-        console.log('식물 정보 저장 성공');
-        navigation.goBack();
+        // console.log('식물 정보 저장 성공');
+        if(!isReviewedInYear){
+          setIsReviewRequestModalVisible(true);
+        }else{
+          navigation.goBack();
+        }
       } else {
         console.error('식물 정보 저장 실패:', error);
         // 사용자에게 오류 메시지를 표시할 수 있습니다.
@@ -294,6 +308,8 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
       {/* 버튼 영역 */}
       <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
         <CustomButton text="취소" size={60} onPress={() => navigation.goBack()}/>
+        <CustomButton text="모달테스트" size={60} onPress={() => setIsReviewRequestModalVisible(true)}/>
+
         {!isAiLoading && aiResponse?.code === "success" && (
           <>
             <View className="w-20"/>
@@ -331,6 +347,20 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         onClose={() => setIsMemoModalVisible(false)}
         memo={memo}
         onMemoChange={setMemo}
+      />
+
+      {/* ReviewRequest 모달 */}
+      <ReviewRequestModal
+      isVisible={isReviewRequestModalVisible}
+      onClose={() => {
+        setIsReviewRequestModalVisible(false); 
+        // 상태가 반영된 후 navigation.goBack 실행
+        // 상태 변경이 비동기이므로 약간의 delay를 줄 수도 있음
+        setTimeout(() => {
+          navigation.goBack();
+        }, 100);
+         }}
+      setReviewedInYear={setReviewedInYear}
       />
     </Background>
   );
