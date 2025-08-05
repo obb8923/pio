@@ -127,7 +127,7 @@ export const Onboarding2Screen = () => {
 
   const handleNextPress = () => {
     completeOnboarding();
-    console.log('다음 화면으로 이동');
+    // console.log('다음 화면으로 이동');
   };
 
   // 애니메이션 시퀀스 실행
