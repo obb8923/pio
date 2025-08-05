@@ -308,7 +308,6 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
       {/* 버튼 영역 */}
       <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
         <CustomButton text="취소" size={60} onPress={() => navigation.goBack()}/>
-        <CustomButton text="모달테스트" size={60} onPress={() => setIsReviewRequestModalVisible(true)}/>
 
         {!isAiLoading && aiResponse?.code === "success" && (
           <>
