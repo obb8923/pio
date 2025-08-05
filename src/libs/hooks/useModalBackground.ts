@@ -1,4 +1,4 @@
-import { useModalBackgroundStore } from "../../store/modalStore";
+import { useModalBackgroundStore } from "../../store/modalBackgroundStore";
 import { useEffect } from "react";
 export const useModalBackground = (isVisible:boolean) => {
   const { isOpenModalBackground, openModalBackground, closeModalBackground } = useModalBackgroundStore();
@@ -9,5 +9,5 @@ export const useModalBackground = (isVisible:boolean) => {
       closeModalBackground();
     }
   },[isVisible])
-  return { isOpenModalBackground, closeModalBackground };
+  return { isOpenModalBackground, openModalBackground, closeModalBackground };
 };

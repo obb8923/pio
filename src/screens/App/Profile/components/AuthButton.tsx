@@ -3,7 +3,7 @@ import GoogleLogo from "../../../../../assets/svgs/GoogleLogo.svg"
 import AppleLogo from "../../../../../assets/svgs/AppleLogo.svg"
 import MailLogo from "../../../../../assets/svgs/Mail.svg"
 import {Colors} from "../../../../constants/Colors"
-import { useModalBackgroundStore } from "../../../../store/modalStore";
+import { useModalBackgroundStore } from "../../../../store/modalBackgroundStore";
 import { useAuthStore } from "../../../../store/authStore";
 import { useEffect, useState, useRef } from "react";
 type AuthButtonProps = { type: 'Google' | 'Apple' | 'Email' };
@@ -58,7 +58,7 @@ export const AuthButton = ({ type }: AuthButtonProps) => {
         visible={isEmailModalOpen}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setIsEmailModalOpen(false)}
+        onRequestClose={() => {setIsEmailModalOpen(false);closeModalBackground();}}
       >
         <View className="flex-1 justify-center items-center mb-32">
           {/* container (background) */}
