@@ -16,6 +16,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="BackgroundGreen" translatesAutoresizingMaskIntoConstraints="NO" id="eAb-XV-tM9">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="fBu-U1-hgo">
                                 <rect key="frame" x="119.5" y="240.5" width="136" height="86"/>
                             </imageView>
@@ -23,17 +26,22 @@
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" red="0.75686274509803919" green="0.86274509803921573" blue="0.53725490196078429" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
+                            <constraint firstItem="eAb-XV-tM9" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="1kh-ZY-DVm"/>
+                            <constraint firstAttribute="trailing" secondItem="eAb-XV-tM9" secondAttribute="trailing" id="CET-TZ-HWx"/>
+                            <constraint firstAttribute="bottom" secondItem="eAb-XV-tM9" secondAttribute="bottom" id="IcH-nb-AEs"/>
                             <constraint firstItem="fBu-U1-hgo" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="h5w-ab-RGk"/>
+                            <constraint firstItem="eAb-XV-tM9" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="hme-iJ-UiQ"/>
                             <constraint firstItem="fBu-U1-hgo" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-50" id="wRZ-6n-dfY"/>
                         </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="52.173913043478265" y="375"/>
+            <point key="canvasLocation" x="52" y="374.66266866566718"/>
         </scene>
     </scenes>
     <resources>
+        <image name="BackgroundGreen" width="1024" height="1024"/>
         <image name="Image" width="136" height="86"/>
     </resources>
 </document>
