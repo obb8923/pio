@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#c1dc89">
+    android:layout_height="match_parent">
 
+    <!-- 배경 이미지를 전체화면에 꽉 차게 표시 -->
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background_green" />
+
+    <!-- 중심에 logo 또는 아이콘 표시 -->
     <ImageView
         android:layout_width="120dp"
         android:layout_height="120dp"
@@ -12,5 +21,5 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:src="@drawable/launch_screen" />
-    
+
 </RelativeLayout>
