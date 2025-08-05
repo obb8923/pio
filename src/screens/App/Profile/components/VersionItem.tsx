@@ -14,8 +14,9 @@ export const VersionItem = () => {
         try {
           const version = await VersionCheck.getCurrentVersion();
           setCurrentVersion(version);
-  
-          console.log(version,"##")
+          if(__DEV__){
+            console.log('version: ',version)
+          }
           const updateInfo = await VersionCheck.needUpdate({ provider: 'playStore' });
           setNeedsUpdate(updateInfo?.isNeeded ?? false);
           const url = await VersionCheck.getStoreUrl({ provider: 'playStore' });
