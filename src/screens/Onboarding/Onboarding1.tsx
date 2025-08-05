@@ -8,8 +8,6 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
-  withSequence,
-  runOnJS,
 } from 'react-native-reanimated';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {OnboardingStackParamList} from "../../nav/stack/Onboarding"
@@ -20,7 +18,6 @@ export const Onboarding1Screen = ({navigation}:Onboarding1ScreenProps) => {
   const [step, setStep] = useState(1);
 
   // 애니메이션 값들
-  const textScale = useSharedValue(1);
   const textTranslateY = useSharedValue(-30);
   const textOpacity = useSharedValue(1); // 텍스트 페이드아웃용 추가
   const imageTranslateY = useSharedValue(100);
@@ -130,7 +127,7 @@ const handleNextPress = () => {
     if (step < 3) {
       const timer = setTimeout(() => {
         setStep(step + 1);
-      }, 2000);
+      }, 1500);
       timers.push(timer);
     }
     
