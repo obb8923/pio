@@ -127,8 +127,14 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
 
   return (
     <Background isStatusBarGap={false} isTabBarGap={false}>
+         <View className="flex justify-center items-center z-10 absolute top-16 left-0 bg-greenTab rounded-r-full w-auto h-auto py-2 pr-2 pl-0">
+         <View className="flex justify-center items-start p-4 border border-greenActive border-l-0 w-auto h-full rounded-r-full">
+        <Text className="text-greenActive font-medium">식물 정보 수정하기</Text>
+        </View>
+        </View>
        {/* 사진 영역 */}
        <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
+       
           <Image
             source={{ uri: image_url }}
             className="w-full h-full rounded-3xl"
@@ -184,7 +190,7 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
               {/* 텍스트 영역 */}
               <View className="h-full w-auto py-4">
                 <Text className="text-greenTab text-center font-medium">
-                   "위치가 선택되었습니다"
+                   위치가 선택되었습니다
                 </Text>
               </View>
               {/* 버튼 영역 */}
@@ -199,7 +205,7 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
                 }}
               >
                 <Text className="text-greenActive text-center font-medium">
-                   "수정하기"
+                   수정하기
                 </Text>
               </TouchableOpacity>
             </View>
