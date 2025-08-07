@@ -209,8 +209,6 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
     }
   }, [aiResponse]);
 
-  
- 
   return (
     <Background isStatusBarGap={false} isTabBarGap={false}>
        {/* 사진 영역 */}

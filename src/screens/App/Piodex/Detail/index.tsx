@@ -19,31 +19,26 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const [imageError, setImageError] = useState(false);
     const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
 
-//     useEffect(()=>{
-// console.log(plant)
-// console.log(image_url)
-//     },[plant])
-
     return (
       <Background isStatusBarGap={false} isTabBarGap={false}>
           {/* 사진 영역 */}
        <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
          {imageError ? (
-           <View className="w-full h-full rounded-3xl bg-gray-100 justify-center items-center opacity-50" >
-            <ImageX width="36" height="36" stroke={Colors.greenTab}/>
-            </View>
+          <View className="w-full h-full rounded-3xl bg-gray-100 justify-center items-center opacity-50" >
+            <ImageX width="36" height="36" style={{color:Colors.greenTab900}}/>
+          </View>
          ) : (
-           <Image
-             source={{ uri: image_url }}
-             className="w-full h-full rounded-3xl"
-             resizeMode="cover"
-             onError={() => {
-              console.log("error_image_url",image_url);setImageError(true)}}
-           />
+          <Image
+          source={{ uri: image_url }}
+          className="w-full h-full rounded-3xl"
+          resizeMode="cover"
+          onError={() =>  setImageError(true)}
+        />
          )}
         </View>
+
         <ScrollView 
-         className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg " 
+         className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg" 
          showsVerticalScrollIndicator={false} 
          contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 100 : 400 }}>
          {/* 식물 정보 영역 */}

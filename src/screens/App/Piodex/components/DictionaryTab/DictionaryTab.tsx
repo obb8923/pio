@@ -44,7 +44,7 @@ export const DictionaryTab = () => {
 
   // 식물 카드 클릭 핸들러
   const handlePlantPress = useCallback((plant: any) => {
-    const publicUrl = getPublicImageUrl(plant.id + ".jpg");
+    const publicUrl = getPublicImageUrl(plant.id + ".webp");
     navigation.navigate('Detail', { plant, image_url: publicUrl });
   }, [getPublicImageUrl, navigation]);
 
