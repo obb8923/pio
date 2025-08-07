@@ -5,7 +5,7 @@ import ImageAddIcon from '../../../../../assets/svgs/ImageAdd.svg';
 import { TAB_BAR_HEIGHT } from '../../../../constants/TabNavOptions';
 import React, { useCallback } from 'react';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { usePermissionStore } from '../../../../store/permissionStore';
+// import { usePermissionStore } from '../../../../store/permissionStore';
 import { usePermissions } from '../../../../libs/hooks/usePermissions';
 import { useFab } from '../hooks/useFab';
 

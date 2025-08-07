@@ -9,13 +9,15 @@ import { found_plants_columns } from "../../../../libs/supabase/operations/found
 import {Line} from "../../../../components/Line"
 import { plantTypeImages } from "../../Map/constants/images"
 import { PlantTypeMap } from "../../../../libs/supabase/operations/foundPlants/type"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import ImageX from '../../../../../assets/svgs/ImageX.svg'
 import {Colors} from "../../../../constants/Colors"
+
 type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
+
 export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const route = useRoute();
-    const {plant,image_url} = route.params as {plant:found_plants_columns,image_url:string}   
+    const {plant,image_url,isPreviousScreenDictionary} = route.params as {plant:found_plants_columns,image_url:string,isPreviousScreenDictionary:boolean}   
     const [imageError, setImageError] = useState(false);
     const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
 
@@ -71,7 +73,7 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
             <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
             }
             {/* 메모 영역 */}
-            {memo &&
+            {!isPreviousScreenDictionary &&
               <Text
                 className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
               >{memo?memo:'메모가 없습니다.'}</Text>
@@ -105,8 +107,11 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
          </ScrollView>  
 
          {/* 확인 버튼 */}
-        <View className="absolute bottom-10 left-0 right-0 h-20 flex-row justify-center items-center">
-          <CustomButton text="확인" size={60} onPress={()=>navigation.goBack()}/>
+         <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
+          {!isPreviousScreenDictionary && 
+           <CustomButton text="수정" size={60} onPress={()=>navigation.navigate('DetailProcessing',{plant,image_url})}/> 
+          }
+          <CustomButton text="확인" size={70} onPress={()=>navigation.goBack()}/>
         </View>
 
     </Background>

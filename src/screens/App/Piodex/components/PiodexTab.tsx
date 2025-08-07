@@ -8,6 +8,8 @@ import { useFoundPlants } from "../../../../libs/hooks/useFoundPlants";
 import { found_plants_columns } from "../../../../libs/supabase/operations/foundPlants/type";
 import { useSignedUrls } from "../../../../libs/hooks/useSignedUrls";
 import { Skeleton } from "../../../../components/Skeleton";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 // Define the navigation prop type directly
 type PiodexTabNavigationProp = NativeStackNavigationProp<PiodexStackParamList, 'Piodex'>;
@@ -30,6 +32,13 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
             setIsLoading(false);
         }
     }, [isLoggedIn, myPlants.length]);
+
+  // 화면이 포커스될 때마다 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      fetchPlants();
+    }, [])
+  );
 
   // 새로고침 핸들러
   const onRefresh = () => {
@@ -129,7 +138,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
             return (
               <TouchableOpacity
                 key={plant.id}
-                onPress={() => navigation.navigate('Detail', { plant, image_url:signedUrl })}
+                onPress={() => navigation.navigate('Detail', { plant, image_url:signedUrl ,isPreviousScreenDictionary:false})}
                 className="p-1 mb-1"
                 style={{ width: itemWidth, height: itemWidth + 30 }}
               >

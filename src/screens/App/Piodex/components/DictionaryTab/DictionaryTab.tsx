@@ -45,7 +45,7 @@ export const DictionaryTab = () => {
   // 식물 카드 클릭 핸들러
   const handlePlantPress = useCallback((plant: any) => {
     const publicUrl = getPublicImageUrl(plant.id + ".webp");
-    navigation.navigate('Detail', { plant, image_url: publicUrl });
+    navigation.navigate('Detail', { plant, image_url: publicUrl,isPreviousScreenDictionary:true });
   }, [getPublicImageUrl, navigation]);
 
   // 아이템 너비 계산
