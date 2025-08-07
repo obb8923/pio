@@ -37,7 +37,8 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
              source={{ uri: image_url }}
              className="w-full h-full rounded-3xl"
              resizeMode="cover"
-             onError={() => setImageError(true)}
+             onError={() => {
+              console.log("error_image_url",image_url);setImageError(true)}}
            />
          )}
         </View>

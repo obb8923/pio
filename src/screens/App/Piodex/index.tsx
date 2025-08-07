@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "../../../nav/stack/Piodex";
 import { Background } from "../../../components/Background";
 import { PiodexTab } from "./components/PiodexTab";
-import { DictionaryTab } from "./components/DictionaryTab";
+import { DictionaryTab } from "./components/DictionaryTab/DictionaryTab";
 import { DEVICE_WIDTH } from "../../../constants/normal";
 
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
