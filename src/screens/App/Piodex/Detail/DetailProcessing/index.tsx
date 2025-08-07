@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View,Text,Image,TouchableOpacity,TextInput,ActivityIndicator,Animated,Alert,Platform,ScrollView} from 'react-native';
+import { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, Alert, Platform, ScrollView } from 'react-native';
 // 외부 라이브러리 - Navigation
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -19,39 +19,28 @@ import { MapModal } from '../../../Map/ImageProcessing/components/MapModal';
 import { DescriptionModal } from '../../../Map/ImageProcessing/components//DescriptionModal';
 import { MemoModal } from '../../../Map/ImageProcessing/components/MemoModal';
 // 상수 & 타입
-import { Colors } from '../../../../../constants/Colors';
-import { BUCKET_NAME } from '../../../../../constants/normal';
 import { plantTypeImages } from '../../../Map/constants/images';
-import { found_plants_columns, PlantType, PlantTypeCode,PlantTypeMap} from '../../../../../libs/supabase/operations/foundPlants/type';
+import { found_plants_columns, PlantTypeMap } from '../../../../../libs/supabase/operations/foundPlants/type';
 
 type DetailProcessingScreenProps = NativeStackScreenProps<PiodexStackParamList,'DetailProcessing'>
 
 export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps) => {
   const route = useRoute();
   const {plant,image_url} = route.params as {plant:found_plants_columns,image_url:string}   
-    const {id,plant_name:prev_plant_name,description:prev_description,memo:prev_memo,lat,lng,type_code,activity_curve,activity_notes} = plant
+    const {id,plant_name,description:prev_description,memo:prev_memo,lat,lng,type_code,activity_curve,activity_notes} = plant
 
   const { userId } = useAuthStore.getState();
-  const [plantName, setPlantName] = useState<string>(prev_plant_name as string);
   const [memo, setMemo] = useState<string>(prev_memo as string);
   const [description, setDescription] = useState<string>(prev_description as string);
   const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
   const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
   const [isMapModalVisible, setIsMapModalVisible] = useState(false);
-  const [isProcessing,setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [center, setCenter] = useState({
     latitude: lat,
     longitude: lng,
     zoom: 16,
   });
-  const [fadeAnim] = useState(new Animated.Value(1));
-  
-  const { imageUri } = route.params as {
-    imageUri: string;
-  };
-
-  // 초기 위치에서 변경되었는지 확인하는 함수
-  const isLocationSelected = center.latitude !== 37.5666102 || center.longitude !== 126.9783881;
 
   // 지도 중심이 바뀔 때마다 중심 좌표 갱신
   const handleCameraChange = (e: any) => {
@@ -153,12 +142,12 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
       >
        
         {/* 식물 정보 영역 */}
-          <Animated.View style={{ opacity: fadeAnim }} className="w-full bg-white rounded-lg p-4">
+          <View className="w-full bg-white rounded-lg p-4">
             {/* 식물 이름 영역 */}
             <View className="mb-4 flex-row justify-center items-center">
               <Text
                 className="rounded-lg p-3 text-center bg-white text-2xl"
-              >{plantName}
+              >{plant_name}
               </Text>
             </View>
             {/* 식물 종류 및 활동 곡선 영역 */}
@@ -195,7 +184,7 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
               {/* 텍스트 영역 */}
               <View className="h-full w-auto py-4">
                 <Text className="text-greenTab text-center font-medium">
-                  {isLocationSelected ? "위치가 선택되었습니다" : "발견한 곳을 선택해 주세요"}
+                   "위치가 선택되었습니다"
                 </Text>
               </View>
               {/* 버튼 영역 */}
@@ -210,11 +199,11 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
                 }}
               >
                 <Text className="text-greenActive text-center font-medium">
-                  {isLocationSelected ? "수정하기" : "선택하기"}
+                   "수정하기"
                 </Text>
               </TouchableOpacity>
             </View>
-          </Animated.View>
+          </View>
         
       </ScrollView>
 
