@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -30,6 +30,12 @@
        <meta-data
         android:name="com.naver.maps.map.CLIENT_ID"
         android:value="m0hdt32426" />
+        <!-- Google Mobile Ads -->
+        <meta-data
+        android:name="com.google.android.gms.ads.APPLICATION_ID"
+        android:value="ca-app-pub-9330846911183369~1270811458"
+        tools:replace="android:value"/>
+
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
