@@ -99,6 +99,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
     <View className="w-1/2 absolute bottom-8 right-4">
       {/* 갤러리 버튼 */}
       <Animated.View
+        pointerEvents={isOpen ? 'auto' : 'none'}
         style={{
           transform: [
             { translateY: galleryButtonTranslateY },
@@ -118,6 +119,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
 
       {/* 카메라 버튼 */}
       <Animated.View
+        pointerEvents={isOpen ? 'auto' : 'none'}
         style={{
           transform: [
             { translateY: cameraButtonTranslateY },
