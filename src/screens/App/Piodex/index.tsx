@@ -6,7 +6,7 @@ import { Background } from "../../../components/Background";
 import { PiodexTab } from "./components/PiodexTab";
 import { DictionaryTab } from "./components/DictionaryTab/DictionaryTab";
 import { DEVICE_WIDTH } from "../../../constants/normal";
-
+import { AdmobBanner } from "../../../components/ads/AdmobBanner";
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
@@ -74,6 +74,7 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
          }
         </View>
       </View>
+      <AdmobBanner />
     </Background>
   );
 };
