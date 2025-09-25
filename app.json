@@ -2,6 +2,9 @@
   "name": "pio",
   "displayName": "pio",
   "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-9330846911183369~1270811458"
+    "android_app_id": "ca-app-pub-9330846911183369~1270811458",
+    "ios_app_id": "ca-app-pub-9330846911183369~9977429611",
+    "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
+
   }
 }
