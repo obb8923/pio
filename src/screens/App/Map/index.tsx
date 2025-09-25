@@ -42,7 +42,6 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
   const insets = useSafeAreaInsets();
   const {isInitialized } = usePermissionStore();
   const {checkAndRequestLocationPermission} = usePermissions();
-
   const { isFirstVisit, setFirstVisit } = useVisitStore();
  
   // 커스텀 훅 사용
@@ -67,6 +66,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       fetchPlants();
     }, [showOnlyMyPlants])
   );
+
 
   const handleTogglePress = useCallback(() => {
     if (!showOnlyMyPlants && !userId) {
@@ -129,7 +129,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
             />
           ))}
         </NaverMapView>   
-        
+
         <AddPlantFAB
       onNavigate={(screen, params) => navigation.navigate(screen as any, params)}
     />  

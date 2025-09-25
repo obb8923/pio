@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View,Text,Image,TouchableOpacity,TextInput,ActivityIndicator,Animated,Alert,Platform,ScrollView} from 'react-native';
-// 외부 라이브러리 - Navigation
+// 외부 라이브러리 
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 // Navigation
@@ -10,6 +10,7 @@ import { saveFoundPlant } from '../../../../libs/supabase/operations/foundPlants
 import { uploadImageAndGetPath } from '../../../../libs/supabase/operations/image/uploadImage';
 import { getAIResponseWithImage } from '../../../../libs/utils/AI';
 import { useReview } from '../../../../libs/hooks/useReview';
+import { useAds } from '../../../../libs/hooks/useAds';
 // 스토어 & 상태관리
 import { useAuthStore } from '../../../../store/authStore';
 // 컴포넌트
@@ -63,6 +64,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
     imageUri: string;
   };
   const {isReviewedInYear,setReviewedInYear,isLoading,lastReviewDate} = useReview();
+  const { isLoaded, isClosed, show } = useAds();
   const [aiResponse, setAiResponse] = useState<AiResponseType | null>({
     code: "success",
     name: "달맞이꽃",
@@ -72,6 +74,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
     activity_curve: [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],
     activity_notes: "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물입니다.",
   });
+
 
   // 초기 위치에서 변경되었는지 확인하는 함수
   const isLocationSelected = center.latitude !== 37.5666102 || center.longitude !== 126.9783881;
@@ -140,6 +143,9 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         // console.log('식물 정보 저장 성공');
         if(!isReviewedInYear){
           setIsReviewRequestModalVisible(true);
+        }else if(isLoaded && !isClosed){
+          show();
+          navigation.goBack();
         }else{
           navigation.goBack();
         }
