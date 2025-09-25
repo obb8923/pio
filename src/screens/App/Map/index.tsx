@@ -12,6 +12,7 @@ import { Background } from "../../../components/Background";
 import { TextToggle } from "../../../components/TextToggle";
 import { PlantDetailModal } from "./components/PlantDetailModal";
 import { AddPlantFAB } from "./components/AddPlantFAB";
+import { AdmobBanner } from "../../../components/ads/AdmobBanner";
 // 상수 & 네비게이션 타입
 import { Colors } from "../../../constants/Colors";
 import { MapStackParamList } from "../../../nav/stack/Map";
@@ -127,7 +128,11 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
               height={16}
             />
           ))}
-        </NaverMapView>     
+        </NaverMapView>   
+        
+        <AddPlantFAB
+      onNavigate={(screen, params) => navigation.navigate(screen as any, params)}
+    />  
     </View>
     
     <PlantDetailModal
@@ -137,9 +142,8 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
       markerPositionAtScreen={screenPosition}
     />
 
-    <AddPlantFAB
-      onNavigate={(screen, params) => navigation.navigate(screen as any, params)}
-    />
+   
+    <AdmobBanner />
   </Background>
 }
 

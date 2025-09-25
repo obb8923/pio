@@ -9,8 +9,6 @@ export const TabBarStyle = {
   borderTopColor: 'transparent',
   backgroundColor: Colors.greenTab,
   height: TAB_BAR_HEIGHT,
-  borderTopLeftRadius: 10,
-  borderTopRightRadius: 10,
   padding: 10,
   display: 'flex' as const,
   elevation: 0,

@@ -96,7 +96,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
   }, [close, onNavigate]);
 
   return (
-    <View className="w-1/2 absolute" style={{ bottom: TAB_BAR_HEIGHT + 20, right: 20 }}>
+    <View className="w-1/2 absolute bottom-8 right-4">
       {/* 갤러리 버튼 */}
       <Animated.View
         style={{
