@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { View,Text,Image,TouchableOpacity,TextInput,ActivityIndicator,Animated,Alert,Platform,ScrollView} from 'react-native';
 // 외부 라이브러리 
 import { useRoute } from '@react-navigation/native';
@@ -13,21 +13,24 @@ import { useReview } from '../../../../libs/hooks/useReview';
 import { useAds } from '../../../../libs/hooks/useAds';
 // 스토어 & 상태관리
 import { useAuthStore } from '../../../../store/authStore';
+import { useModalBackgroundStore } from '../../../../store/modalBackgroundStore';
 // 컴포넌트
 import { Background } from '../../../../components/Background';
 import { CustomButton } from '../../../../components/CustomButton';
 import { Line } from '../../../../components/Line';
-import { MapModal } from './components/MapModal';
-import { DescriptionModal } from './components/DescriptionModal';
-import { MemoModal } from './components/MemoModal';
-import { ReviewRequestModal } from './components/ReviewRequestModal';
+
+// 지연 로딩을 위한 모달 컴포넌트들
+const MapModal = lazy(() => import('./components/MapModal').then(module => ({ default: module.MapModal })));
+const DescriptionModal = lazy(() => import('./components/DescriptionModal').then(module => ({ default: module.DescriptionModal })));
+const MemoModal = lazy(() => import('./components/MemoModal').then(module => ({ default: module.MemoModal })));
+const ReviewRequestModal = lazy(() => import('./components/ReviewRequestModal').then(module => ({ default: module.ReviewRequestModal })));
 // 상수 & 타입
 import { Colors } from '../../../../constants/Colors';
 import { BUCKET_NAME } from '../../../../constants/normal';
 import { plantTypeImages } from '../constants/images';
 import { PlantType, PlantTypeCode } from '../../../../libs/supabase/operations/foundPlants/type';
 
-type ImageProcessingScreenProps =NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
+type ImageProcessingScreenProps= NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
 // AI 응답 객체 타입 정의
 interface AiResponseType {
@@ -43,15 +46,13 @@ interface AiResponseType {
 export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) => {
   const route = useRoute();
   const { userId } = useAuthStore.getState();
+  const { forceCloseModalBackground } = useModalBackgroundStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [plantName, setPlantName] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [isDescriptionModalVisible, setIsDescriptionModalVisible] = useState(false);
-  const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
-  const [isMapModalVisible, setIsMapModalVisible] = useState(false);
-  const [isReviewRequestModalVisible, setIsReviewRequestModalVisible] = useState(false);
+  const [openedModalType, setOpenedModalType] = useState<'map' | 'description' | 'memo' | 'reviewRequest' | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [center, setCenter] = useState({
     latitude: 37.5666102,
@@ -90,7 +91,20 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
 
   // 선택된 위치를 사용할 수 있음
   const handleLocationSelect = () => {
-    setIsMapModalVisible(false);
+    setOpenedModalType(null);
+    // 모달 배경도 확실히 닫기
+    setTimeout(() => {
+      forceCloseModalBackground();
+    }, 100);
+  };
+
+  // 모달 닫기 공통 함수
+  const closeModal = () => {
+    setOpenedModalType(null);
+    // 모달 배경도 확실히 닫기
+    setTimeout(() => {
+      forceCloseModalBackground();
+    }, 100);
   };
 
   const handleSave = async () => {
@@ -142,7 +156,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
       if (success) {
         // console.log('식물 정보 저장 성공');
         if(!isReviewedInYear){
-          setIsReviewRequestModalVisible(true);
+          setOpenedModalType('reviewRequest');
         }else if(isLoaded && !isClosed){
           show();
           navigation.goBack();
@@ -267,7 +281,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
                 </View>
             </View>
             {/* 설명 영역 */}
-            <TouchableOpacity onPress={() => setIsDescriptionModalVisible(true)}>
+            <TouchableOpacity onPress={() => setOpenedModalType('description')}>
               <Text
                 className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               
               >{description===''?'식물에 대한 설명을 입력해주세요':description}</Text>
@@ -275,7 +289,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
             <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
 
             {/* 메모 영역 */}
-            <TouchableOpacity onPress={() => setIsMemoModalVisible(true)}>
+            <TouchableOpacity onPress={() => setOpenedModalType('memo')}>
               <Text
                 className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
               >{memo===''?'식물에 대한 메모를 입력해주세요':memo}</Text>
@@ -297,7 +311,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
                     Alert.alert("알림", "로그인 후 이용해주세요.");
                     return;
                   }
-                  setIsMapModalVisible(true);
+                  setOpenedModalType('map');
                 }}
               >
                 <Text className="text-greenActive text-center font-medium">
@@ -326,45 +340,58 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         )}
       </View>
 
-      {/* 지도 모달 */}
-      <MapModal
-        isVisible={isMapModalVisible}
-        onClose={() => setIsMapModalVisible(false)}
-        onComplete={handleLocationSelect}
-        center={center}
-        onCameraChange={handleCameraChange}
-        plantTypeImageCode={aiResponse?.type_code ?? 0}
-      />
+      {/* 지연 로딩된 모달들 */}
+      {openedModalType === 'map' && (
+        <Suspense fallback={<View />}>
+          <MapModal
+            isVisible={openedModalType === 'map'}
+            onClose={closeModal}
+            onComplete={handleLocationSelect}
+            center={center}
+            onCameraChange={handleCameraChange}
+            plantTypeImageCode={aiResponse?.type_code ?? 0}
+          />
+        </Suspense>
+      )}
 
-      {/* 설명 모달 */}
-      <DescriptionModal
-        isVisible={isDescriptionModalVisible}
-        onClose={() => setIsDescriptionModalVisible(false)}
-        description={description}
-        onDescriptionChange={setDescription}
-      />
+      {openedModalType === 'description' && (
+        <Suspense fallback={<View />}>
+          <DescriptionModal
+            isVisible={openedModalType === 'description'}
+            onClose={closeModal}
+            description={description}
+            onDescriptionChange={setDescription}
+          />
+        </Suspense>
+      )}
 
-      {/* 메모 모달 */}
-      <MemoModal
-        isVisible={isMemoModalVisible}
-        onClose={() => setIsMemoModalVisible(false)}
-        memo={memo}
-        onMemoChange={setMemo}
-      />
+      {openedModalType === 'memo' && (
+        <Suspense fallback={<View />}>
+          <MemoModal
+            isVisible={openedModalType === 'memo'}
+            onClose={closeModal}
+            memo={memo}
+            onMemoChange={setMemo}
+          />
+        </Suspense>
+      )}
 
-      {/* ReviewRequest 모달 */}
-      <ReviewRequestModal
-      isVisible={isReviewRequestModalVisible}
-      onClose={() => {
-        setIsReviewRequestModalVisible(false); 
-        // 상태가 반영된 후 navigation.goBack 실행
-        // 상태 변경이 비동기이므로 약간의 delay를 줄 수도 있음
-        setTimeout(() => {
-          navigation.goBack();
-        }, 100);
-         }}
-      setReviewedInYear={setReviewedInYear}
-      />
+      {openedModalType === 'reviewRequest' && (
+        <Suspense fallback={<View />}>
+          <ReviewRequestModal
+            isVisible={openedModalType === 'reviewRequest'}
+            onClose={() => {
+              closeModal();
+              // 상태가 반영된 후 navigation.goBack 실행
+              // 상태 변경이 비동기이므로 약간의 delay를 줄 수도 있음
+              setTimeout(() => {
+                navigation.goBack();
+              }, 200);
+            }}
+            setReviewedInYear={setReviewedInYear}
+          />
+        </Suspense>
+      )}
     </Background>
   );
 };
