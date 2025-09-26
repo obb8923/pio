@@ -128,6 +128,7 @@
 		<dict><key>SKAdNetworkIdentifier</key><string>3rd42ekr43.skadnetwork</string></dict>
 		<dict><key>SKAdNetworkIdentifier</key><string>3qcr597p9d.skadnetwork</string></dict>
 	</array>
-
+<key>NSUserTrackingUsageDescription</key>
+<string>개인화된 기능 제공과 오류수정을 위해서 기록을 보관합니다.</string>
 </dict>
 </plist>
