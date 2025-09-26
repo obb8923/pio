@@ -18,9 +18,9 @@ import { useModalBackgroundStore } from '../../../../store/modalBackgroundStore'
 import { Background } from '../../../../components/Background';
 import { CustomButton } from '../../../../components/CustomButton';
 import { Line } from '../../../../components/Line';
+import { MapModal } from './components/MapModal';
 
 // 지연 로딩을 위한 모달 컴포넌트들
-const MapModal = lazy(() => import('./components/MapModal').then(module => ({ default: module.MapModal })));
 const DescriptionModal = lazy(() => import('./components/DescriptionModal').then(module => ({ default: module.DescriptionModal })));
 const MemoModal = lazy(() => import('./components/MemoModal').then(module => ({ default: module.MemoModal })));
 const ReviewRequestModal = lazy(() => import('./components/ReviewRequestModal').then(module => ({ default: module.ReviewRequestModal })));
@@ -404,8 +404,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
       />
 
       {/* 모달들 */}
-      {openedModalType === 'map' && (
-        <Suspense fallback={<View />}>
+   
           <MapModal
             isVisible={openedModalType === 'map'}
             onClose={closeModal}
@@ -414,8 +413,6 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
             onCameraChange={handleCameraChange}
             plantTypeImageCode={aiResponse?.type_code ?? 0}
           />
-        </Suspense>
-      )}
 
       {openedModalType === 'description' && (
         <Suspense fallback={<View />}>
