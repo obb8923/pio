@@ -1,6 +1,6 @@
 // React & React Native 기본 모듈
 import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, memo, useMemo } from "react";
 // 네비게이션 & 안전 영역 관리
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -35,12 +35,38 @@ type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>;
 type RootStack = NativeStackScreenProps<RootStackParamList>;
 type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
 
-export const MapScreen = ({navigation}:MapScreenProps) => {
-  const { latitude, longitude } = useLocationStore();
+// 최적화된 마커 컴포넌트
+const PlantMarker = memo(({ 
+  plant, 
+  onMarkerPress 
+}: { 
+  plant: found_plants_columns; 
+  onMarkerPress: (plant: found_plants_columns) => void;
+}) => {
+  const handlePress = useCallback(() => {
+    onMarkerPress(plant);
+  }, [plant, onMarkerPress]);
+
+  return (
+    <NaverMapMarkerOverlay
+      latitude={plant.lat}
+      longitude={plant.lng}
+      onTap={handlePress}
+      image={getFlowerImageForPlant(plant.type_code, plant.id)}
+      width={16}
+      height={16}
+    />
+  );
+});
+
+const MapScreenComponent = ({navigation}:MapScreenProps) => {
+  // 스토어 구독 최적화 - 개별적으로 구독하여 무한 루프 방지
+  const latitude = useLocationStore(state => state.latitude);
+  const longitude = useLocationStore(state => state.longitude);
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
-  const { userId } = useAuthStore();
+  const userId = useAuthStore(state => state.userId);
   const insets = useSafeAreaInsets();
-  const {isInitialized } = usePermissionStore();
+  const isInitialized = usePermissionStore(state => state.isInitialized);
   const {checkAndRequestLocationPermission} = usePermissions();
   const { isFirstVisit, setFirstVisit } = useVisitStore();
  
@@ -81,6 +107,18 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
     }
     setShowOnlyMyPlants(!showOnlyMyPlants);
   }, [showOnlyMyPlants, userId]);
+
+  // 마커 리스트를 메모이제이션
+  const plantMarkers = useMemo(() => {
+    const plants = showOnlyMyPlants ? myPlants : allPlants;
+    return plants.map((plant: found_plants_columns) => (
+      <PlantMarker 
+        key={plant.id} 
+        plant={plant} 
+        onMarkerPress={handleMarkerPress}
+      />
+    ));
+  }, [showOnlyMyPlants, myPlants, allPlants, handleMarkerPress]);
   
   return <Background >
     <View className="flex-1">
@@ -89,7 +127,11 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
          {/* 새로고침 버튼 */}
       <TouchableOpacity
         className="bg-white rounded-full px-3 py-1.5 shadow-lg flex-row items-center border border-greenTab"
-        onPress={fetchPlants}
+        onPress={() => {
+          if (!isLoadingPlants) {
+            fetchPlants();
+          }
+        }}
         disabled={isLoadingPlants}
       >
         {isLoadingPlants ? (
@@ -117,17 +159,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
             zoom: 12,
           }}
         >
-          {(showOnlyMyPlants ? myPlants : allPlants).map((plant: found_plants_columns) => (
-            <NaverMapMarkerOverlay
-              key={plant.id}
-              latitude={plant.lat}
-              longitude={plant.lng}
-              onTap={() => handleMarkerPress(plant)}
-              image={getFlowerImageForPlant(plant.type_code,plant.id)}
-              width={16}
-              height={16}
-            />
-          ))}
+          {plantMarkers}
         </NaverMapView>   
 
         <AddPlantFAB
@@ -145,5 +177,7 @@ export const MapScreen = ({navigation}:MapScreenProps) => {
    
     <AdmobBanner />
   </Background>
-}
+};
+
+export const MapScreen = memo(MapScreenComponent);
 

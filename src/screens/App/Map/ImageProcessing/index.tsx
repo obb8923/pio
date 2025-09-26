@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, memo, useCallback, useMemo } from 'react';
 import { View,Text,Image,TouchableOpacity,TextInput,ActivityIndicator,Animated,Alert,Platform,ScrollView} from 'react-native';
 // 외부 라이브러리 
 import { useRoute } from '@react-navigation/native';
@@ -32,6 +32,62 @@ import { PlantType, PlantTypeCode } from '../../../../libs/supabase/operations/f
 
 type ImageProcessingScreenProps= NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
+// 이미지 섹션 컴포넌트
+const ImageSection = memo(({ imageUri }: { imageUri: string }) => (
+  <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
+    <Image
+      source={{ uri: imageUri }}
+      className="w-full h-full rounded-3xl"
+      resizeMode="cover"
+    />
+  </View>
+));
+
+// 로딩 섹션 컴포넌트
+const AILoadingSection = memo(() => (
+  <View className="w-full h-96 bg-white rounded-lg p-4 justify-center items-center">
+    <ActivityIndicator size="large" color={Colors.greenTab} />
+    <Text className="mt-4 text-lg text-gray-600">식물을 분석 중입니다...</Text>
+  </View>
+));
+
+// 에러 섹션 컴포넌트
+const ErrorSection = memo(({ error }: { error: string }) => (
+  <View className="w-full h-96 bg-white rounded-lg p-4 justify-center items-center">
+    <Text className="text-red-500 text-lg text-center">{error}</Text>
+  </View>
+));
+
+// 버튼 섹션 컴포넌트
+const ButtonSection = memo(({ 
+  onCancel, 
+  onSave, 
+  isProcessing, 
+  isAiLoading, 
+  aiResponse 
+}: {
+  onCancel: () => void;
+  onSave: () => void;
+  isProcessing: boolean;
+  isAiLoading: boolean;
+  aiResponse: AiResponseType | null;
+}) => (
+  <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
+    <CustomButton text="취소" size={60} onPress={onCancel}/>
+    {!isAiLoading && aiResponse?.code === "success" && (
+      <>
+        <View className="w-20"/>
+        <CustomButton 
+          text="저장" 
+          size={70} 
+          onPress={onSave} 
+          isProcessing={isProcessing}
+        />
+      </>
+    )}
+  </View>
+));
+
 // AI 응답 객체 타입 정의
 interface AiResponseType {
   code: "success" | "error" | "not_plant" | "low_confidence";
@@ -43,7 +99,7 @@ interface AiResponseType {
   activity_notes?: string;
   error?: string;
 }
-export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) => {
+const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps) => {
   const route = useRoute();
   const { userId } = useAuthStore.getState();
   const { forceCloseModalBackground } = useModalBackgroundStore();
@@ -78,36 +134,56 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
 
 
   // 초기 위치에서 변경되었는지 확인하는 함수
-  const isLocationSelected = center.latitude !== 37.5666102 || center.longitude !== 126.9783881;
+  const isLocationSelected = useMemo(() => 
+    center.latitude !== 37.5666102 || center.longitude !== 126.9783881,
+    [center.latitude, center.longitude]
+  );
+
+  // 모달 열기 함수들
+  const openDescriptionModal = useCallback(() => {
+    setOpenedModalType('description');
+  }, []);
+
+  const openMemoModal = useCallback(() => {
+    setOpenedModalType('memo');
+  }, []);
+
+  const openMapModal = useCallback(() => {
+    if (!userId) {
+      Alert.alert("알림", "로그인 후 이용해주세요.");
+      return;
+    }
+    setOpenedModalType('map');
+  }, [userId]);
 
   // 지도 중심이 바뀔 때마다 중심 좌표 갱신
-  const handleCameraChange = (e: any) => {
+  const handleCameraChange = useCallback((e: any) => {
     setCenter({
       latitude: e.latitude,
       longitude: e.longitude,
       zoom: e.zoom,
     });
-  };
+  }, []);
 
   // 선택된 위치를 사용할 수 있음
-  const handleLocationSelect = () => {
+  const handleLocationSelect = useCallback(() => {
     setOpenedModalType(null);
     // 모달 배경도 확실히 닫기
     setTimeout(() => {
       forceCloseModalBackground();
     }, 100);
-  };
+  }, [forceCloseModalBackground]);
 
   // 모달 닫기 공통 함수
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setOpenedModalType(null);
     // 모달 배경도 확실히 닫기
     setTimeout(() => {
       forceCloseModalBackground();
     }, 100);
-  };
+  }, [forceCloseModalBackground]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if(!userId) {
       Alert.alert("알림", "로그인 후 이용해주세요.");
       return;
@@ -173,9 +249,9 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [userId, plantName, memo, description, center, aiResponse, isLocationSelected, isReviewedInYear, isLoaded, isClosed, show, navigation, setReviewedInYear]);
 
-  const fetchAIResponse = async () => {
+  const fetchAIResponse = useCallback(async () => {
     setIsAiLoading(true);
     setAiError(null);
     try {
@@ -212,7 +288,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
         useNativeDriver: true,
       }).start();
     }
-  };
+  }, [imageUri, fadeAnim]);
 
   useEffect(() => {
     fetchAIResponse();
@@ -232,13 +308,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
   return (
     <Background isStatusBarGap={false} isTabBarGap={false}>
        {/* 사진 영역 */}
-       <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
-          <Image
-            source={{ uri: imageUri }}
-            className="w-full h-full rounded-3xl"
-            resizeMode="cover"
-          />
-        </View>
+       <ImageSection imageUri={imageUri} />
        <ScrollView
         className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg "
         contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 100 : 400 }}
@@ -247,14 +317,9 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
        
         {/* 식물 정보 영역 */}
         {isAiLoading ? (
-          <View className="w-full h-96 bg-white rounded-lg p-4 justify-center items-center">
-            <ActivityIndicator size="large" color={Colors.greenTab} />
-            <Text className="mt-4 text-lg text-gray-600">AI가 식물 정보를 분석 중입니다...</Text>
-          </View>
+          <AILoadingSection />
         ) : aiError ? (
-          <View className="w-full h-96 bg-white rounded-lg p-4 justify-center items-center">
-            <Text className="text-red-500 text-lg text-center">{aiError}</Text>
-          </View>
+          <ErrorSection error={aiError} />
         ) : (
           <Animated.View style={{ opacity: fadeAnim }} className="w-full bg-white rounded-lg p-4">
             {/* 식물 이름 영역 */}
@@ -281,7 +346,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
                 </View>
             </View>
             {/* 설명 영역 */}
-            <TouchableOpacity onPress={() => setOpenedModalType('description')}>
+            <TouchableOpacity onPress={openDescriptionModal}>
               <Text
                 className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               
               >{description===''?'식물에 대한 설명을 입력해주세요':description}</Text>
@@ -289,7 +354,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
             <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
 
             {/* 메모 영역 */}
-            <TouchableOpacity onPress={() => setOpenedModalType('memo')}>
+            <TouchableOpacity onPress={openMemoModal}>
               <Text
                 className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
               >{memo===''?'식물에 대한 메모를 입력해주세요':memo}</Text>
@@ -306,13 +371,7 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
               {/* 버튼 영역 */}
               <TouchableOpacity 
                 className="p-4 bg-greenTab rounded-full justify-center items-center"
-                onPress={() => {
-                  if(!userId) {
-                    Alert.alert("알림", "로그인 후 이용해주세요.");
-                    return;
-                  }
-                  setOpenedModalType('map');
-                }}
+                onPress={openMapModal}
               >
                 <Text className="text-greenActive text-center font-medium">
                   {isLocationSelected ? "수정하기" : "선택하기"}
@@ -324,21 +383,13 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
       </ScrollView>
 
       {/* 버튼 영역 */}
-      <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
-        <CustomButton text="취소" size={60} onPress={() => navigation.goBack()}/>
-
-        {!isAiLoading && aiResponse?.code === "success" && (
-          <>
-            <View className="w-20"/>
-            <CustomButton 
-              text="저장" 
-              size={70} 
-              onPress={handleSave} 
-              isProcessing={isProcessing}
-            />
-          </>
-        )}
-      </View>
+      <ButtonSection 
+        onCancel={() => navigation.goBack()}
+        onSave={handleSave}
+        isProcessing={isProcessing}
+        isAiLoading={isAiLoading}
+        aiResponse={aiResponse}
+      />
 
       {/* 지연 로딩된 모달들 */}
       {openedModalType === 'map' && (
@@ -395,3 +446,5 @@ export const ImageProcessingScreen = ({navigation}:ImageProcessingScreenProps) =
     </Background>
   );
 };
+
+export const ImageProcessingScreen = memo(ImageProcessingScreenComponent);

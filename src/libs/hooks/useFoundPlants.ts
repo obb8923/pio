@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { getFoundPlants } from '../supabase/operations/foundPlants/getFoundPlants';
 import { useAuthStore } from '../../store/authStore';
@@ -10,8 +10,8 @@ export const useFoundPlants = (showOnlyMyPlants: boolean) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // 식물 데이터를 가져오는 함수
-  const fetchPlants = async () => {
+  // 식물 데이터를 가져오는 함수 (useCallback으로 메모이제이션)
+  const fetchPlants = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -27,7 +27,7 @@ export const useFoundPlants = (showOnlyMyPlants: boolean) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showOnlyMyPlants, setMyPlants, setAllPlants]);
 
   // 훅의 반환값
   return {
