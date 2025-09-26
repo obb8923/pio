@@ -230,15 +230,27 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
       const { success, error } = await saveFoundPlant(plantData);
 
       if (success) {
-        // console.log('식물 정보 저장 성공');
-        if(!isReviewedInYear){
-          setOpenedModalType('reviewRequest');
-        }else if(isLoaded && !isClosed){
-          show();
-          navigation.goBack();
-        }else{
-          navigation.goBack();
-        }
+        // 저장 성공 알림 표시
+        Alert.alert(
+          "저장 완료",
+          "식물 정보가 성공적으로 저장되었습니다.",
+          [
+            {
+              text: "확인",
+              onPress: () => {
+                // 확인을 누르면 기존 로직 실행
+                if(!isReviewedInYear){
+                  setOpenedModalType('reviewRequest');
+                }else if(isLoaded && !isClosed){
+                  show();
+                  navigation.goBack();
+                }else{
+                  navigation.goBack();
+                }
+              }
+            }
+          ]
+        );
       } else {
         console.error('식물 정보 저장 실패:', error);
         // 사용자에게 오류 메시지를 표시할 수 있습니다.
@@ -391,7 +403,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
         aiResponse={aiResponse}
       />
 
-      {/* 지연 로딩된 모달들 */}
+      {/* 모달들 */}
       {openedModalType === 'map' && (
         <Suspense fallback={<View />}>
           <MapModal
