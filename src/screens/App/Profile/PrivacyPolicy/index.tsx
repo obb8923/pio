@@ -7,7 +7,7 @@ import { ProfileStackParamList } from "../../../../nav/stack/Profile"
 type PrivacyPolicyScreenProps = NativeStackScreenProps<ProfileStackParamList, 'PrivacyPolicy'>;
 export const PrivacyPolicyScreen = ({navigation}:PrivacyPolicyScreenProps) => {
     return (
-        <Background isStatusBarGap={true} type="solid">
+        <Background isStatusBarGap={true} type="white">
             <AppBar navigation={navigation} />
             <ScrollView className="flex-1 p-4"
             contentContainerStyle={{paddingBottom: 50}}

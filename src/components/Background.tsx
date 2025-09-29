@@ -7,19 +7,12 @@ type BackgroundProps = {
   children: React.ReactNode;
   className?: string;
   style?: ViewStyle | ViewStyle[];
-  type?: 'green' | 'white' | 'solid';
+  type?: 'green' | 'white' ;
   isStatusBarGap?: boolean;
   isTabBarGap?: boolean;
 }
 export const Background = ({children,isStatusBarGap=false,type='green',isTabBarGap=true,...props}: BackgroundProps) => {
   const insets = useSafeAreaInsets();
-  if(type === 'solid'){
-    return (
-      <View className="flex-1 bg-greenSolid" style={{paddingTop: isStatusBarGap ? insets.top : 0}}>
-        {children}
-      </View>
-    )
-  }
   return (
     <View className="flex-1">
       <LinearGradient

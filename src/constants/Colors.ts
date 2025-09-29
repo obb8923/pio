@@ -1,6 +1,5 @@
 
 export const Colors = {
-  greenSolid: '#93CCA3',
   white: '#fefefe',
   black: '#191919',
   svggray: '#6b7280',

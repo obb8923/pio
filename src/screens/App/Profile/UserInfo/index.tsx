@@ -188,7 +188,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
     }
 
     return (
-        <Background isStatusBarGap={true} type="solid">
+        <Background isStatusBarGap={true} type="white">
             <AppBar title="회원 정보" navigation={navigation}/>
             <ScrollView className="flex-1">
                 <View className="p-4">
