@@ -9,7 +9,10 @@ type AdmobBannerProps = {
   requestNonPersonalizedAdsOnly?: boolean; // 명시적으로 설정하지 않으면 추적 권한 상태에 따라 자동 결정
 };
 
-const UNIT_ID_BANNER = __DEV__ ? TestIds.BANNER : Platform.select({ android: GOOGLE_MOBILE_ADS_UNIT_ID_BANNER_ANDROID, ios: GOOGLE_MOBILE_ADS_UNIT_ID_BANNER_IOS }) || TestIds.BANNER;
+const UNIT_ID_BANNER = 
+__DEV__ ? 
+TestIds.BANNER : 
+Platform.select({ android: GOOGLE_MOBILE_ADS_UNIT_ID_BANNER_ANDROID, ios: GOOGLE_MOBILE_ADS_UNIT_ID_BANNER_IOS }) || TestIds.BANNER;
 
 
 export function AdmobBanner({
