@@ -64,6 +64,7 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
   const latitude = useLocationStore(state => state.latitude);
   const longitude = useLocationStore(state => state.longitude);
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
+  const [shouldShowAd, setShouldShowAd] = useState(false);
   const userId = useAuthStore(state => state.userId);
   const insets = useSafeAreaInsets();
   const isInitialized = usePermissionStore(state => state.isInitialized);
@@ -75,6 +76,7 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
   const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
     // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
     useNotifee();
+
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
       setFirstVisit(false);
@@ -85,6 +87,29 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
       // }
     }
   }, [isInitialized]);
+
+  // 렌더링이 완료된 후 광고 표시 (requestIdleCallback 방식)
+  useEffect(() => {
+    if (!isLoadingPlants && !shouldShowAd) {
+      let cancelled = false;
+      
+      // requestAnimationFrame을 2번 체인하여 렌더링 완료 후 실행
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // setImmediate로 메인 스레드가 유휴 상태일 때 실행
+          setImmediate(() => {
+            if (!cancelled) {
+              setShouldShowAd(true);
+            }
+          });
+        });
+      });
+      
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [isLoadingPlants, shouldShowAd]);
 
   // 화면이 포커스될 때마다 식물 데이터 가져오기
   useFocusEffect(
@@ -175,7 +200,7 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
     />
 
    
-    <AdmobBanner />
+    {shouldShowAd && <AdmobBanner />}
   </Background>
 };
 
