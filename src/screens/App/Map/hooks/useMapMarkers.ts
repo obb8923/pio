@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { found_plants_columns } from '../../../../libs/supabase/operations/foundPlants/type';
 import { NaverMapViewRef } from '@mj-studio/react-native-naver-map';
 import { DEVICE_WIDTH_HALF, DEVICE_HEIGHT_HALF } from '../../../../constants/normal';
@@ -11,7 +11,7 @@ export const useMapMarkers = () => {
     x: DEVICE_WIDTH_HALF,
     y: DEVICE_HEIGHT_HALF
   });}
-  const handleMarkerPress = async (plant: found_plants_columns) => {
+  const handleMarkerPress = useCallback(async (plant: found_plants_columns) => {
    
     
     try {
@@ -45,7 +45,7 @@ export const useMapMarkers = () => {
      // 식물 정보와 모달을 표시
      setSelectedPlant(plant);
      setIsModalVisible(true);
-  };
+  }, []); // 의존성 없음 - setState 함수들은 안정적이고, mapRef는 ref 객체라서 안정적
 
   const closeModal = () => {
     setIsModalVisible(false);
