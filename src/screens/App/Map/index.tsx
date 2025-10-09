@@ -1,5 +1,5 @@
 // React & React Native 기본 모듈
-import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 import { useState, useCallback, useEffect, memo, useMemo } from "react";
 // 네비게이션 & 안전 영역 관리
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,7 +9,6 @@ import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import { NaverMapMarkerOverlay, NaverMapView } from '@mj-studio/react-native-naver-map';
 // 내부 컴포넌트
 import { Background } from "../../../components/Background";
-import { TextToggle } from "../../../components/TextToggle";
 import { PlantDetailModal } from "./components/PlantDetailModal";
 import { AddPlantFAB } from "./components/AddPlantFAB";
 import { AdmobBanner } from "../../../components/ads/AdmobBanner";
@@ -19,7 +18,6 @@ import { MapStackParamList } from "../../../nav/stack/Map";
 import { RootStackParamList } from "../../../nav/stack/Root";
 // 상태 관리 스토어 (Zustand)
 import { useLocationStore } from "../../../store/locationStore";      // 위치 정보 관리
-import { useAuthStore } from "../../../store/authStore";              // 사용자 인증 관리
 import { usePermissionStore } from "../../../store/permissionStore";  // 앱 권한 관리
 import { useVisitStore } from "../../../store/visitStore";            // 방문 기록 관리
 // 커스텀 훅스 & 유틸리티 & 데이터베이스 타입
@@ -30,7 +28,8 @@ import { useNotifee } from "../../../libs/hooks/useNotifee";          // 알림 
 import { getFlowerImageForPlant } from "./utils/markerUtils";                           // 식물별 꽃 이미지 가져오기
 import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type'; // Supabase 테이블 타입 정의
 import { MARKER_WIDTH, MARKER_HEIGHT } from '../../../constants/normal';
-
+import { RefreshButton } from "./components/RefreshButton";
+import { PlantFilterToggle } from "./components/PlantFilterToggle";
 type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>;
 type RootStack = NativeStackScreenProps<RootStackParamList>;
 type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
@@ -80,7 +79,6 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
   const longitude = useLocationStore(state => state.longitude);
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const [shouldShowAd, setShouldShowAd] = useState(false);
-  const userId = useAuthStore(state => state.userId);
   const insets = useSafeAreaInsets();
   const isInitialized = usePermissionStore(state => state.isInitialized);
   const {checkAndRequestLocationPermission} = usePermissions();
@@ -133,20 +131,15 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
     }, [showOnlyMyPlants])
   );
 
-
-  const handleTogglePress = useCallback(() => {
-    if (!showOnlyMyPlants && !userId) {
-      Alert.alert(
-        "로그인 필요",
-        "내 식물을 보려면 로그인이 필요합니다.",
-        [
-          { text: "확인", style: "default" }
-        ]
-      );
-      return;
-    }
+  // 토글 핸들러 (로직은 PlantFilterToggle 컴포넌트로 이동)
+  const handleToggle = useCallback(() => {
     setShowOnlyMyPlants(!showOnlyMyPlants);
-  }, [showOnlyMyPlants, userId]);
+  }, [showOnlyMyPlants]);
+
+  // AddPlantFAB 네비게이션 핸들러
+  const handleNavigate = useCallback((screen: string, params: any) => {
+    navigation.navigate(screen as any, params);
+  }, [navigation]);
 
   // 마커 리스트를 메모이제이션
   const plantMarkers = useMemo(() => {
@@ -164,32 +157,19 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
     <View className="flex-1">
       {/* 상단 네비게이션 바 */}
       <View className="absolute h-10 px-4 z-10 flex-row items-center justify-between w-full" style={{marginTop: insets.top + 10}}>
-         {/* 새로고침 버튼 */}
-      <TouchableOpacity
-        className="bg-white rounded-full px-3 py-1.5 shadow-lg flex-row items-center border border-greenTab"
-        onPress={() => {
-          if (!isLoadingPlants) {
-            fetchPlants();
-          }
-        }}
-        disabled={isLoadingPlants}
-      >
-        {isLoadingPlants ? (
-          <ActivityIndicator size="small" color={Colors.greenTab} />
-        ) : (
-          <Text className="text-greenTab font-medium text-sm">지도 새로고침</Text>
-        )}
-      </TouchableOpacity>
-      {/* 필터링 토글 */}
-        <TextToggle
-          isActive={showOnlyMyPlants}
-          activeText="내 식물만"
-          inactiveText="모든 식물"
-          onToggle={handleTogglePress}
+        {/* 새로고침 버튼 */}
+        <RefreshButton 
+          isLoading={isLoadingPlants} 
+          onRefresh={fetchPlants}
+        />
+        
+        {/* 필터링 토글 */}
+        <PlantFilterToggle
+          showOnlyMyPlants={showOnlyMyPlants}
+          onToggle={handleToggle}
         />
       </View>
 
-     
         <NaverMapView
           ref={mapRef}
           style={{ flex: 1 }}
@@ -202,9 +182,7 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
           {plantMarkers}
         </NaverMapView>   
 
-        <AddPlantFAB
-      onNavigate={(screen, params) => navigation.navigate(screen as any, params)}
-    />  
+        <AddPlantFAB onNavigate={handleNavigate} />
     </View>
     
     <PlantDetailModal
@@ -214,7 +192,6 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
       markerPositionAtScreen={screenPosition}
     />
 
-   
     {shouldShowAd && <AdmobBanner />}
   </Background>
 };

@@ -3,7 +3,7 @@ import { Colors } from '../../../../constants/Colors';
 import CameraIcon from '../../../../../assets/svgs/Camera.svg';
 import ImageAddIcon from '../../../../../assets/svgs/ImageAdd.svg';
 import { TAB_BAR_HEIGHT } from '../../../../constants/TabNavOptions';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 // import { usePermissionStore } from '../../../../store/permissionStore';
 import { usePermissions } from '../../../../libs/hooks/usePermissions';
@@ -13,7 +13,7 @@ interface AddPlantFABProps {
   onNavigate: (screen: string, params: any) => void;
 }
 
-export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
+export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
   const { isOpen, toggle, close, fabAnimation, animations } = useFab();
   const { cameraButtonTranslateY, galleryButtonTranslateY, buttonScale } = animations;
   const {cameraPermission,photoLibraryPermission,checkAndRequestCameraPermission,checkAndRequestPhotoLibraryPermission } = usePermissions();
@@ -54,7 +54,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
         Alert.alert('오류', '이미지를 가져올 수 없습니다.');
       }
     });
-  }, [close, onNavigate]);
+  }, [cameraPermission, checkAndRequestCameraPermission, close, onNavigate]);
 
   const handleGalleryPress = useCallback(async () => {
     if (!photoLibraryPermission) {
@@ -93,7 +93,7 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
         Alert.alert('오류', '이미지를 가져올 수 없습니다.');
       }
     });
-  }, [close, onNavigate]);
+  }, [photoLibraryPermission, checkAndRequestPhotoLibraryPermission, close, onNavigate]);
 
   return (
     <View className="w-1/2 absolute bottom-8 right-4">
@@ -157,4 +157,4 @@ export const AddPlantFAB = ({ onNavigate }:AddPlantFABProps) => {
       </TouchableOpacity>
     </View>
   );
-}; 
+}); 
