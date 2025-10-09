@@ -29,7 +29,7 @@ import { usePermissions } from '../../../libs/hooks/usePermissions';  // 권한 
 import { useNotifee } from "../../../libs/hooks/useNotifee";          // 알림 관리
 import { getFlowerImageForPlant } from "./utils/markerUtils";                           // 식물별 꽃 이미지 가져오기
 import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type'; // Supabase 테이블 타입 정의
-
+import { MARKER_WIDTH, MARKER_HEIGHT } from '../../../constants/normal';
 
 type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>;
 type RootStack = NativeStackScreenProps<RootStackParamList>;
@@ -47,15 +47,30 @@ const PlantMarker = memo(({
     onMarkerPress(plant);
   }, [plant, onMarkerPress]);
 
+  // 마커 이미지 메모이제이션
+  const markerImage = useMemo(
+    () => getFlowerImageForPlant(plant.type_code, plant.id),
+    [plant.type_code, plant.id]
+  );
+
   return (
     <NaverMapMarkerOverlay
       latitude={plant.lat}
       longitude={plant.lng}
       onTap={handlePress}
-      image={getFlowerImageForPlant(plant.type_code, plant.id)}
-      width={16}
-      height={16}
+      image={markerImage}
+      width={MARKER_WIDTH}
+      height={MARKER_HEIGHT}
     />
+  );
+}, (prevProps, nextProps) => {
+  // 커스텀 비교 함수: 필요한 필드만 비교하여 불필요한 리렌더링 방지
+  return (
+    prevProps.plant.id === nextProps.plant.id &&
+    prevProps.plant.lat === nextProps.plant.lat &&
+    prevProps.plant.lng === nextProps.plant.lng &&
+    prevProps.plant.type_code === nextProps.plant.type_code &&
+    prevProps.onMarkerPress === nextProps.onMarkerPress
   );
 });
 
