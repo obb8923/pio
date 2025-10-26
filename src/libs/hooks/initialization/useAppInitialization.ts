@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from "@env";
-import { useAuthStore } from "../../store/authStore";
-import { usePermissionStore } from "../../store/permissionStore";
-import { useTrackingStore } from "../../store/trackingStore";
-import { useOnboarding } from "./useOnboarding";
-import { type MaintenanceResponse, checkMaintenance } from "../../libs/supabase/operations/normal/checkMaintenance";
+import { useAuthStore } from "../../../store/authStore";
+import { usePermissionStore } from "../../../store/permissionStore";
+import { useOnboarding } from "../useOnboarding";
+import { type MaintenanceResponse, checkMaintenance } from "../../../libs/supabase/operations/normal/checkMaintenance";
 
 /**
- * 앱 초기화 로직을 관리하는 훅
+ * 앱 초기화 로직을 관리하는 훅 (권한 요청 제외)
  * - Google Sign-In 설정
- * - 권한 초기화
- * - 추적 권한 요청
+ * - 권한 상태 초기화 (요청은 하지 않음)
  * - 유지보수 상태 확인
  * - 로그인 상태 확인
  * - 온보딩 상태 확인
+ * 
+ * 참고: 권한 요청은 각 화면(예: Map)에서 필요할 때 수행
  */
 export const useAppInitialization = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -22,7 +22,6 @@ export const useAppInitialization = () => {
   
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized: isPermissionsInitialized } = usePermissionStore();
-  const { requestTrackingPermission: requestTracking } = useTrackingStore();
   const { isOnboardingCompleted } = useOnboarding();
 
   useEffect(() => {
@@ -40,21 +39,13 @@ export const useAppInitialization = () => {
           if (__DEV__) console.error('[useAppInitialization] Google Sign-In configuration error:', error);
         }
 
-        // 2. 권한 초기화
+        // 2. 권한 상태 초기화 (체크만, 요청은 하지 않음)
         if (!isPermissionsInitialized) {
           await initPermissions();
           if (__DEV__) console.log('[useAppInitialization] Permissions initialized');
         }
         
-        // 3. 추적 권한 요청
-        try {
-          const trackingStatus = await requestTracking();
-          if (__DEV__) console.log('[useAppInitialization] Tracking permission status:', trackingStatus);
-        } catch (error) {
-          if (__DEV__) console.error('[useAppInitialization] Error requesting tracking permission:', error);
-        }
-        
-        // 4. 유지보수 상태 확인
+        // 3. 유지보수 상태 확인
         try {
           const maintenanceData = await checkMaintenance();
           if (maintenanceData) {
@@ -65,7 +56,7 @@ export const useAppInitialization = () => {
           if (__DEV__) console.error('[useAppInitialization] Error checking maintenance:', error);
         }
         
-        // 5. 로그인 상태 확인
+        // 4. 로그인 상태 확인
         await checkLoginStatus();
         if (__DEV__) console.log('[useAppInitialization] Login status checked');
         

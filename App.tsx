@@ -15,7 +15,7 @@ import { OnboardingStack } from "./src/nav/stack/Onboarding";
 import { ModalBackground } from "./src/components/ModalBackground";
 import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
 // 내부 훅
-import { useAppInitialization } from "./src/libs/hooks/useAppInitialization";
+import { useAppInitialization } from "./src/libs/hooks/initialization/useAppInitialization";
 
 function App() {
   const { isInitialized, maintenanceData, isOnboardingCompleted } = useAppInitialization();

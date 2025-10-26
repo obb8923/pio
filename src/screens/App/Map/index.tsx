@@ -25,6 +25,7 @@ import { useFoundPlants } from "../../../libs/hooks/useFoundPlants";  // 발견�
 import { useMapMarkers } from "./hooks/useMapMarkers";                // 지도 마커 관리
 import { usePermissions } from '../../../libs/hooks/usePermissions';  // 권한 요청 및 확인
 import { useNotifee } from "../../../libs/hooks/useNotifee";          // 알림 관리
+import { useMapInitialization } from "../../../libs/hooks/initialization/useMapInitialization"; // Map 초기화 및 권한 요청
 import { getFlowerImageForPlant } from "./utils/markerUtils";                           // 식물별 꽃 이미지 가져오기
 import { found_plants_columns } from '../../../libs/supabase/operations/foundPlants/type'; // Supabase 테이블 타입 정의
 import { MARKER_WIDTH, MARKER_HEIGHT } from '../../../constants/normal';
@@ -87,8 +88,10 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
   // 커스텀 훅 사용
   const { myPlants, allPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
-    // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
-    useNotifee();
+  // useNotifee 훅을 호출하여 알림 자동 설정 (반환값은 사용하지 않음)
+  useNotifee();
+  // Map 초기화 및 권한 요청 (추적, 위치)
+  useMapInitialization();
 
   useEffect(() => {
     if (isFirstVisit && isInitialized) {
