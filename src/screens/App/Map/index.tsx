@@ -104,6 +104,17 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
     }
   }, [isInitialized]);
 
+  // location이 변경될 때 지도 카메라 이동
+  useEffect(() => {
+    if (latitude && longitude && mapRef.current) {
+      mapRef.current.animateCameraTo({
+        latitude,
+        longitude,
+        zoom: 13,
+      });
+    }
+  }, [latitude, longitude]);
+
   // 렌더링이 완료된 후 광고 표시 (requestIdleCallback 방식)
   useEffect(() => {
     if (!isLoadingPlants && !shouldShowAd) {
@@ -179,7 +190,7 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
           initialCamera={{
             latitude: latitude || 37.5666102,
             longitude: longitude || 126.9783881,
-            zoom: 12,
+            zoom: 13,
           }}
         >
           {plantMarkers}
