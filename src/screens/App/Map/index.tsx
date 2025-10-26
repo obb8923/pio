@@ -192,7 +192,10 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
       markerPositionAtScreen={screenPosition}
     />
 
-    {shouldShowAd && <AdmobBanner />}
+    {/* 광고 영역 - 항상 공간을 확보하여 덜컹거림 방지 */}
+    <View style={{ height: 60 }}>
+      {shouldShowAd && <AdmobBanner />}
+    </View>
   </Background>
 };
 
