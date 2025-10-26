@@ -2,13 +2,12 @@ import { View, Text, TouchableOpacity, Animated, Alert, Linking } from 'react-na
 import { Colors } from '../../../../constants/Colors';
 import CameraIcon from '../../../../../assets/svgs/Camera.svg';
 import ImageAddIcon from '../../../../../assets/svgs/ImageAdd.svg';
-import { TAB_BAR_HEIGHT } from '../../../../constants/TabNavOptions';
 import React, { useCallback, memo } from 'react';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 // import { usePermissionStore } from '../../../../store/permissionStore';
 import { usePermissions } from '../../../../libs/hooks/usePermissions';
 import { useFab } from '../hooks/useFab';
-
+import { useHaptic } from '../../../../libs/hooks/useHaptic';
 interface AddPlantFABProps {
   onNavigate: (screen: string, params: any) => void;
 }
@@ -17,6 +16,7 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
   const { isOpen, toggle, close, fabAnimation, animations } = useFab();
   const { cameraButtonTranslateY, galleryButtonTranslateY, buttonScale } = animations;
   const {cameraPermission,photoLibraryPermission,checkAndRequestCameraPermission,checkAndRequestPhotoLibraryPermission } = usePermissions();
+  const { light } = useHaptic();
   const handleCameraPress = useCallback(async () => {
     if (!cameraPermission) {
       close(); // FAB 닫기
@@ -141,7 +141,10 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
       <TouchableOpacity
         className="bg-greenTab rounded-full px-6 py-4 flex-row justify-center items-center shadow-lg"
         style={{opacity: isOpen ? 0.7 : 1}}
-        onPress={toggle}
+        onPress={() => {
+          light();
+          toggle();
+        }}
       >
         <Animated.Text
           className="text-greenActive text-3xl font-bold"
