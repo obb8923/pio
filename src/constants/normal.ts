@@ -24,3 +24,8 @@ export const MODAL_ANIMATION_DURATION_CLOSE_LONG = 350;
 // 마커 크기
 export const MARKER_WIDTH = 16;
 export const MARKER_HEIGHT = 16;
+
+//지도 초기 값
+export const DEFAULT_LATITUDE = 37.5666102;
+export const DEFAULT_LONGITUDE = 126.9783881;
+export const DEFAULT_ZOOM = 16;

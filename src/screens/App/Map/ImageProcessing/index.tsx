@@ -14,6 +14,7 @@ import { useAds } from '../../../../libs/hooks/useAds';
 // 스토어 & 상태관리
 import { useAuthStore } from '../../../../store/authStore';
 import { useModalBackgroundStore } from '../../../../store/modalBackgroundStore';
+import { useLocationStore } from '../../../../store/locationStore';
 // 컴포넌트
 import { Background } from '../../../../components/Background';
 import { CustomButton } from '../../../../components/CustomButton';
@@ -29,7 +30,7 @@ import { Colors } from '../../../../constants/Colors';
 import { BUCKET_NAME } from '../../../../constants/normal';
 import { plantTypeImages } from '../constants/images';
 import { PlantType, PlantTypeCode } from '../../../../libs/supabase/operations/foundPlants/type';
-
+import { DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_ZOOM } from '../../../../constants/normal';
 type ImageProcessingScreenProps= NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
 
 // 이미지 섹션 컴포넌트
@@ -103,6 +104,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   const route = useRoute();
   const { userId } = useAuthStore.getState();
   const { forceCloseModalBackground } = useModalBackgroundStore();
+  const { latitude: userLatitude, longitude: userLongitude } = useLocationStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [plantName, setPlantName] = useState<string>('');
@@ -110,10 +112,11 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   const [description, setDescription] = useState<string>('');
   const [openedModalType, setOpenedModalType] = useState<'map' | 'description' | 'memo' | 'reviewRequest' | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [isLocationManuallySelected, setIsLocationManuallySelected] = useState(false);
   const [center, setCenter] = useState({
-    latitude: 37.5666102,
-    longitude: 126.9783881,
-    zoom: 16,
+    latitude: userLatitude ?? DEFAULT_LATITUDE,
+    longitude: userLongitude ?? DEFAULT_LONGITUDE,
+    zoom: DEFAULT_ZOOM,
   });
   const [fadeAnim] = useState(new Animated.Value(1));
   
@@ -133,10 +136,21 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   });
 
 
-  // 초기 위치에서 변경되었는지 확인하는 함수
+  // 사용자 위치가 로드되면 center 업데이트 (아직 수동으로 선택하지 않은 경우만)
+  useEffect(() => {
+    if (userLatitude !== null && userLongitude !== null && !isLocationManuallySelected) {
+      setCenter(prev => ({
+        ...prev,
+        latitude: userLatitude,
+        longitude: userLongitude,
+      }));
+    }
+  }, [userLatitude, userLongitude, isLocationManuallySelected]);
+
+  // 사용자가 명시적으로 위치를 선택했는지 확인
   const isLocationSelected = useMemo(() => 
-    center.latitude !== 37.5666102 || center.longitude !== 126.9783881,
-    [center.latitude, center.longitude]
+    isLocationManuallySelected,
+    [isLocationManuallySelected]
   );
 
   // 모달 열기 함수들
@@ -167,6 +181,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
 
   // 선택된 위치를 사용할 수 있음
   const handleLocationSelect = useCallback(() => {
+    setIsLocationManuallySelected(true);
     setOpenedModalType(null);
     // 모달 배경도 확실히 닫기
     setTimeout(() => {
