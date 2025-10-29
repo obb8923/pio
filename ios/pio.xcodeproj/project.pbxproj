@@ -306,7 +306,7 @@
 				CODE_SIGN_ENTITLEMENTS = pio/pio.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = K56RYM74A7;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = pio/Info.plist;
@@ -317,7 +317,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.8;
+				MARKETING_VERSION = 0.1.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -342,7 +342,7 @@
 				CODE_SIGN_ENTITLEMENTS = pio/pio.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = K56RYM74A7;
 				INFOPLIST_FILE = pio/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = pio;
@@ -352,7 +352,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.8;
+				MARKETING_VERSION = 0.1.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
