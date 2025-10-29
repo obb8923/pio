@@ -6,16 +6,13 @@
       "@/*": ["src/*"],
       "@assets/*": ["assets/*"],
       "@domain/*": ["src/domain/*"],
-      "@libs/*": ["src/libs/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@components/*": ["src/components/*"],
-      "@screens/*": ["src/screens/*"],
-      "@types/*": ["src/types/*"],
-      "@utils/*": ["src/utils/*"],
-      "@styles/*": ["src/styles/*"],
-      "@config/*": ["src/config/*"],
-      "@services/*": ["src/services/*"],
-      "@store/*": ["src/store/*"],
+      "@shared/*": ["src/shared/*"],
+      "@components/*": ["src/shared/components/*"],
+      "@constants/*": ["src/shared/constants/*"],
+      "@libs/*": ["src/shared/libs/*"],
+      "@nav/*": ["src/shared/nav/*"],
+      "@store/*": ["src/shared/store/*"],
+      "@type/*": ["src/shared/type/*"],
     }
   }
 }

@@ -1,0 +1,119 @@
+import { View,Text, ScrollView, Image, Platform } from "react-native"
+import { useRoute } from "@react-navigation/native"
+import { NaverMapView,NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
+import { CustomButton } from "@components/CustomButton"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { PiodexStackParamList } from "@nav/stack/Piodex"
+import { Background } from "@components/Background"
+import { found_plants_columns } from "@libs/supabase/operations/foundPlants/type"
+import {Line} from "@components/Line"
+import { plantTypeImages } from "@domain/App/Map/constants/images"
+import { PlantTypeMap } from "@libs/supabase/operations/foundPlants/type"
+import { useState } from "react"
+import ImageX from '@assets/svgs/ImageX.svg'
+import {Colors} from "@constants/Colors"
+
+type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
+
+export const DetailScreen = ({navigation}:DetailScreenProps)=>{
+    const route = useRoute();
+    const {plant,image_url,isPreviousScreenDictionary} = route.params as {plant:found_plants_columns,image_url:string,isPreviousScreenDictionary:boolean}   
+    const [imageError, setImageError] = useState(false);
+    const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
+
+    return (
+      <Background isStatusBarGap={false} isTabBarGap={false}>
+          {/* 사진 영역 */}
+       <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
+         {imageError ? (
+          <View className="w-full h-full rounded-3xl bg-gray-100 justify-center items-center opacity-50" >
+            <ImageX width="36" height="36" style={{color:Colors.greenTab900}}/>
+          </View>
+         ) : (
+          <Image
+          source={{ uri: image_url }}
+          className="w-full h-full rounded-3xl"
+          resizeMode="cover"
+          onError={() =>  setImageError(true)}
+        />
+         )}
+        </View>
+
+        <ScrollView 
+         className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg" 
+         showsVerticalScrollIndicator={false} 
+         contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 100 : 400 }}>
+         {/* 식물 정보 영역 */}
+         <View className="w-full bg-white rounded-lg p-4">
+            {/* 식물 이름 영역 */}
+            <View className="mb-4 flex-row justify-center items-center">
+              <Text
+                className="rounded-lg p-3 text-center bg-white text-2xl"
+              >{plant_name}</Text>
+            </View>
+    {/* 식물 종류 및 활동 곡선 영역 */}
+    <View className="flex-row items-center">
+              {/* 식물 종류 영역 */}
+              <View className="h-[60px] justify-center items-center" style={{width: '30%'}}>
+              <Image source={plantTypeImages[type_code ?? 0]} className="w-[32px] h-[32px]" />
+              <Text className="text-[#333] text-sm mt-2">{PlantTypeMap[type_code ?? 0]}</Text>
+              </View>
+              {/* 구분선 */}
+              <View className="h-[40px] w-0.5 bg-gray-200"/>
+              {/* 활동 곡선 영역 */}
+              <View className=" justify-center items-center" style={{width: '70%'}}>
+              <Line data={activity_curve ?? []} width={200} height={80}  />
+                </View>
+            </View>
+            {/* 설명 영역 */}
+              <Text
+                className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               
+              >{description?description:'설명이 없습니다.'}</Text>
+            {(memo || (lng&&lat)) &&
+            <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
+            }
+            {/* 메모 영역 */}
+            {!isPreviousScreenDictionary &&
+              <Text
+                className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
+              >{memo?memo:'메모가 없습니다.'}</Text>
+            }
+             {/* 지도 영역 */}
+             {lat && lng &&
+            <View className="w-full h-64 my-8">
+              <NaverMapView
+                style={{ width: '100%', height: '100%' }}
+                initialCamera={{
+                  latitude: lat,
+                  longitude: lng,
+                  zoom: 17,
+                }}
+                isShowZoomControls={true}
+                isShowLocationButton={false}
+              ><NaverMapMarkerOverlay
+              latitude={lat}
+              longitude={lng}
+              image={plantTypeImages[type_code ?? 0]}
+              width={32}
+              height={32}
+              />
+              </NaverMapView>  
+              <View className="absolute top-2 left-4 flex-row justify-between items-center">
+                <Text className="text-lg font-bold text-greenTab">발견한 위치</Text>
+              </View>
+            </View>
+            }
+           </View>
+         </ScrollView>  
+
+         {/* 확인 버튼 */}
+         <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
+          {!isPreviousScreenDictionary && 
+           <CustomButton text="수정" size={60} onPress={()=>navigation.navigate('DetailProcessing',{plant,image_url})}/> 
+          }
+          <CustomButton text="확인" size={70} onPress={()=>navigation.goBack()}/>
+        </View>
+
+    </Background>
+    )
+}

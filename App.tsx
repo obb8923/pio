@@ -10,12 +10,12 @@ import SplashScreen from "react-native-splash-screen";
 import "./global.css";
 
 // 내부 네비게이션/컴포넌트
-import { RootStack } from "./src/nav/stack/Root";
-import { OnboardingStack } from "./src/nav/stack/Onboarding";
-import { ModalBackground } from "./src/components/ModalBackground";
-import { MaintenanceScreen } from "./src/screens/normal/Maintenance";
+import { RootStack } from "@nav/stack/Root";
+import { OnboardingStack } from "@nav/stack/Onboarding";
+import { ModalBackground } from "@components/ModalBackground";
+import { MaintenanceScreen } from "@domain/normal/Maintenance";
 // 내부 훅
-import { useAppInitialization } from "./src/libs/hooks/initialization/useAppInitialization";
+import { useAppInitialization } from "@libs/hooks/initialization/useAppInitialization";
 
 function App() {
   const { isInitialized, maintenanceData, isOnboardingCompleted } = useAppInitialization();
