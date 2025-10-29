@@ -11,6 +11,7 @@ import Mail from "../../../../assets/svgs/Mail.svg";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { VersionItem } from "./components/VersionItem";
 import { AdmobBanner } from "../../../components/ads/AdmobBanner";
+import { TAB_BAR_HEIGHT } from "../../../constants/TabNavOptions";
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: () => void,type?: 'default' | 'link'|'mail'}) => {
@@ -60,8 +61,11 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
         <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
         <VersionItem />
       </ScrollView>
-      <AdmobBanner />
-    </Background>
+      {/* 광고 영역 */}
+      <View style={{position:'absolute',bottom:TAB_BAR_HEIGHT,left: 0,right: 0}}>
+        <AdmobBanner />
+      </View>
+</Background>
   );
 };
 

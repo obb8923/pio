@@ -28,7 +28,7 @@ export function AdmobBanner({
     : !isTrackingAuthorized;
   
   return (
-    <View style={[{ alignItems: "center", justifyContent: "center", width: "100%" ,height: 'auto'}, style]}>
+    <View style={[{ alignItems: "center", justifyContent: "center", width: "100%" ,height: 60}, style]}>
       <BannerAd
         unitId={bannerUnitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
