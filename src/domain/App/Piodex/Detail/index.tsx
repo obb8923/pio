@@ -12,77 +12,153 @@ import { PlantTypeMap } from "@libs/supabase/operations/foundPlants/type"
 import { useState } from "react"
 import ImageX from '@assets/svgs/ImageX.svg'
 import {Colors} from "@constants/Colors"
-
+import { BlurView } from "@shared/components/BlurView"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
 
 export const DetailScreen = ({navigation}:DetailScreenProps)=>{
     const route = useRoute();
+    const insets = useSafeAreaInsets();
     const {plant,image_url,isPreviousScreenDictionary} = route.params as {plant:found_plants_columns,image_url:string,isPreviousScreenDictionary:boolean}   
     const [imageError, setImageError] = useState(false);
+    const [curveWidth, setCurveWidth] = useState<number>(200);
     const {id,plant_name,description,memo,lat,lng,type_code,activity_curve,activity_notes} = plant
 
     return (
-      <Background isStatusBarGap={false} isTabBarGap={false}>
-          {/* 사진 영역 */}
-       <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
-         {imageError ? (
-          <View className="w-full h-full rounded-3xl bg-gray-100 justify-center items-center opacity-50" >
-            <ImageX width="36" height="36" style={{color:Colors.greenTab900}}/>
-          </View>
-         ) : (
-          <Image
-          source={{ uri: image_url }}
-          className="w-full h-full rounded-3xl"
-          resizeMode="cover"
-          onError={() =>  setImageError(true)}
-        />
-         )}
-        </View>
-
+      <Background isStatusBarGap={false} isTabBarGap={false} style={{alignItems:'center'}}>
         <ScrollView 
-         className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg" 
+         className="flex-1 px-4 rounded-3xl" 
          showsVerticalScrollIndicator={false} 
-         contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 100 : 400 }}>
-         {/* 식물 정보 영역 */}
-         <View className="w-full bg-white rounded-lg p-4">
-            {/* 식물 이름 영역 */}
-            <View className="mb-4 flex-row justify-center items-center">
-              <Text
-                className="rounded-lg p-3 text-center bg-white text-2xl"
-              >{plant_name}</Text>
-            </View>
-    {/* 식물 종류 및 활동 곡선 영역 */}
-    <View className="flex-row items-center">
-              {/* 식물 종류 영역 */}
-              <View className="h-[60px] justify-center items-center" style={{width: '30%'}}>
-              <Image source={plantTypeImages[type_code ?? 0]} className="w-[32px] h-[32px]" />
-              <Text className="text-[#333] text-sm mt-2">{PlantTypeMap[type_code ?? 0]}</Text>
-              </View>
-              {/* 구분선 */}
-              <View className="h-[40px] w-0.5 bg-gray-200"/>
-              {/* 활동 곡선 영역 */}
-              <View className=" justify-center items-center" style={{width: '70%'}}>
-              <Line data={activity_curve ?? []} width={200} height={80}  />
+         contentContainerStyle={{ 
+          paddingTop: insets.top + 16,
+          paddingBottom: Platform.OS === "ios" ? 120 : 400 ,
+          alignItems:'center',
+
+          }}>
+            {/* 전체 컨테이너 */}
+            <View 
+            className=" bg-white p-4 w-full"
+            style={{borderTopLeftRadius:96,borderTopRightRadius:96,borderBottomLeftRadius:20,borderBottomRightRadius:20,
+             
+            }}
+            >
+              
+            {/* 사진 영역 */}
+            <View 
+            className="items-center w-full h-80"
+            style={{borderTopLeftRadius:80,borderTopRightRadius:80,borderBottomLeftRadius:20,borderBottomRightRadius:20,overflow:'hidden'}}
+
+            >
+                <View 
+                className="overflow-hidden w-full h-full"
+                style={{borderTopLeftRadius:72,borderTopRightRadius:72,borderBottomLeftRadius:20,borderBottomRightRadius:20,overflow:'hidden'}}
+                >
+                {imageError ? (
+                <View className="w-full h-full bg-gray-100 justify-center items-center opacity-50" >
+                  <ImageX width="36" height="36" style={{color:Colors.greenTab900}}/>
                 </View>
+              ) : (
+                <>
+                  <Image
+                    source={{ uri: image_url }}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                    onError={() => setImageError(true)}
+                  />                 
+                   <View className="w-full h-full absolute top-0 left-0 right-0 bottom-0"
+                  style={{ 
+                    borderRadius: 76,
+                    boxShadow: [
+                      {
+                        inset: true,
+                        offsetX: 0,
+                        offsetY: 0,
+                        blurRadius: 30,
+                        spreadDistance: 0,
+                        color: "rgba(0, 0, 0, 0.6)",
+                      },
+                    ],
+                  }}
+                  />
+                  </>
+              )}
+                </View>
+              
+              </View>
+               {/* 식물 이름 ,종류 영역 */}
+               
+               <View>
+            <View className="px-0 flex-row justify-between items-center absolute top-[-52px] left-0 right-0 w-full">
+              {/* 이름 */}
+              
+              <BlurView style={{borderWidth:6,borderColor: Colors.white,borderRadius:10000,maxWidth:'70%',minWidth:'35%',
+                boxShadow: [
+                  {
+                    offsetX: 0,
+                    offsetY: 0,
+                    blurRadius: 17,
+                    spreadDistance: 0,
+                    color: "rgba(0, 0, 0, 0.3)",
+                  },
+                ],
+              }} innerStyle={{borderRadius:20}}>
+              <View className="px-6 py-4">
+              <Text className="text-center text-xl font-bold overflow-scroll" numberOfLines={1} >
+              {plant_name}
+              </Text>
+              </View>
+              </BlurView>
+
+               {/* 식물 종류 영역 */}
+               <BlurView style={{borderWidth:6,borderColor: Colors.white,borderRadius:10000,boxShadow: [
+                  {
+                    offsetX: 0,
+                    offsetY: 0,
+                    blurRadius: 17,
+                    spreadDistance: 0,
+                    color: "rgba(0, 0, 0, 0.3)",
+                  },
+                ],}} innerStyle={{borderRadius:20}}>
+               <View className="justify-center items-center px-6 py-4 flex-row">
+              <Image source={plantTypeImages[type_code ?? 0]} style={{width:24,height:24}}/>
+              <Text className="text-center text-md ml-2">{PlantTypeMap[type_code ?? 0]}</Text>
+              </View>
+              </BlurView>
             </View>
+            </View>
+         {/* 식물 정보 영역 */}
+         <View className="w-full py-8 items-center">
             {/* 설명 영역 */}
-              <Text
-                className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               
-              >{description?description:'설명이 없습니다.'}</Text>
-            {(memo || (lng&&lat)) &&
-            <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
-            }
-            {/* 메모 영역 */}
-            {!isPreviousScreenDictionary &&
-              <Text
-                className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
-              >{memo?memo:'메모가 없습니다.'}</Text>
-            }
+            <Text className="border-b border-gray-300 border-1 text-gray-900 min-h-[90px] max-h-[140px] p-4 rounded-lg overflow-y-scroll">
+                {description?description:'설명이 없습니다.'}
+              </Text>
+     
+              {/* 활동 곡선 영역 */}
+              <View className="w-full items-center p-4 border-b border-gray-300 border-1">
+                <Text className="w-full text-gray-600 text-sm">식물의 활동 곡선</Text>
+              <View 
+                className="justify-center items-center mb-2" 
+                style={{width: '90%'}} 
+                onLayout={(event) => {
+                  const { width } = event.nativeEvent.layout;
+                  setCurveWidth(width);
+                }}
+              >
+                {curveWidth !== null && (
+                  <Line data={activity_curve ?? []} width={curveWidth} height={100} />
+                )}
+              </View>
+              </View>
+           
+            
+          
              {/* 지도 영역 */}
              {lat && lng &&
-            <View className="w-full h-64 my-8">
-              <NaverMapView
-                style={{ width: '100%', height: '100%' }}
+            <View className="w-full h-72 p-4 border-b border-gray-300 border-1 ">
+                <Text className="w-full text-gray-600 text-sm mb-2">발견한 위치</Text>
+                <View className="flex-1 rounded-3xl overflow-hidden">
+                <NaverMapView
+                style={{ flex:1 }}
                 initialCamera={{
                   latitude: lat,
                   longitude: lng,
@@ -90,19 +166,36 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
                 }}
                 isShowZoomControls={true}
                 isShowLocationButton={false}
-              ><NaverMapMarkerOverlay
-              latitude={lat}
-              longitude={lng}
-              image={plantTypeImages[type_code ?? 0]}
-              width={32}
-              height={32}
+              >
+              <NaverMapMarkerOverlay
+                latitude={lat}
+                longitude={lng}
+                image={plantTypeImages[type_code ?? 0]}
+                width={32}
+                height={32}
               />
               </NaverMapView>  
-              <View className="absolute top-2 left-4 flex-row justify-between items-center">
-                <Text className="text-lg font-bold text-greenTab">발견한 위치</Text>
               </View>
             </View>
             }
+              {/* 메모 영역 */}
+              {!isPreviousScreenDictionary &&
+              <View className="w-full p-4">
+                {/* 메모 */}
+                <View className="bg-[#FFDEA2] rounded-lg p-4 w-full">
+                  {/* 메모 헤더 */}
+                  <View className="w-full flex-row justify-between items-center mb-2">
+                  <Text className="text-[#9D691D] text-sm font-bold">메모</Text>
+                  </View>
+                  {/* 메모 내용 */}
+                  <Text
+                    className="min-h-[90px] max-h-[140px] text-[#A2690F]"
+                  >{memo?memo:'메모가 없습니다.'}</Text>
+              </View>
+              </View>
+            }
+
+           </View>
            </View>
          </ScrollView>  
 
