@@ -20,7 +20,7 @@ import { Background } from '@components/Background';
 import { CustomButton } from '@components/CustomButton';
 import { Line } from '@components/Line';
 import { MapModal } from '@domain/App/Map/ImageProcessing/components/MapModal.tsx';
-
+import { PlantDetail } from '@shared/components/PlantDetail';
 // 지연 로딩을 위한 모달 컴포넌트들
 const DescriptionModal = lazy(() => import('./components/DescriptionModal').then(module => ({ default: module.DescriptionModal })));
 const MemoModal = lazy(() => import('./components/MemoModal').then(module => ({ default: module.MemoModal })));
@@ -279,6 +279,11 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   }, [userId, plantName, memo, description, center, aiResponse, isLocationSelected, isReviewedInYear, isLoaded, isClosed, show, navigation, setReviewedInYear]);
 
   const fetchAIResponse = useCallback(async () => {
+    if(__DEV__){
+      setAiError(null);
+      setIsAiLoading(false);
+      return;
+    }
     setIsAiLoading(true);
     setAiError(null);
     try {
@@ -334,81 +339,20 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
 
   return (
     <Background isStatusBarGap={false} isTabBarGap={false}>
-       {/* 사진 영역 */}
-       <ImageSection imageUri={imageUri} />
-       <ScrollView
-        className="flex-1 mt-4 pt-80 px-2 pb-2 rounded-lg "
-        contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 100 : 400 }}
-        showsVerticalScrollIndicator={false}
-      >
-       
-        {/* 식물 정보 영역 */}
-        {isAiLoading ? (
-          <AILoadingSection />
-        ) : aiError ? (
-          <ErrorSection error={aiError} />
-        ) : (
-          <Animated.View style={{ opacity: fadeAnim }} className="w-full bg-white rounded-lg p-4">
-            {/* 식물 이름 영역 */}
-            <View className="mb-4 flex-row justify-center items-center">
-              <TextInput
-                className="rounded-lg p-3 text-center bg-white text-2xl"
-                placeholder="식물 이름을 입력하세요"
-                value={plantName ?? ''}
-                onChangeText={setPlantName}
-              />
-            </View>
-            {/* 식물 종류 및 활동 곡선 영역 */}
-            <View className="flex-row items-center">
-              {/* 식물 종류 영역 */}
-              <View className="h-[60px] justify-center items-center" style={{width: '30%'}}>
-              <Image source={plantTypeImages[aiResponse?.type_code ?? 0]} className="w-[32px] h-[32px]" />
-              <Text className="text-[#333] text-sm mt-2">{aiResponse?.type}</Text>
-              </View>
-              {/* 구분선 */}
-              <View className="h-[40px] w-0.5 bg-gray-200"/>
-              {/* 활동 곡선 영역 */}
-              <View className=" justify-center items-center" style={{width: '70%'}}>
-              <Line data={aiResponse?.activity_curve ?? []} width={200} height={80}  />
-                </View>
-            </View>
-            {/* 설명 영역 */}
-            <TouchableOpacity onPress={openDescriptionModal}>
-              <Text
-                className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll"               
-              >{description===''?'식물에 대한 설명을 입력해주세요':description}</Text>
-            </TouchableOpacity>
-            <View className="h-0.5 rounded-full bg-svggray3 my-8"/>
-
-            {/* 메모 영역 */}
-            <TouchableOpacity onPress={openMemoModal}>
-              <Text
-                className="border border-gray-300 rounded-lg p-3 bg-white min-h-[90px] max-h-[140px] text-gray-600"
-              >{memo===''?'식물에 대한 메모를 입력해주세요':memo}</Text>
-            </TouchableOpacity>
-
-            {/* 위치 선택 영역 */}
-            <View className="bg-gray-100 mt-6 mb-8 pl-4 rounded-full flex-row justify-between items-center">
-              {/* 텍스트 영역 */}
-              <View className="h-full w-auto py-4">
-                <Text className="text-greenTab text-center font-medium">
-                  {isLocationSelected ? "위치가 선택되었습니다" : "발견한 곳을 선택해 주세요"}
-                </Text>
-              </View>
-              {/* 버튼 영역 */}
-              <TouchableOpacity 
-                className="p-4 bg-greenTab rounded-full justify-center items-center"
-                onPress={openMapModal}
-              >
-                <Text className="text-greenActive text-center font-medium">
-                  {isLocationSelected ? "수정하기" : "선택하기"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        )}
-      </ScrollView>
-
+      <PlantDetail
+        type="imageProcessing"
+        image_url={imageUri}
+        plant_name={plantName}
+        type_code={aiResponse?.type_code ?? 0}
+        description={description}
+        activity_curve={aiResponse?.activity_curve ?? []}
+        memo={memo}
+        lat={center.latitude}
+        lng={center.longitude}
+        onOpenModal={(modalType: 'map' | 'memo' | 'reviewRequest') => setOpenedModalType(modalType)}
+        isLocationSelected={isLocationSelected}
+      />
+      
       {/* 버튼 영역 */}
       <ButtonSection 
         onCancel={() => navigation.goBack()}
@@ -417,10 +361,8 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
         isAiLoading={isAiLoading}
         aiResponse={aiResponse}
       />
-
-      {/* 모달들 */}
-   
-          <MapModal
+    {/* 모달들 */}
+      <MapModal
             isVisible={openedModalType === 'map'}
             onClose={closeModal}
             onComplete={handleLocationSelect}
@@ -428,18 +370,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
             onCameraChange={handleCameraChange}
             plantTypeImageCode={aiResponse?.type_code ?? 0}
           />
-
-      {openedModalType === 'description' && (
-        <Suspense fallback={<View />}>
-          <DescriptionModal
-            isVisible={openedModalType === 'description'}
-            onClose={closeModal}
-            description={description}
-            onDescriptionChange={setDescription}
-          />
-        </Suspense>
-      )}
-
+     
       {openedModalType === 'memo' && (
         <Suspense fallback={<View />}>
           <MemoModal

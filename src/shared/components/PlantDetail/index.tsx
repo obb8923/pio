@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { View, Text, ScrollView, Platform ,Image} from "react-native"
+import { View, Text, ScrollView, Platform ,Image, TouchableOpacity} from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import ImageX from '@assets/svgs/ImageX.svg'
 import {Colors} from "@constants/Colors"
@@ -8,18 +8,22 @@ import { plantTypeImages } from "@domain/App/Map/constants/images"
 import { PlantTypeCode, PlantTypeMap } from "@libs/supabase/operations/foundPlants/type"
 import { Line } from "@components/Line"
 import { NaverMapView, NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
+
 type PlantDetailProps = {
-  image_url: string | null;
-  plant_name: string;
-  type_code: PlantTypeCode;
-  description: string;
-  activity_curve: number[];
-  lat: number;
-  lng: number;
-  memo: string;
-    
+    type : "imageProcessing" | "detail" | "detailProcessing";
+    image_url?: string | null;
+    plant_name: string;
+    type_code: PlantTypeCode;
+    description?: string;
+    activity_curve?: number[];
+    lat?: number;
+    lng?: number;
+    memo?: string;
+    onOpenModal?: (modalType: 'map' | 'memo' | 'reviewRequest') => void;
+    isLocationSelected?: boolean;
 }
-export const PlantDetail = ({image_url, plant_name, type_code, description, activity_curve, memo, lat, lng}: PlantDetailProps) => {
+
+export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, description, activity_curve, memo, lat, lng, onOpenModal, isLocationSelected}: PlantDetailProps) => {
   const insets = useSafeAreaInsets();
   const [curveWidth, setCurveWidth] = useState<number>(200);
   return (
@@ -149,10 +153,28 @@ export const PlantDetail = ({image_url, plant_name, type_code, description, acti
        
      
         {/* 지도 영역 */}
-        {lat && lng &&
-       <View className="w-full h-72 p-4 border-b border-gray-300 border-1 ">
+      
+       <View className="w-full p-4 border-b border-gray-300 border-1 ">
            <Text className="w-full text-gray-600 text-sm mb-2">발견한 위치</Text>
-           <View className="flex-1 rounded-3xl overflow-hidden">
+           {type === "imageProcessing" && (
+           <View className="bg-gray-100 pl-4 rounded-full flex-row justify-between items-center">
+              <View className="h-full w-auto py-4">
+                <Text className="text-greenTab text-center font-medium">
+                  {isLocationSelected ? "위치가 선택되었습니다" : "발견한 곳을 선택해 주세요"}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                className="p-4 bg-greenTab rounded-full justify-center items-center"
+                onPress={() => onOpenModal?.('map')}
+              >
+                <Text className="text-greenActive text-center font-medium">
+                  {isLocationSelected ? "수정하기" : "선택하기"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            )}
+           {lat && lng && type === "detail" && (
+           <View className=" w-full h-72 rounded-3xl overflow-hidden">
            <NaverMapView
            style={{ flex:1 }}
            initialCamera={{
@@ -172,10 +194,11 @@ export const PlantDetail = ({image_url, plant_name, type_code, description, acti
          />
          </NaverMapView>  
          </View>
+           )}
        </View>
-       }
+       
          {/* 메모 영역 */}
-         <View className="w-full p-4">
+         <View className="w-full p-4" onTouchEnd={() => onOpenModal?.('memo')}>
            {/* 메모 */}
            <View className="bg-[#FFDEA2] rounded-lg p-4 w-full">
              {/* 메모 헤더 */}

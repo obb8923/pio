@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { PiodexStackParamList } from "@nav/stack/Piodex"
 import { Background } from "@components/Background"
 import { found_plants_columns } from "@libs/supabase/operations/foundPlants/type"
-import { PlantDetail } from "@shared/components/PlantDetail"
+import { PlantDetail } from "@components/PlantDetail"
 type DetailScreenProps = NativeStackScreenProps<PiodexStackParamList,'Detail'>
 
 export const DetailScreen = ({navigation}:DetailScreenProps)=>{
@@ -15,7 +15,8 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
 
     return (
       <Background isStatusBarGap={false} isTabBarGap={false} style={{alignItems:'center'}}>
-       <PlantDetail 
+       <PlantDetail
+       type="detail"
        image_url={image_url} 
        plant_name={plant_name as string} 
        type_code={type_code} 
