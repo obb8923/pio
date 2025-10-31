@@ -1,13 +1,13 @@
 import { useAuthStore } from "@store/authStore.ts";
 import { supabase } from "@libs/supabase/supabase.ts";
-import { saveFoundPlantType } from "@libs/supabase/operations/foundPlants/type.ts";
+import { saveFoundPlantType, found_plants_columns } from "@libs/supabase/operations/foundPlants/type.ts";
 
-export const saveFoundPlant = async (plantData: saveFoundPlantType): Promise<{ success: boolean, error?: any }> => {
+export const saveFoundPlant = async (plantData: saveFoundPlantType): Promise<{ success: boolean, data?: found_plants_columns, error?: any }> => {
   
   /**
    * found_plants 테이블에 식물 데이터를 저장합니다.
    * @param plantData 저장할 식물 데이터
-   * @returns {Promise<{ success: boolean, error?: any }>} 저장 성공 여부와 에러 객체
+   * @returns {Promise<{ success: boolean, data?: found_plants_columns, error?: any }>} 저장 성공 여부, 새로 생성된 데이터, 에러 객체
    */
     const { userId } = useAuthStore.getState();
     if (!userId) {
@@ -16,7 +16,7 @@ export const saveFoundPlant = async (plantData: saveFoundPlantType): Promise<{ s
     try {
       const { imagePath, memo, lat, lng, description, plantName, type_code, activity_curve, activity_notes } = plantData;
       console.log('saveFoundPlant', plantData);
-      const { error } = await supabase.from('found_plants').insert([
+      const { data, error } = await supabase.from('found_plants').insert([
         {
           user_id: userId,
           image_path: imagePath,
@@ -29,14 +29,14 @@ export const saveFoundPlant = async (plantData: saveFoundPlantType): Promise<{ s
           activity_curve: activity_curve,
           activity_notes: activity_notes
         },
-      ]);
+      ]).select().single();
   
       if (error) {
         console.error('Error saving found plant data:', error);
         return { success: false, error };
       }
   
-      return { success: true };
+      return { success: true, data: data as found_plants_columns };
     } catch (err) {
       console.error('saveFoundPlant function error:', err);
       return { success: false, error: err };

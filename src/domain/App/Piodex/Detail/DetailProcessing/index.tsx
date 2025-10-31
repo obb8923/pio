@@ -11,6 +11,7 @@ import { updateFoundPlant } from '@libs/supabase/operations/foundPlants/updateFo
 import { deleteFoundPlant } from '@libs/supabase/operations/foundPlants/deleteFoundPlant';
 // 스토어 & 상태관리
 import { useAuthStore } from '@store/authStore.ts';
+import { useFoundPlantsStore } from '@store/foundPlantsStore.ts';
 // 컴포넌트
 import { Background } from '@components/Background';
 import { CustomButton } from '@components/CustomButton';
@@ -86,6 +87,14 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
         lng: center.longitude,
       });
       if (success) {
+        // 스토어 업데이트
+        useFoundPlantsStore.getState().updatePlant(id, {
+          description,
+          memo,
+          lat: center.latitude,
+          lng: center.longitude,
+        });
+        
         Alert.alert('성공', '정보가 성공적으로 수정되었습니다.', [
           { text: '확인', onPress: goToHome },
         ]);
@@ -117,6 +126,9 @@ export const DetailProcessingScreen = ({navigation}:DetailProcessingScreenProps)
             try {
               const { success, error } = await deleteFoundPlant(id);
               if (success) {
+                // 스토어에서 제거
+                useFoundPlantsStore.getState().removePlant(id);
+                
                 Alert.alert('성공', '삭제가 완료되었습니다.', [
                   { text: '확인', onPress: goToHome },
                 ]);

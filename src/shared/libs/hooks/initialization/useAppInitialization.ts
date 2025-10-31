@@ -5,6 +5,7 @@ import { useAuthStore } from "@store/authStore.ts";
 import { usePermissionStore } from "@store/permissionStore.ts";
 import { useOnboarding } from "@libs/hooks/useOnboarding.ts";
 import { useDictionaryStore } from "@store/dictionaryStore.ts";
+import { useFoundPlantsStore } from "@store/foundPlantsStore.ts";
 import { type MaintenanceResponse, checkMaintenance } from "@libs/supabase/operations/normal/checkMaintenance.ts";
 
 /**
@@ -70,6 +71,18 @@ export const useAppInitialization = () => {
           }
         } catch (error) {
           if (__DEV__) console.error('[useAppInitialization] Error loading dictionary:', error);
+        }
+        
+        // 6. MyPlants 데이터 사전 로딩 (로그인된 경우만)
+        try {
+          const { userId } = useAuthStore.getState();
+          if (userId) {
+            const { fetchMyPlants } = useFoundPlantsStore.getState();
+            fetchMyPlants(); // Promise를 await하지 않아도 됨 (백그라운드 로딩)
+            if (__DEV__) console.log('[useAppInitialization] MyPlants data loading started');
+          }
+        } catch (error) {
+          if (__DEV__) console.error('[useAppInitialization] Error loading myPlants:', error);
         }
         
         setIsInitialized(true);

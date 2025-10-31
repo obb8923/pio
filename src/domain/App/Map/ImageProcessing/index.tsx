@@ -15,6 +15,7 @@ import { useAds } from '@libs/hooks/useAds';
 import { useAuthStore } from '@store/authStore.ts';
 import { useModalBackgroundStore } from '@store/modalBackgroundStore.ts';
 import { useLocationStore } from '@store/locationStore.ts';
+import { useFoundPlantsStore } from '@store/foundPlantsStore.ts';
 // 컴포넌트
 import { Background } from '@components/Background';
 import { CustomButton } from '@components/CustomButton';
@@ -242,9 +243,14 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
         activity_notes: aiResponse?.activity_notes ?? '',
       };
 
-      const { success, error } = await saveFoundPlant(plantData);
+      const { success, error, data: newPlant } = await saveFoundPlant(plantData);
 
       if (success) {
+        // 스토어에 새 식물 추가
+        if (newPlant) {
+          useFoundPlantsStore.getState().addPlant(newPlant);
+        }
+        
         // 저장 성공 알림 표시
         Alert.alert(
           "저장 완료",

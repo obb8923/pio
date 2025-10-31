@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image,RefreshControl, SectionList, ActivityIndicator } from "react-native";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "@nav/stack/Piodex";
 import { useAuthStore } from "@store/authStore.ts";
@@ -8,8 +8,6 @@ import { useFoundPlants } from "@libs/hooks/useFoundPlants";
 import { found_plants_columns } from "@libs/supabase/operations/foundPlants/type";
 import { useSignedUrls } from "@libs/hooks/useSignedUrls";
 import { Skeleton } from "@components/Skeleton";
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 
 // Define the navigation prop type directly
 type PiodexTabNavigationProp = NativeStackNavigationProp<PiodexStackParamList, 'Piodex'>;
@@ -20,25 +18,13 @@ interface PiodexTabProps {
 
 export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   const [containerWidth, setContainerWidth] = useState(0);
-  const { myPlants, isLoading: loading,setIsLoading, fetchPlants } = useFoundPlants(true);
+  const { myPlants, isLoading: loading, fetchPlants } = useFoundPlants(true);
   const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
   const [refreshing, setRefreshing] = useState(false);
   const { isLoggedIn } = useAuthStore();
 
-    useEffect(() => {
-        if (isLoggedIn && myPlants.length === 0) {
-            fetchPlants();
-        }else{
-            setIsLoading(false);
-        }
-    }, [isLoggedIn, myPlants.length]);
-
-  // 화면이 포커스될 때마다 데이터 새로고침
-  useFocusEffect(
-    useCallback(() => {
-      fetchPlants();
-    }, [])
-  );
+  // 앱 초기화에서 이미 데이터를 로드하므로 useEffect/useFocusEffect 제거
+  // 수동 새로고침(RefreshControl)으로만 최신 데이터 가져오기
 
   // 새로고침 핸들러
   const onRefresh = () => {
