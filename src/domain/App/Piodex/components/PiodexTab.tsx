@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image,RefreshControl, SectionList, ActivityIndicator } from "react-native";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "@nav/stack/Piodex";
 import { useAuthStore } from "@store/authStore.ts";
@@ -21,6 +21,16 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
   const [refreshing, setRefreshing] = useState(false);
   const { isLoggedIn } = useAuthStore();
+
+  // id -> signedUrl 매핑을 메모이제이션하여 O(1) 조회
+  const idToSignedUrlMap = useMemo(() => {
+    const map = new Map<number, string | null>();
+    if (!myPlants || !signedUrls) return map;
+    myPlants.forEach((plant, index) => {
+      map.set(plant.id as unknown as number, signedUrls[index] ?? null);
+    });
+    return map;
+  }, [myPlants, signedUrls]);
 
   // 새로고침 핸들러
   const onRefresh = () => {
@@ -102,7 +112,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   // 데이터가 있을 때
   return (
     <SectionList
-      sections={groupPlantsByDate(myPlants)}
+      sections={useMemo(() => groupPlantsByDate(myPlants), [myPlants])}
       keyExtractor={(item, index) => `section-${index}`}
       renderItem={({ item: plantsInDate }) => (
         <View 
@@ -116,7 +126,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
         > 
           {plantsInDate.map((plant: found_plants_columns) => {
             const itemWidth = containerWidth > 0 ? (containerWidth - 8) / 4 : 125;
-            const signedUrl = signedUrls[myPlants.findIndex((p: found_plants_columns) => p.id === plant.id)];
+            const signedUrl = idToSignedUrlMap.get(plant.id as unknown as number) ?? null;
             return (
               <TouchableOpacity
                 key={plant.id}
@@ -145,6 +155,10 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
         <Text className="font-semibold py-2 my-2 rounded-md">{title}</Text>
       )}
       stickySectionHeadersEnabled={false}
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={5}
+      removeClippedSubviews
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.greenTab]} />
       }
