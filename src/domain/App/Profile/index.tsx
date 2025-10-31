@@ -8,7 +8,7 @@ import { Background } from "@components/Background";
 import { FEEDBACK_FORM_URL, MAIL_ADDRESS,GOOGLEPLAY_URL ,APPSTORE_URL} from "@constants/normal";
 import ArrowUpRight from "@assets/svgs/ArrowUpRight.svg";
 import Mail from "@assets/svgs/Mail.svg";
-import { ProfileHeader } from "@domain/App/Profile/components/ProfileHeader.tsx";
+import { AuthGate} from "@domain/App/Profile/components/AuthGate.tsx";
 import { VersionItem } from "@domain/App/Profile/components/VersionItem.tsx";
 import { AdmobBanner } from "@components/ads/AdmobBanner";
 import { TAB_BAR_HEIGHT } from "@constants/TabNavOptions";
@@ -34,7 +34,7 @@ export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
       
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
         {/* 프로필 헤더 - 로그인 또는 이름*/}
-        <ProfileHeader />
+        {!isLoggedIn && <AuthGate />}
         
         <View className="h-8" />
 
