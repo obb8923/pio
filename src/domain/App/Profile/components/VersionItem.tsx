@@ -1,9 +1,9 @@
 import {useState,useEffect} from 'react'
-import { View,Text,TouchableOpacity,Linking } from 'react-native';
+import { View,Text,TouchableOpacity,Linking,Platform } from 'react-native';
 import VersionCheck from 'react-native-version-check';
 import {Colors} from '@constants/Colors.ts'
 import ArrowUpRight from "@assets/svgs/ArrowUpRight.svg";
-
+import { IOS_APP_ID } from '@constants/normal';
 export const VersionItem = () => {
     const [currentVersion, setCurrentVersion] = useState<string>('');
     const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
@@ -17,10 +17,28 @@ export const VersionItem = () => {
           if(__DEV__){
             console.log('version: ',version)
           }
-          const updateInfo = await VersionCheck.needUpdate({ provider: 'playStore' });
-          setNeedsUpdate(updateInfo?.isNeeded ?? false);
-          const url = await VersionCheck.getStoreUrl({ provider: 'playStore' });
-          setStoreUrl(url);
+          if(Platform.OS === 'ios'){
+            if(!IOS_APP_ID){
+              if(__DEV__) console.warn('Version check skipped: iOS appID is empty.');
+              setNeedsUpdate(false);
+              return;
+            }
+            // iOS: App Store 사용. appID 필수
+            // @ts-ignore - setAppID is available in the library at runtime
+            if(typeof (VersionCheck as any).setAppID === 'function'){
+              (VersionCheck as any).setAppID(IOS_APP_ID);
+            }
+            const updateInfo = await VersionCheck.needUpdate({ provider: 'appStore' as any });
+            setNeedsUpdate(updateInfo?.isNeeded ?? false);
+            const url = updateInfo?.storeUrl || (await VersionCheck.getStoreUrl({ appID: IOS_APP_ID } as any));
+            setStoreUrl(url);
+          }else{
+            // Android: Play Store 사용, packageName 기반 동작
+            const updateInfo = await VersionCheck.needUpdate({ provider: 'playStore' as any });
+            setNeedsUpdate(updateInfo?.isNeeded ?? false);
+            const url = updateInfo?.storeUrl || (await VersionCheck.getStoreUrl());
+            setStoreUrl(url);
+          }
         } catch (error) {
           console.error('Version check failed:', error);
           setNeedsUpdate(false);
