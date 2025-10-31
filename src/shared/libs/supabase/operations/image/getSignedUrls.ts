@@ -19,18 +19,41 @@ export const getSignedUrls = async (imagePaths: string | string[]): Promise<stri
             .createSignedUrl(path, 3600);
 
           if (error) {
-            console.error('Error creating signed URL:', error);
+            // 에러 객체의 더 자세한 정보 로깅
+            console.error('Error creating signed URL:', {
+              message: error.message,
+              name: error.name,
+              statusCode: (error as any).statusCode,
+              path,
+              bucket: BUCKET_NAME,
+            });
             return null;
           }
 
           if (!data?.signedUrl) {
-            console.error('No signed URL returned from Supabase');
+            console.error('No signed URL returned from Supabase', {
+              data,
+              path,
+              bucket: BUCKET_NAME,
+            });
             return null;
           }
 
           return data.signedUrl;
         } catch (err) {
-          console.error('Error getting signed URL:', err);
+          // 예상치 못한 에러에 대한 더 자세한 정보
+          const errorInfo = err instanceof Error 
+            ? {
+                message: err.message,
+                name: err.name,
+                stack: err.stack,
+              }
+            : err;
+          console.error('Error getting signed URL:', {
+            error: errorInfo,
+            path,
+            bucket: BUCKET_NAME,
+          });
           return null;
         }
       })
@@ -38,7 +61,14 @@ export const getSignedUrls = async (imagePaths: string | string[]): Promise<stri
 
     return Array.isArray(imagePaths) ? signedUrls : (signedUrls[0] || '');
   } catch (err) {
-    console.error('Error in getSignedUrls:', err);
+    const errorInfo = err instanceof Error 
+      ? {
+          message: err.message,
+          name: err.name,
+          stack: err.stack,
+        }
+      : err;
+    console.error('Error in getSignedUrls:', errorInfo);
     return Array.isArray(imagePaths) ? imagePaths.map(() => null) : '';
   }
 };
