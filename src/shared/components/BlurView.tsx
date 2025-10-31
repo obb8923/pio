@@ -9,7 +9,7 @@ export const BlurView = ({children,style,innerStyle}: {children?: React.ReactNod
         blurType="xlight" 
         blurAmount={57} 
         reducedTransparencyFallbackColor="rgba(255,255,255,0.8)"
-        style={{position:'absolute',top:0,left:0,right:0,bottom:0,height:'100%',justifyContent:'center',alignItems:'center',...innerStyle}}
+        style={{position:'absolute',top:0,left:0,right:0,bottom:0,...innerStyle}}
         />
         {children}
       </View>
