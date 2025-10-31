@@ -9,6 +9,7 @@ import { PlantTypeCode, PlantTypeMap } from "@libs/supabase/operations/foundPlan
 import { Line } from "@components/Line"
 import { NaverMapView, NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
 import { Memo } from "@components/PlantDetail/Memo"
+import { MapModalButton } from "@components/PlantDetail/MapModalButton"
 type PlantDetailProps = {
     type : "imageProcessing" | "detail" | "detailProcessing";
     image_url?: string | null;
@@ -159,21 +160,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
        <View className="w-full p-4 border-b border-gray-300 border-1 ">
            <Text className="w-full text-gray-600 text-sm mb-2">발견한 위치{isPreviousScreenDictionary}</Text>
            {type === "imageProcessing" && (
-           <View className="bg-gray-100 pl-4 rounded-full flex-row justify-between items-center">
-              <View className="h-full w-auto py-4">
-                <Text className="text-greenTab text-center font-medium">
-                  {isLocationSelected ? "위치가 선택되었습니다" : "발견한 곳을 선택해 주세요"}
-                </Text>
-              </View>
-              <TouchableOpacity 
-                className="p-4 bg-greenTab rounded-full justify-center items-center"
-                onPress={() => onOpenModal?.('map')}
-              >
-                <Text className="text-greenActive text-center font-medium">
-                  {isLocationSelected ? "수정하기" : "선택하기"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+           <MapModalButton isLocationSelected={isLocationSelected ?? false} onOpenModal={onOpenModal as (modalType: 'map' | 'memo' | 'reviewRequest') => void} />
             )}
            {lat && lng && type === "detail" && (
            <View className=" w-full h-72 rounded-3xl overflow-hidden">
