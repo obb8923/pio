@@ -7,14 +7,12 @@ import { PiodexTab } from '@domain/App/Piodex/components/PiodexTab.tsx';
 import { DictionaryTab } from '@domain/App/Piodex/components/DictionaryTab/DictionaryTab.tsx';
 import { DEVICE_WIDTH } from '@constants/normal';
 import { AdmobBanner } from '@components/ads/AdmobBanner';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TAB_BAR_HEIGHT } from '@constants/TabNavOptions';
 type PiodexScreenProps = NativeStackScreenProps<PiodexStackParamList,'Piodex'>
 
 export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
   const [activeTab, setActiveTab] = useState<'piodex' | 'plant'>('piodex');
   const slideAnim = useState(new Animated.Value(0))[0];
-  const insets = useSafeAreaInsets();
 
   const handleTabChange = (tab: 'piodex' | 'plant') => {
     if (activeTab === tab) return;
@@ -76,7 +74,7 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
          }
         </View>
       </View>
-      <View style={{position:'absolute',bottom:TAB_BAR_HEIGHT,left: 0,right: 0}}>
+      <View style={{height: 60}}>
       <AdmobBanner />
       </View>
     </Background>
