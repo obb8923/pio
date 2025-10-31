@@ -49,9 +49,9 @@ export const DictionaryTab = () => {
     navigation.navigate('Detail', { plant, image_url: publicUrl,isPreviousScreenDictionary:true });
   }, [getPublicImageUrl, navigation]);
 
-  // 아이템 너비 계산
-  const itemWidth = containerWidth > 0 
-    ? (containerWidth - ITEM_SPACING) / ITEMS_PER_ROW 
+  // 아이템 너비 계산 (행 내 간격을 모두 고려)
+  const itemWidth = containerWidth > 0
+    ? (containerWidth - ITEM_SPACING * (ITEMS_PER_ROW - 1)) / ITEMS_PER_ROW
     : DEFAULT_ITEM_WIDTH;
 
   // 로딩 상태 체크 - 데이터가 없고 로딩 중일 때만 표시
@@ -90,19 +90,28 @@ export const DictionaryTab = () => {
       renderItem={({ item: plantsInSection }) => (
         plantsInSection.length === 0 ? null : (
           <View
-            className="flex-row flex-wrap justify-start px-1"
+            className="flex-row flex-wrap justify-start"
             onLayout={handleContainerLayout}
           >
-            {plantsInSection.map((plant) => {
+            {plantsInSection.map((plant, index) => {
               const publicUrl = getPublicImageUrl(plant.id + ".webp");
+              const isLastInRow = (index + 1) % ITEMS_PER_ROW === 0;
               return (
-                <PlantCard
+                <View
                   key={plant.id}
-                  plant={plant}
-                  imageUrl={publicUrl}
-                  itemWidth={itemWidth}
-                  onPress={() => handlePlantPress(plant)}
-                />
+                  style={{
+                    width: itemWidth,
+                    marginRight: isLastInRow ? 0 : ITEM_SPACING,
+                    marginBottom: ITEM_SPACING,
+                  }}
+                >
+                  <PlantCard
+                    plant={plant}
+                    imageUrl={publicUrl}
+                    itemWidth={itemWidth}
+                    onPress={() => handlePlantPress(plant)}
+                  />
+                </View>
               );
             })}
           </View>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { DictionaryColumns } from '@libs/supabase/operations/dictionary/type';
-
+import { ImageItem } from "@domain/App/Piodex/components/ImageItem";
 interface PlantCardProps {
   plant: DictionaryColumns;
   imageUrl: string;
@@ -19,25 +19,16 @@ export const PlantCard = React.memo<PlantCardProps>(({
   
   return (
     <TouchableOpacity
-      className="p-1 mb-1"
-      style={{ width: itemWidth, height: itemWidth + 30 }}
+      style={{ width: '100%', height: itemWidth + 30 }}
       onPress={onPress}
       activeOpacity={0.8}
     >
       <View className="w-full h-full rounded-sm overflow-hidden bg-gray-100 items-center">
         <View style={{ position: 'relative', width: '100%', height: itemWidth, borderRadius: 6, overflow: 'hidden' }}>
-          <Image
-            source={{ uri: imageUrl }}
-            className="w-full"
-            style={{ 
-              height: itemWidth, 
-              borderRadius: 6,
-              backgroundColor: 'transparent',
-              opacity: imageLoaded ? 1 : 0,
-            }}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {}}
+          <ImageItem
+            signedUrl={imageUrl}
+            isLoadingImages={false}
+            width={itemWidth}
           />
           {!imageLoaded && (
             <View 

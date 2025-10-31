@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image,RefreshControl, SectionList, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity,RefreshControl, SectionList, ActivityIndicator } from "react-native";
 import { useState, useMemo } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "@nav/stack/Piodex";
@@ -7,8 +7,8 @@ import { Colors } from "@constants/Colors.ts";
 import { useFoundPlants } from "@libs/hooks/useFoundPlants";
 import { found_plants_columns } from "@libs/supabase/operations/foundPlants/type";
 import { useSignedUrls } from "@libs/hooks/useSignedUrls";
-import { Skeleton } from "@components/Skeleton";
-
+import { ImageItem } from "@domain/App/Piodex/components/ImageItem";
+import { ITEMS_PER_ROW, ITEM_SPACING, DEFAULT_ITEM_WIDTH } from "@domain/App/Piodex/components/DictionaryTab/constants.ts";
 type PiodexTabNavigationProp = NativeStackNavigationProp<PiodexStackParamList, 'Piodex'>;
 
 interface PiodexTabProps {
@@ -21,6 +21,9 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
   const [refreshing, setRefreshing] = useState(false);
   const { isLoggedIn } = useAuthStore();
+  const itemWidth = containerWidth > 0
+    ? (containerWidth - ITEM_SPACING * (ITEMS_PER_ROW - 1)) / ITEMS_PER_ROW
+    : DEFAULT_ITEM_WIDTH;
 
   // id -> signedUrl 매핑을 메모이제이션하여 O(1) 조회
   const idToSignedUrlMap = useMemo(() => {
@@ -116,7 +119,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
       keyExtractor={(item, index) => `section-${index}`}
       renderItem={({ item: plantsInDate }) => (
         <View 
-          className="flex-row flex-wrap justify-start px-1"
+          className="flex-row flex-wrap justify-start"
           onLayout={(event) => {
             const { width } = event.nativeEvent.layout;
             if (containerWidth === 0) {
@@ -124,28 +127,21 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
             }
           }}
         > 
-          {plantsInDate.map((plant: found_plants_columns) => {
-            const itemWidth = containerWidth > 0 ? (containerWidth - 8) / 4 : 125;
+          {plantsInDate.map((plant: found_plants_columns, index: number) => {
+            const isLastInRow = (index + 1) % ITEMS_PER_ROW === 0;
             const signedUrl = idToSignedUrlMap.get(plant.id as unknown as number) ?? null;
             return (
               <TouchableOpacity
                 key={plant.id}
                 onPress={() => navigation.navigate('Detail', { plant, image_url:signedUrl ,isPreviousScreenDictionary:false})}
-                className="p-1 mb-1"
-                style={{ width: itemWidth, height: itemWidth + 30 }}
+                style={{
+                  width: itemWidth,
+                  height: itemWidth,
+                  marginRight: isLastInRow ? 0 : ITEM_SPACING,
+                  marginBottom: ITEM_SPACING,
+                }}
               >
-                <View className="w-full h-full rounded-sm overflow-hidden bg-gray-100">
-                  {!signedUrl && isLoadingImages ? (
-                    <Skeleton width={itemWidth} height={itemWidth + 30} />
-                  ) : signedUrl ? (
-                    <Image
-                      source={{ uri: signedUrl }}
-                      className="w-full h-full"
-                      style={{ backgroundColor: 'transparent' }}
-                      resizeMode="cover"
-                    />
-                  ) : null}
-                </View>
+                <ImageItem signedUrl={signedUrl} isLoadingImages={isLoadingImages} width={itemWidth} />
               </TouchableOpacity>
             );
           })}
