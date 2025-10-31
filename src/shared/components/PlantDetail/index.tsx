@@ -21,9 +21,10 @@ type PlantDetailProps = {
     memo?: string;
     onOpenModal?: (modalType: 'map' | 'memo' | 'reviewRequest') => void;
     isLocationSelected?: boolean;
+    isPreviousScreenDictionary?: boolean;
 }
 
-export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, description, activity_curve, memo, lat, lng, onOpenModal, isLocationSelected}: PlantDetailProps) => {
+export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, description, activity_curve, memo, lat, lng, onOpenModal, isLocationSelected, isPreviousScreenDictionary}: PlantDetailProps) => {
   const insets = useSafeAreaInsets();
   const [curveWidth, setCurveWidth] = useState<number>(200);
   return (
@@ -153,9 +154,10 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
        
      
         {/* 지도 영역 */}
-      
+       {!isPreviousScreenDictionary && (
+        <>
        <View className="w-full p-4 border-b border-gray-300 border-1 ">
-           <Text className="w-full text-gray-600 text-sm mb-2">발견한 위치</Text>
+           <Text className="w-full text-gray-600 text-sm mb-2">발견한 위치{isPreviousScreenDictionary}</Text>
            {type === "imageProcessing" && (
            <View className="bg-gray-100 pl-4 rounded-full flex-row justify-between items-center">
               <View className="h-full w-auto py-4">
@@ -211,7 +213,8 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
              >{memo?memo:'메모가 없습니다.'}</Text>
          </View>
          </View>
-       
+         </>
+         )}
 
       </View>
       </View>

@@ -25,6 +25,7 @@ export const DetailScreen = ({navigation}:DetailScreenProps)=>{
        memo={memo as string} 
        lat={lat} 
        lng={lng}
+       isPreviousScreenDictionary={isPreviousScreenDictionary}
        />
 
          {/* 확인 버튼 */}
