@@ -23,7 +23,7 @@ export const PlantCard = React.memo<PlantCardProps>(({
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View className="w-full h-full rounded-sm overflow-hidden bg-gray-100 items-center">
+      <View className="w-full h-full rounded-sm overflow-hidden items-center">
         <View style={{ position: 'relative', width: '100%', height: itemWidth, borderRadius: 6, overflow: 'hidden' }}>
           <ImageItem
             signedUrl={imageUrl}
