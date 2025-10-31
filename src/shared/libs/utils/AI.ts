@@ -1,22 +1,20 @@
 import { supabase } from '@libs/supabase/supabase.ts';
 import { SUPABASE_REF, SUPABASE_ANON_KEY } from '@env';
 import * as RNFS from 'react-native-fs';
+import { type PlantType, type PlantTypeCode } from '@libs/supabase/operations/foundPlants/type';
 
-export type PlantType = "기타" | "꽃" | "관목" | "나무" | "선인장/다육" | "수중식물" | "덩굴식물" | "잔디류";
-export type PlantTypeCode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-export interface AIResponse {
-  code: "success" | "error" | "not_plant" | "low_confidence";
-  name?: string;
-  type?: PlantType;
-  type_code?: PlantTypeCode;
-  description?: string;
-  activity_curve?: number[];
-  activity_notes?: string;
-  error?: string;
+export type ResponseCode = "success" | "error" | "not_plant" | "low_confidence";
+export type AIResponseType = {
+  response_code: ResponseCode;
+  plant_name?: string;
+  plant_type?: PlantType;
+  plant_type_code?: PlantTypeCode;
+  plant_description?: string;
+  plant_activity_curve?: number[];
+  error_message?: string;
 }
 
-export async function getAIResponseWithImage(imageUri: string): Promise<AIResponse | null> {
+export async function getAIResponseWithImage(imageUri: string): Promise<AIResponseType | null> {
   try {
     let imageBase64: string | null = null;
     try {
@@ -62,7 +60,7 @@ export async function getAIResponseWithImage(imageUri: string): Promise<AIRespon
     }
 
     const responseData = await response.json();
-    return responseData as AIResponse;
+    return responseData as AIResponseType;
 
   } catch (error: any) {
     console.error("getAIResponseWithImage error:", {
@@ -71,8 +69,8 @@ export async function getAIResponseWithImage(imageUri: string): Promise<AIRespon
       details: error.details
     });
     return {
-      code: "error",
-      error: "이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요."
+      response_code: "error",
+      error_message: "이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요."
     };
   }
 }

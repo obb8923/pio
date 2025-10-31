@@ -34,13 +34,12 @@ serve(async (req) => {
 
 - 사진에 여러 식물이 있을 경우, 사진의 중앙에서 가장 가까운 식물을 우선 분석해줘.  
 - 반드시 다음 항목들을 포함해줘:  
-  - 식물 이름(name)  
-  - 식물 형태(type) 및 대응 코드(type_code)  
-  - 설명(description): 간단한 설명, 학명, 과, 속, 종, 추가 설명 순서로 쉼표 또는 괄호로 구분된 하나의 문장으로 작성  
-  - 활동성 곡선(activity_curve): 1월부터 12월까지 각 달의 활동성을 0~1 범위로 표현한 배열 (인덱스 0=1월, 1=2월, ..., 11=12월)  
-  - 활동성 노트(activity_notes): 활동성 곡선에 대한 간단한 설명  
+  - 식물 이름(plant_name)  
+  - 식물 형태(plant_type) 및 대응 코드(plant_type_code)  
+  - 설명(plant_description): 식물에 대한 설명을 해줘 식물에 대해 잘 모르는 사람이 들었을때 알 수 있도록 쉽고, 유익하거나 알면 재밌는 정보가 있으면 좋아. 설명은 최대 4줄 까지 작성할 수 있어. 구분없이 쭉 작성
+  - 활동성 곡선(plant_activity_curve): 1월부터 12월까지 각 달의 활동성을 0~1 범위로 표현한 배열 (인덱스 0=1월, 1=2월, ..., 11=12월)  
 
-- 'type' 값은 반드시 아래 7가지 중 하나를 정확히 사용하고, 해당하는 'type_code'도 정확히 매칭해줘:  
+- 'plant_type' 값은 반드시 아래 7가지 중 하나를 정확히 사용하고, 해당하는 'plant_type_code'도 정확히 매칭해줘:  
   - 기타 (0)  
   - 꽃 (1)  
   - 관목 (2)  
@@ -52,31 +51,30 @@ serve(async (req) => {
 
 식물일 경우 예시 응답:  
 {  
-  "code": "success",  
-  "name": "달맞이꽃",  
-  "type": "꽃",  
-  "type_code": 1,  
-  "description": "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물이며, 학명은 Oenothera biennis, 과는 물레나물과(Onagraceae), 속은 Oenothera, 종은 biennis입니다. 주로 6~7월에 개화하고 9~10월에 결실합니다.",  
-  "activity_curve": [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],  
-  "activity_notes": "6~7월 개화, 9~10월 결실 후 한해살이 종료"  
+  "response_code": "success",  
+  "plant_name": "달맞이꽃",  
+  "plant_type": "꽃",  
+  "plant_type_code": 1,  
+  "plant_description": "달맞이꽃은 이름처럼 저녁에 피고 아침에 지는 노란색 꽃입니다. 밤에 활짝 피어 달빛을 맞이하는 것처럼 보여 월견초(月見草)라고도 불립니다. 꽃이 밤에 피는 이유는 나방처럼 밤에 활동하는 곤충들의 도움을 받아 씨앗을 만들려고 하는 영리한 전략 때문입니다. 놀랍게도, 달맞이꽃은 벌의 날갯짓 소리를 들으면 꿀을 더 많이 분비하는 능력이 있는 것으로 알려져 있습니다. 이는 꽃잎이 진동을 감지하여 귀와 같은 역할을 한다는 흥미로운 연구 결과입니다. 씨앗에서 짜낸 기름은 감마리놀렌산이 풍부한 '달맞이꽃종자유'라 불리며 건강식품으로도 유명하며, 꽃말은 밤새 기다리는 기다림입니다.",  
+  "plant_activity_curve": [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],  
 }  
 
 식물이 아닐 경우 예시 응답:  
 {  
-  "code": "not_plant",  
-  "error": "식물 사진이 아닙니다. 다시 시도해주세요."  
+  "response_code": "not_plant",  
+  "error_message": "식물 사진이 아닙니다. 다시 시도해주세요."  
 }  
 
 판단이 불확실한 경우 예시 응답:  
 {  
-  "code": "low_confidence",  
-  "error": "식물로 보이나 정확한 종류를 식별하기 어렵습니다. 다른 각도의 사진을 시도해보세요."  
+  "response_code": "low_confidence",  
+  "error_message": "식물로 보이나 정확한 종류를 식별하기 어렵습니다. 다른 각도의 사진을 시도해보세요."  
 }  
 
 기타 문제 발생 시 예시 응답:  
 {  
-  "code": "error",  
-  "error": "이미지 처리에 문제가 있습니다. 다시 시도해주세요."  
+  "response_code": "error",  
+  "error_message": "문제가 발생했습니다. 다시 시도해주세요."  
 }  
 
 ` },
@@ -102,55 +100,55 @@ serve(async (req) => {
         jsonText = response.text.trim();
       }
 
-      // JSON 파싱
+      // JSON 파싱 (통일된 키만 허용)
       const responseData = JSON.parse(jsonText);
       
       // 응답 형식 검증
-      if (!responseData.code || !["success", "error", "not_plant", "low_confidence"].includes(responseData.code)) {
+      if (!responseData.response_code || !["success", "error", "not_plant", "low_confidence"].includes(responseData.response_code)) {
         return new Response(
           JSON.stringify({
-            code: "error",
-            error: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+            response_code: "error",
+            error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
           }),
           { headers }
         );
       }
 
       // 성공 케이스 검증
-      if (responseData.code === "success") {
-        if (!responseData.name || !responseData.description || 
-            !responseData.type || !responseData.type_code || 
-            !responseData.activity_curve || !responseData.activity_notes) {
+      if (responseData.response_code === "success") {
+        if (!responseData.plant_name || !responseData.plant_description || 
+            !responseData.plant_type || (responseData.plant_type_code === undefined) || 
+            !responseData.plant_activity_curve) {
           return new Response(
             JSON.stringify({
-              code: "error",
-              error: "식물 정보를 가져오는데 실패했습니다. 다시 시도해주세요."
+              response_code: "error",
+              error_message: "식물 정보를 가져오는데 실패했습니다. 다시 시도해주세요."
             }),
             { headers }
           );
         }
 
         // type_code 유효성 검사
-        if (typeof responseData.type_code !== 'number' || 
-            responseData.type_code < 0 || 
-            responseData.type_code > 7) {
+        if (typeof responseData.plant_type_code !== 'number' || 
+            responseData.plant_type_code < 0 || 
+            responseData.plant_type_code > 7) {
           return new Response(
             JSON.stringify({
-              code: "error",
-              error: "식물 유형 코드가 유효하지 않습니다. 다시 시도해주세요."
+              response_code: "error",
+              error_message: "식물 유형 코드가 유효하지 않습니다. 다시 시도해주세요."
             }),
             { headers }
           );
         }
 
         // activity_curve 유효성 검사
-        if (!Array.isArray(responseData.activity_curve) || 
-            responseData.activity_curve.length !== 12 || 
-            !responseData.activity_curve.every(val => typeof val === 'number' && val >= 0 && val <= 1)) {
+        if (!Array.isArray(responseData.plant_activity_curve) || 
+            responseData.plant_activity_curve.length !== 12 || 
+            !responseData.plant_activity_curve.every((val: any) => typeof val === 'number' && val >= 0 && val <= 1)) {
           return new Response(
             JSON.stringify({
-              code: "error",
-              error: "활동성 곡선 데이터가 유효하지 않습니다. 다시 시도해주세요."
+              response_code: "error",
+              error_message: "활동성 곡선 데이터가 유효하지 않습니다. 다시 시도해주세요."
             }),
             { headers }
           );
@@ -158,11 +156,11 @@ serve(async (req) => {
       }
 
       // 에러 케이스 검증
-      if ((responseData.code === "error" || responseData.code === "not_plant" || responseData.code === "low_confidence") && !responseData.error) {
+      if ((responseData.response_code === "error" || responseData.response_code === "not_plant" || responseData.response_code === "low_confidence") && !responseData.error_message) {
         return new Response(
           JSON.stringify({
-            code: "error",
-            error: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+            response_code: "error",
+            error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
           }),
           { headers }
         );
@@ -174,8 +172,8 @@ serve(async (req) => {
       console.error("Original response text:", response.text);
       return new Response(
         JSON.stringify({
-          code: "error",
-          error: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+          response_code: "error",
+          error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
         }),
         { headers }
       );
@@ -191,8 +189,8 @@ serve(async (req) => {
     }
     return new Response(
       JSON.stringify({
-        code: "error",
-        error: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+        response_code: "error",
+        error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
       }),
       { status: 500, headers }
     );

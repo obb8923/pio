@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense, memo, useCallback, useMemo } from 'react';
-import { View,Text,Image,TouchableOpacity,TextInput,ActivityIndicator,Animated,Alert,Platform,ScrollView} from 'react-native';
+import { View,Animated,Alert } from 'react-native';
 // 외부 라이브러리 
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -19,46 +19,16 @@ import { useFoundPlantsStore } from '@store/foundPlantsStore.ts';
 // 컴포넌트
 import { Background } from '@components/Background';
 import { CustomButton } from '@components/CustomButton';
-import { Line } from '@components/Line';
 import { MapModal } from '@domain/App/Map/ImageProcessing/components/MapModal.tsx';
 import { PlantDetail } from '@shared/components/PlantDetail';
 // 지연 로딩을 위한 모달 컴포넌트들
-const DescriptionModal = lazy(() => import('./components/DescriptionModal').then(module => ({ default: module.DescriptionModal })));
 const MemoModal = lazy(() => import('./components/MemoModal').then(module => ({ default: module.MemoModal })));
 const ReviewRequestModal = lazy(() => import('./components/ReviewRequestModal').then(module => ({ default: module.ReviewRequestModal })));
 // 상수 & 타입
-import { Colors } from '@constants/Colors.ts';
 import { BUCKET_NAME } from '@constants/normal.ts';
-import { plantTypeImages } from '@domain/App/Map/constants/images.ts';
-import { PlantType, PlantTypeCode } from '@libs/supabase/operations/foundPlants/type';
 import { DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_ZOOM } from '@constants/normal.ts';
+import { type AIResponseType ,type ResponseCode} from '@libs/utils/AI';
 type ImageProcessingScreenProps= NativeStackScreenProps <MapStackParamList,'ImageProcessing'>
-
-// 이미지 섹션 컴포넌트
-const ImageSection = memo(({ imageUri }: { imageUri: string }) => (
-  <View className="absolute top-0 left-0 right-0 items-center mb-6 w-full h-80">
-    <Image
-      source={{ uri: imageUri }}
-      className="w-full h-full rounded-3xl"
-      resizeMode="cover"
-    />
-  </View>
-));
-
-// 로딩 섹션 컴포넌트
-const AILoadingSection = memo(() => (
-  <View className="w-full h-96 bg-white rounded-lg p-4 justify-center items-center">
-    <ActivityIndicator size="large" color={Colors.greenTab} />
-    <Text className="mt-4 text-lg text-gray-600">식물을 분석 중입니다...</Text>
-  </View>
-));
-
-// 에러 섹션 컴포넌트
-const ErrorSection = memo(({ error }: { error: string }) => (
-  <View className="w-full h-96 bg-white rounded-lg p-4 justify-center items-center">
-    <Text className="text-red-500 text-lg text-center">{error}</Text>
-  </View>
-));
 
 // 버튼 섹션 컴포넌트
 const ButtonSection = memo(({ 
@@ -72,11 +42,11 @@ const ButtonSection = memo(({
   onSave: () => void;
   isProcessing: boolean;
   isAiLoading: boolean;
-  aiResponse: AiResponseType | null;
+  aiResponse: AIResponseType | null;
 }) => (
   <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
     <CustomButton text="취소" size={60} onPress={onCancel}/>
-    {!isAiLoading && aiResponse?.code === "success" && (
+    {!isAiLoading && aiResponse?.response_code === "success" && (
       <>
         <View className="w-20"/>
         <CustomButton 
@@ -90,17 +60,7 @@ const ButtonSection = memo(({
   </View>
 ));
 
-// AI 응답 객체 타입 정의
-interface AiResponseType {
-  code: "success" | "error" | "not_plant" | "low_confidence";
-  name?: string;
-  type?: PlantType;
-  type_code?: PlantTypeCode;
-  description?: string;
-  activity_curve?: number[];
-  activity_notes?: string;
-  error?: string;
-}
+
 const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps) => {
   const route = useRoute();
   const { userId } = useAuthStore.getState();
@@ -108,11 +68,9 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   const { latitude: userLatitude, longitude: userLongitude } = useLocationStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [plantName, setPlantName] = useState<string>('');
   const [memo, setMemo] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  const [ AIResponseCode, setAIResponseCode] = useState<ResponseCode | null>(null);
   const [openedModalType, setOpenedModalType] = useState<'map' | 'description' | 'memo' | 'reviewRequest' | null>(null);
-  const [aiError, setAiError] = useState<string | null>(null);
   const [isLocationManuallySelected, setIsLocationManuallySelected] = useState(false);
   const [center, setCenter] = useState({
     latitude: userLatitude ?? DEFAULT_LATITUDE,
@@ -126,15 +84,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   };
   const {isReviewedInYear,setReviewedInYear,isLoading,lastReviewDate} = useReview();
   const { isLoaded, isClosed, show } = useAds();
-  const [aiResponse, setAiResponse] = useState<AiResponseType | null>({
-    code: "success",
-    name: "달맞이꽃",
-    type: "꽃",
-    type_code: 1,
-    description: "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물입니다.",
-    activity_curve: [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],
-    activity_notes: "달맞이꽃은 해질 무렵 노란 꽃이 피는 초본식물입니다.",
-  });
+  const [aiResponse, setAiResponse] = useState<AIResponseType | null>(null);
 
 
   // 사용자 위치가 로드되면 center 업데이트 (아직 수동으로 선택하지 않은 경우만)
@@ -153,23 +103,6 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
     isLocationManuallySelected,
     [isLocationManuallySelected]
   );
-
-  // 모달 열기 함수들
-  const openDescriptionModal = useCallback(() => {
-    setOpenedModalType('description');
-  }, []);
-
-  const openMemoModal = useCallback(() => {
-    setOpenedModalType('memo');
-  }, []);
-
-  const openMapModal = useCallback(() => {
-    if (!userId) {
-      Alert.alert("알림", "로그인 후 이용해주세요.");
-      return;
-    }
-    setOpenedModalType('map');
-  }, [userId]);
 
   // 지도 중심이 바뀔 때마다 중심 좌표 갱신
   const handleCameraChange = useCallback((e: any) => {
@@ -204,10 +137,6 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
       Alert.alert("알림", "로그인 후 이용해주세요.");
       return;
     }
-    if (!plantName) {
-      Alert.alert("알림", "식물 이름을 입력해주세요.");
-      return;
-    }
     if (!isLocationSelected) {
       Alert.alert("알림", "발견한 곳을 선택해주세요.");
       return;
@@ -236,11 +165,10 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
         memo: memo || null,
         lat: center.latitude,
         lng: center.longitude,
-        description: description || null,
-        plantName: plantName,
-        type_code: aiResponse?.type_code ?? 0,
-        activity_curve: aiResponse?.activity_curve ?? [],
-        activity_notes: aiResponse?.activity_notes ?? '',
+        description: aiResponse?.plant_description ?? null,
+        plantName: aiResponse?.plant_name ?? '',
+        type_code: aiResponse?.plant_type_code ?? 0,
+        activity_curve: aiResponse?.plant_activity_curve ?? [],
       };
 
       const { success, error, data: newPlant } = await saveFoundPlant(plantData);
@@ -282,49 +210,32 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
     } finally {
       setIsProcessing(false);
     }
-  }, [userId, plantName, memo, description, center, aiResponse, isLocationSelected, isReviewedInYear, isLoaded, isClosed, show, navigation, setReviewedInYear]);
+  }, [userId, aiResponse?.plant_name, memo, aiResponse?.plant_description, center, aiResponse, isLocationSelected, isReviewedInYear, isLoaded, isClosed, show, navigation, setReviewedInYear]);
 
   const fetchAIResponse = useCallback(async () => {
-    if(__DEV__){
-      setAiError(null);
-      setIsAiLoading(false);
-      return;
-    }
+   
     setIsAiLoading(true);
-    setAiError(null);
     try {
       const response = await getAIResponseWithImage(imageUri);
+      console.log("response", response);
       if (response) {
         // response의 code가 유효한 값인지 확인
-        if (response.code === "success" || response.code === "error" || response.code === "not_plant" || response.code === "low_confidence") {
-          setAiResponse(response as AiResponseType);
-          if (response.code === "error") {
-            setAiError(response.error || "AI 처리 중 오류가 발생했습니다.");
-          } else if (response.code === "not_plant") {
-            setAiError("식물이 아닌 것으로 판단되었습니다.");
-          } else if (response.code === "low_confidence") {
-            setAiError("식물을 정확하게 인식하지 못했습니다. 다시 시도해주세요.");
-          }
-        } else {
-          setAiError("예상치 못한 응답 형식입니다. 다시 시도해주세요.");
+        if (response.response_code === "success") {
+          setAiResponse(response as AIResponseType);
+          setAIResponseCode(null);
+        } else if (response.response_code === "error" || response.response_code === "not_plant" || response.response_code === "low_confidence"){
           setAiResponse(null);
+          setAIResponseCode(response.response_code);
         }
       } else {
-        setAiError("AI 응답을 받지 못했습니다. 다시 시도해주세요.");
+        setAIResponseCode("error");
         setAiResponse(null);
       }
     } catch (error) {
-      console.error("AI 응답 요청 중 오류:", error);
-      setAiError("AI 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setAIResponseCode("error");
       setAiResponse(null);
     } finally {
       setIsAiLoading(false);
-      // AI 로딩 완료 후 애니메이션 시작
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
     }
   }, [imageUri, fadeAnim]);
 
@@ -332,31 +243,22 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
     fetchAIResponse();
   }, [imageUri]);
 
-  // aiResponse 상태가 변경되면 plantName과 description 업데이트
-  useEffect(() => {
-    if (aiResponse && aiResponse.code === "success") {
-      setPlantName(aiResponse.name || '');
-      setDescription(aiResponse.description || '');
-    } else {
-      setPlantName('');
-      setDescription('');
-    }
-  }, [aiResponse]);
-
   return (
     <Background isStatusBarGap={false} isTabBarGap={false}>
       <PlantDetail
         type="imageProcessing"
         image_url={imageUri}
-        plant_name={plantName}
-        type_code={aiResponse?.type_code ?? 0}
-        description={description}
-        activity_curve={aiResponse?.activity_curve ?? []}
+        plant_name={aiResponse?.plant_name ?? ''}
+        type_code={aiResponse?.plant_type_code ?? 0}
+        description={aiResponse?.plant_description ?? ''}
+        activity_curve={aiResponse?.plant_activity_curve ?? []}
         memo={memo}
         lat={center.latitude}
         lng={center.longitude}
         onOpenModal={(modalType: 'map' | 'memo' | 'reviewRequest') => setOpenedModalType(modalType)}
         isLocationSelected={isLocationSelected}
+        isAILoading={isAiLoading}
+        AIResponseCode={AIResponseCode}
       />
       
       {/* 버튼 영역 */}
@@ -374,7 +276,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
             onComplete={handleLocationSelect}
             center={center}
             onCameraChange={handleCameraChange}
-            plantTypeImageCode={aiResponse?.type_code ?? 0}
+            plantTypeImageCode={aiResponse?.plant_type_code ?? 0}
           />
      
       {openedModalType === 'memo' && (

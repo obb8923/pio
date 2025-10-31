@@ -21,7 +21,6 @@ export type found_plants_columns = {
     plant_name: string | null; 
     type_code: PlantTypeCode ;
     activity_curve: number[] ;
-    activity_notes: string ;
   }
   export type saveFoundPlantType = {
     userId: string;
@@ -33,5 +32,4 @@ export type found_plants_columns = {
     plantName: string | null; 
     type_code: PlantTypeCode ;
     activity_curve: number[] ;
-    activity_notes: string ;
   }
