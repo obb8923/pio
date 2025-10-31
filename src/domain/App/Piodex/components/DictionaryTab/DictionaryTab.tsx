@@ -22,12 +22,13 @@ export const DictionaryTab = () => {
   const { imageLoading, getPublicImageUrl } = useImagePrefetch(dictionary);
   const { sections, toggleSection, openSections } = useSeasonSections(dictionary);
 
-  // 초기 데이터 로딩
+  // 초기 데이터 로딩 
   useEffect(() => {
-    if (!dictionary) {
+    // 이미 로딩 중이 아니고 데이터도 없으면 (초기화 실패 시 대비)
+    if (!loading && !dictionary) {
       fetchDictionary();
     }
-  }, [dictionary, fetchDictionary]);
+  }, []); // 마운트 시 한 번만
 
   // 새로고침 핸들러
   const onRefresh = useCallback(async () => {
@@ -53,8 +54,8 @@ export const DictionaryTab = () => {
     ? (containerWidth - ITEM_SPACING) / ITEMS_PER_ROW 
     : DEFAULT_ITEM_WIDTH;
 
-  // 로딩 상태 체크
-  if (loading || imageLoading) {
+  // 로딩 상태 체크 - 데이터가 없고 로딩 중일 때만 표시
+  if (loading && !dictionary) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />

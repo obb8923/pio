@@ -4,6 +4,7 @@ import { SUPABASE_WEB_CLIENT_KEY, SUPABASE_IOS_CLIENT_KEY } from "@env";
 import { useAuthStore } from "@store/authStore.ts";
 import { usePermissionStore } from "@store/permissionStore.ts";
 import { useOnboarding } from "@libs/hooks/useOnboarding.ts";
+import { useDictionaryStore } from "@store/dictionaryStore.ts";
 import { type MaintenanceResponse, checkMaintenance } from "@libs/supabase/operations/normal/checkMaintenance.ts";
 
 /**
@@ -59,6 +60,17 @@ export const useAppInitialization = () => {
         // 4. 로그인 상태 확인
         await checkLoginStatus();
         if (__DEV__) console.log('[useAppInitialization] Login status checked');
+        
+        // 5. Dictionary 데이터 사전 로딩 (비동기, 블로킹하지 않음)
+        try {
+          const { dictionary, fetchDictionary } = useDictionaryStore.getState();
+          if (!dictionary) {
+            fetchDictionary(); // Promise를 await하지 않아도 됨 (백그라운드 로딩)
+            if (__DEV__) console.log('[useAppInitialization] Dictionary data loading started');
+          }
+        } catch (error) {
+          if (__DEV__) console.error('[useAppInitialization] Error loading dictionary:', error);
+        }
         
         setIsInitialized(true);
       } catch (error) {
