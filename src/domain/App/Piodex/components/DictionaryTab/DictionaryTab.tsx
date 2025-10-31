@@ -73,55 +73,57 @@ export const DictionaryTab = () => {
   }
 
   return (
-    <SectionList
-      sections={sections}
-      initialNumToRender={10} // 최초 렌더링 아이템 수
-      maxToRenderPerBatch={10} // 한 번에 렌더링할 최대 아이템 수
-      windowSize={1} // 화면 밖에 몇 배수까지 렌더링할지
-      removeClippedSubviews={true} // 화면 밖 아이템 언마운트
-      keyExtractor={(item, index) => `section-${index}`}
-      renderSectionHeader={({ section: { title, idx } }) => (
-        <TouchableOpacity onPress={() => toggleSection(idx)}>
-          <Text className="font-semibold py-2 my-2 rounded-md">
-            {title} {openSections[idx] ? "▲" : "▼"}
-          </Text>
-        </TouchableOpacity>
-      )}
-      renderItem={({ item: plantsInSection }) => (
-        plantsInSection.length === 0 ? null : (
-          <View
-            className="flex-row flex-wrap justify-start"
-            onLayout={handleContainerLayout}
-          >
-            {plantsInSection.map((plant, index) => {
-              const publicUrl = getPublicImageUrl(plant.id + ".webp");
-              const isLastInRow = (index + 1) % ITEMS_PER_ROW === 0;
-              return (
-                <View
-                  key={plant.id}
-                  style={{
-                    width: itemWidth,
-                    marginRight: isLastInRow ? 0 : ITEM_SPACING,
-                    marginBottom: ITEM_SPACING,
-                  }}
-                >
-                  <PlantCard
-                    plant={plant}
-                    imageUrl={publicUrl}
-                    itemWidth={itemWidth}
-                    onPress={() => handlePlantPress(plant)}
-                  />
-                </View>
-              );
-            })}
-          </View>
-        )
-      )}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      stickySectionHeadersEnabled={false}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
-    />
+    <>
+      <SectionList
+        sections={sections}
+        initialNumToRender={10} // 최초 렌더링 아이템 수
+        maxToRenderPerBatch={10} // 한 번에 렌더링할 최대 아이템 수
+        windowSize={1} // 화면 밖에 몇 배수까지 렌더링할지
+        removeClippedSubviews={true} // 화면 밖 아이템 언마운트
+        keyExtractor={(item, index) => `section-${index}`}
+        renderSectionHeader={({ section: { title, idx } }) => (
+          <TouchableOpacity onPress={() => toggleSection(idx)}>
+            <Text className="font-semibold py-2 my-2 rounded-md">
+              {title} {openSections[idx] ? "▲" : "▼"}
+            </Text>
+          </TouchableOpacity>
+        )}
+        renderItem={({ item: plantsInSection }) => (
+          plantsInSection.length === 0 ? null : (
+            <View
+              className="flex-row flex-wrap justify-start"
+              onLayout={handleContainerLayout}
+            >
+              {plantsInSection.map((plant, index) => {
+                const publicUrl = getPublicImageUrl(plant.id + ".webp");
+                const isLastInRow = (index + 1) % ITEMS_PER_ROW === 0;
+                return (
+                  <View
+                    key={plant.id}
+                    style={{
+                      width: itemWidth,
+                      marginRight: isLastInRow ? 0 : ITEM_SPACING,
+                      marginBottom: ITEM_SPACING,
+                    }}
+                  >
+                    <PlantCard
+                      plant={plant}
+                      imageUrl={publicUrl}
+                      itemWidth={itemWidth}
+                      onPress={() => handlePlantPress(plant)}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+          )
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        stickySectionHeadersEnabled={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
+      />
+    </>
   );
 }; 

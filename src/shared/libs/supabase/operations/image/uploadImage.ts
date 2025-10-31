@@ -106,7 +106,14 @@ export const uploadImageAndGetPath = async (imageUri: string, bucketName: string
 
     // 파일 이름 생성
     const extension = resizedImage.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const fileName = `${userId}/${new Date().toISOString()}_${Math.random().toString(36).substring(2, 15)}.${extension}`;
+    // 파일명에 포함될 수 있는 문제 문자(:, ., 공백 등)를 치환하여 안전한 경로로 생성
+    const isoSafe = new Date()
+      .toISOString()
+      .replace(/[:]/g, '-')
+      .replace(/[.]/g, '-')
+      .replace(/\s+/g, '_');
+    const randomSafe = Math.random().toString(36).substring(2, 15);
+    const fileName = `${userId}/${isoSafe}_${randomSafe}.${extension}`;
     console.log('uploadImageAndGetUrl: Generated fileName:', fileName);
 
     // 2. 이미지 변환

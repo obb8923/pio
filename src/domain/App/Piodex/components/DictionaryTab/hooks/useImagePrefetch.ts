@@ -44,6 +44,7 @@ export const useImagePrefetch = (dictionary: DictionaryColumns[] | null) => {
     } else if (!dictionary) {
       setImageLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dictionary]);
 
   return {

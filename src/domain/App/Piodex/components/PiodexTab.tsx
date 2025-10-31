@@ -21,10 +21,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
   const [refreshing, setRefreshing] = useState(false);
   const { isLoggedIn } = useAuthStore();
-  const itemWidth = containerWidth > 0
-    ? (containerWidth - ITEM_SPACING * (ITEMS_PER_ROW - 1)) / ITEMS_PER_ROW
-    : DEFAULT_ITEM_WIDTH;
-
+  
   // id -> signedUrl 매핑을 메모이제이션하여 O(1) 조회
   const idToSignedUrlMap = useMemo(() => {
     const map = new Map<number, string | null>();
@@ -75,6 +72,13 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
     return sections;
   };
 
+  const itemWidth = containerWidth > 0
+    ? (containerWidth - ITEM_SPACING * (ITEMS_PER_ROW - 1)) / ITEMS_PER_ROW
+    : DEFAULT_ITEM_WIDTH;
+
+  // 섹션 데이터 메모이제이션
+  const sectionsData = useMemo(() => groupPlantsByDate(myPlants), [myPlants]);
+
   // 로그인 상태 체크
   if(!isLoggedIn) return (
     <View className="flex-1 justify-center items-center">
@@ -115,7 +119,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   // 데이터가 있을 때
   return (
     <SectionList
-      sections={useMemo(() => groupPlantsByDate(myPlants), [myPlants])}
+      sections={sectionsData}
       keyExtractor={(item, index) => `section-${index}`}
       renderItem={({ item: plantsInDate }) => (
         <View 

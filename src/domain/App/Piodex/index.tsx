@@ -69,9 +69,12 @@ export const PiodexScreen = ({navigation}:PiodexScreenProps) => {
         
         {/* 콘텐츠 영역 */}
         <View className="flex-1">
-         {
-          activeTab === 'piodex' ? <PiodexTab navigation={navigation} /> : <DictionaryTab />
-         }
+          <View style={{ display: activeTab === 'piodex' ? 'flex' : 'none', flex: 1 }}>
+            <PiodexTab navigation={navigation} />
+          </View>
+          <View style={{ display: activeTab === 'plant' ? 'flex' : 'none', flex: 1 }}>
+            <DictionaryTab />
+          </View>
         </View>
       </View>
       <View style={{height: 60}}>
