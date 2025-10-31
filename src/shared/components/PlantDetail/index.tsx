@@ -1,7 +1,7 @@
-import { useState ,useEffect} from "react"
+import { useState } from "react"
 import { View, Text, ScrollView, Platform ,Image } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import Animated, { SlideInUp, Keyframe } from 'react-native-reanimated'
+import Animated, { Keyframe } from 'react-native-reanimated'
 import ImageX from '@assets/svgs/ImageX.svg'
 import {Colors} from "@constants/Colors"
 import { BlurView } from "@components/BlurView"
