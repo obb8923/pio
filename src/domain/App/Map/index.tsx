@@ -31,6 +31,7 @@ import { found_plants_columns } from '@libs/supabase/operations/foundPlants/type
 import { MARKER_WIDTH, MARKER_HEIGHT } from "@constants/normal";
 import { RefreshButton } from "@domain/App/Map/components/RefreshButton";
 import { PlantFilterToggle } from "@domain/App/Map/components/PlantFilterToggle";
+import {useHaptic} from "@libs/hooks/useHaptic";
 type MapStack = NativeStackScreenProps<MapStackParamList,'Map'>;
 type RootStack = NativeStackScreenProps<RootStackParamList>;
 type MapScreenProps = CompositeScreenProps<MapStack, RootStack>;
@@ -84,7 +85,7 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
   const isInitialized = usePermissionStore(state => state.isInitialized);
   const {checkAndRequestLocationPermission} = usePermissions();
   const { isFirstVisit, setFirstVisit } = useVisitStore();
- 
+  const { light } = useHaptic();
   // 커스텀 훅 사용
   const { myPlants, allPlants, isLoading: isLoadingPlants, fetchPlants } = useFoundPlants(showOnlyMyPlants);
   const { selectedPlant, isModalVisible, screenPosition, handleMarkerPress, closeModal, mapRef } = useMapMarkers();
@@ -162,7 +163,12 @@ const MapScreenComponent = ({navigation}:MapScreenProps) => {
       <PlantMarker 
         key={plant.id} 
         plant={plant} 
-        onMarkerPress={handleMarkerPress}
+        onMarkerPress={
+          (plant: found_plants_columns) => {
+            light();
+            handleMarkerPress(plant);
+          }
+        }
       />
     ));
   }, [showOnlyMyPlants, myPlants, allPlants, handleMarkerPress]);
