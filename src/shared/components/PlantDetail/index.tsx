@@ -3,12 +3,12 @@ import { View, Text, ScrollView, Platform ,Image, TouchableOpacity} from "react-
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import ImageX from '@assets/svgs/ImageX.svg'
 import {Colors} from "@constants/Colors"
-import { BlurView } from "@shared/components/BlurView"
+import { BlurView } from "@components/BlurView"
 import { plantTypeImages } from "@domain/App/Map/constants/images"
 import { PlantTypeCode, PlantTypeMap } from "@libs/supabase/operations/foundPlants/type"
 import { Line } from "@components/Line"
 import { NaverMapView, NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
-
+import { Memo } from "@components/PlantDetail/Memo"
 type PlantDetailProps = {
     type : "imageProcessing" | "detail" | "detailProcessing";
     image_url?: string | null;
@@ -202,16 +202,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
          {/* 메모 영역 */}
          <View className="w-full p-4" onTouchEnd={() => onOpenModal?.('memo')}>
            {/* 메모 */}
-           <View className="bg-[#FFDEA2] rounded-lg p-4 w-full">
-             {/* 메모 헤더 */}
-             <View className="w-full flex-row justify-between items-center mb-2">
-             <Text className="text-[#9D691D] text-sm font-bold">메모</Text>
-             </View>
-             {/* 메모 내용 */}
-             <Text
-               className="min-h-[90px] max-h-[140px] text-[#A2690F]"
-             >{memo?memo:'메모가 없습니다.'}</Text>
-         </View>
+           <Memo content={memo ?? null} type="button" />
          </View>
          </>
          )}
