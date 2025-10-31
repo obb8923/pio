@@ -6,6 +6,7 @@ import { getSignedUrls } from '@libs/supabase/operations/image/getSignedUrls';
 import { found_plants_columns } from '@libs/supabase/operations/foundPlants/type';
 import { DEVICE_WIDTH_HALF, DEVICE_HEIGHT_HALF, MODAL_ANIMATION_DURATION_CLOSE, MODAL_ANIMATION_DURATION_OPEN_LONG } from '@constants/normal.ts';
 import { useModalBackground } from '@libs/hooks/useModalBackground';
+import { BlurView } from "@components/BlurView"
 
 interface PlantDetailModalProps {
   isVisible: boolean;
@@ -34,7 +35,8 @@ const PlantImage = React.memo(({ signedUrl, isLoading }: { signedUrl: string | n
   return (
     <Image
       source={{ uri: signedUrl }}
-      className="w-full h-full rounded-t-xl"
+      className="w-full h-full"
+      style={{borderTopLeftRadius:80,borderTopRightRadius:80,borderBottomLeftRadius:20,borderBottomRightRadius:20}}
       resizeMode="cover"
       onError={() => {
         console.log('이미지 로드 실패', signedUrl);
@@ -43,28 +45,6 @@ const PlantImage = React.memo(({ signedUrl, isLoading }: { signedUrl: string | n
   );
 });
 
-// 텍스트 컨텐츠 컴포넌트를 메모이제이션
-const PlantContent = React.memo(({ selectedPlant }: { selectedPlant: found_plants_columns | null }) => {
-  const plantName = useMemo(() => selectedPlant?.plant_name || '이름 없는 식물', [selectedPlant?.plant_name]);
-  const description = useMemo(() => selectedPlant?.description || '설명이 없습니다.', [selectedPlant?.description]);
-  const memo = useMemo(() => selectedPlant?.memo || '', [selectedPlant?.memo]);
-
-  return (
-    <View className="mb-4 p-4">
-      <View className="flex-row justify-start items-center mb-4">
-        <Text className="text-xl font-bold text-gray-800">
-          {plantName}
-        </Text>
-      </View>
-      <Text className="text-gray-600 mb-2">
-        {description}
-      </Text>
-      <Text className="text-gray-500">
-        {memo}
-      </Text>
-    </View>
-  );
-});
 
 export const PlantDetailModal = React.memo(({
   isVisible,
@@ -191,20 +171,58 @@ export const PlantDetailModal = React.memo(({
       visible={isVisible}
       onRequestClose={handleCloseWithAnimation}
     >
+      {/* 전체화면 */}
       <View className="flex-1 justify-center items-center">    
+        {/* 모달 컨테이너 */}
         <Animated.View 
-          className="bg-white rounded-3xl max-h-[90%] min-h-[50%] w-[90%]"
-          style={animatedViewStyle}
+          className="bg-white max-h-[90%] min-h-[50%] w-[90%]"
+          style={{...animatedViewStyle,borderTopLeftRadius:96,borderTopRightRadius:96,borderBottomLeftRadius:20,borderBottomRightRadius:20}}
         >
-          <ScrollView 
+          
+            <View className="w-full h-[300px] mb-1 p-4" style={{borderTopLeftRadius:96,borderTopRightRadius:96,borderBottomLeftRadius:20,borderBottomRightRadius:20}}>
+              <View className="w-full h-full relative bg-black " style={{borderTopLeftRadius:80,borderTopRightRadius:80,borderBottomLeftRadius:20,borderBottomRightRadius:20}}>
+              <PlantImage signedUrl={signedUrl} isLoading={isLoading} />
+              <View style={{width:'100%',height:'100%',position:'absolute',top:0,left:0,right:0,bottom:0,borderTopLeftRadius:80,borderTopRightRadius:80,borderBottomLeftRadius:20,borderBottomRightRadius:20,
+                boxShadow: [{
+                  inset: true,
+                  offsetX: 0,
+                  offsetY: 0,
+                  blurRadius: 30,
+                  spreadDistance: 0,
+                  color: "rgba(0, 0, 0, 0.6)",
+                },]}}/>
+              </View>
+            </View>
+            <View style={{position:'absolute',top:245,left:10,width:'100%',alignItems:'flex-start',justifyContent:'center'}}>
+            <BlurView style={{borderWidth:6,borderColor: "white",borderRadius:999,maxWidth:'90%',minWidth:'20%',justifyContent:'center',alignItems:'center',paddingHorizontal:24,paddingVertical:12,
+               boxShadow: [
+                 {
+                   offsetX: 0,
+                   offsetY: 0,
+                   blurRadius: 17,
+                   spreadDistance: 0,
+                   color: "rgba(0, 0, 0, 0.3)",
+                 },
+               ],
+             }}
+             >
+                <Text className="text-xl font-bold text-gray-900" numberOfLines={1}>
+                  {selectedPlant?.plant_name || '이름 없는 식물'}
+                </Text>
+                </BlurView>
+                </View>
+            <ScrollView 
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 100}}
           >  
-            <View className="w-full h-[300px] rounded-t-xl mb-1 bg-gray-100">
-              <PlantImage signedUrl={signedUrl} isLoading={isLoading} />
+            <View className="mb-4 p-4">
+              <Text className="text-gray-900 mb-2">
+                {selectedPlant?.description || '설명이 없습니다.'}
+              </Text>
+              <Text className="text-gray-600">
+                {selectedPlant?.memo || ''}
+              </Text>
             </View>
-            
-            <PlantContent selectedPlant={selectedPlant} />
           </ScrollView>
           <View className="absolute bottom-6 left-0 right-0 justify-center items-center">
             <CustomButton
