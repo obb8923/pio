@@ -125,15 +125,16 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
                 style={{ width: itemWidth, height: itemWidth + 30 }}
               >
                 <View className="w-full h-full rounded-sm overflow-hidden bg-gray-100">
-                  {isLoadingImages || !signedUrl ? (
+                  {!signedUrl && isLoadingImages ? (
                     <Skeleton width={itemWidth} height={itemWidth + 30} />
-                  ) : (
+                  ) : signedUrl ? (
                     <Image
                       source={{ uri: signedUrl }}
                       className="w-full h-full"
+                      style={{ backgroundColor: 'transparent' }}
                       resizeMode="cover"
                     />
-                  )}
+                  ) : null}
                 </View>
               </TouchableOpacity>
             );
