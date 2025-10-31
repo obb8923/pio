@@ -9,7 +9,6 @@ import { found_plants_columns } from "@libs/supabase/operations/foundPlants/type
 import { useSignedUrls } from "@libs/hooks/useSignedUrls";
 import { Skeleton } from "@components/Skeleton";
 
-// Define the navigation prop type directly
 type PiodexTabNavigationProp = NativeStackNavigationProp<PiodexStackParamList, 'Piodex'>;
 
 interface PiodexTabProps {
@@ -22,9 +21,6 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
   const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
   const [refreshing, setRefreshing] = useState(false);
   const { isLoggedIn } = useAuthStore();
-
-  // 앱 초기화에서 이미 데이터를 로드하므로 useEffect/useFocusEffect 제거
-  // 수동 새로고침(RefreshControl)으로만 최신 데이터 가져오기
 
   // 새로고침 핸들러
   const onRefresh = () => {
