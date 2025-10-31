@@ -6,7 +6,8 @@ export const useFoundPlants = (showOnlyMyPlants: boolean) => {
   const {
     myPlants,
     allPlants,
-    loading,
+    loadingMy,
+    loadingAll,
     fetchMyPlants,
     fetchAllPlants,
   } = useFoundPlantsStore();
@@ -22,7 +23,7 @@ export const useFoundPlants = (showOnlyMyPlants: boolean) => {
   return {
     myPlants,
     allPlants,
-    isLoading: loading,
+    isLoading: showOnlyMyPlants ? loadingMy : loadingAll,
     fetchPlants,
   };
 }; 

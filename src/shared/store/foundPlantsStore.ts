@@ -7,7 +7,8 @@ interface FoundPlantsState {
   myPlants: found_plants_columns[];
   allPlants: found_plants_columns[];
   isFetched: boolean; // myPlants가 한 번이라도 가져왔는지 여부
-  loading: boolean;
+  loadingMy: boolean;
+  loadingAll: boolean;
   fetchMyPlants: () => Promise<void>;
   fetchAllPlants: () => Promise<void>;
   addPlant: (plant: found_plants_columns) => void;
@@ -21,7 +22,8 @@ export const useFoundPlantsStore = create<FoundPlantsState>((set, get) => ({
   myPlants: [],
   allPlants: [],
   isFetched: false,
-  loading: false,
+  loadingMy: false,
+  loadingAll: false,
   
   fetchMyPlants: async () => {
     // 이미 데이터가 있고 로딩이 완료되었다면 다시 가져오지 않음
@@ -30,7 +32,7 @@ export const useFoundPlantsStore = create<FoundPlantsState>((set, get) => ({
     }
     
     // 이미 로딩 중이면 중복 호출 방지
-    if (get().loading) {
+    if (get().loadingMy) {
       return;
     }
     
@@ -39,36 +41,36 @@ export const useFoundPlantsStore = create<FoundPlantsState>((set, get) => ({
       return; // 로그인되지 않은 경우 스킵
     }
     
-    set({ loading: true });
+    set({ loadingMy: true });
     try {
       const plants = await getFoundPlants(userId);
       if (plants) {
-        set({ myPlants: plants, isFetched: true, loading: false });
+        set({ myPlants: plants, isFetched: true, loadingMy: false });
       } else {
-        set({ loading: false });
+        set({ loadingMy: false });
       }
     } catch (error) {
       console.error('Error fetching my plants:', error);
-      set({ loading: false });
+      set({ loadingMy: false });
     }
   },
   
   fetchAllPlants: async () => {
-    if (get().loading) {
+    if (get().loadingAll) {
       return;
     }
     
-    set({ loading: true });
+    set({ loadingAll: true });
     try {
       const plants = await getFoundPlants();
       if (plants) {
-        set({ allPlants: plants, loading: false });
+        set({ allPlants: plants, loadingAll: false });
       } else {
-        set({ loading: false });
+        set({ loadingAll: false });
       }
     } catch (error) {
       console.error('Error fetching all plants:', error);
-      set({ loading: false });
+      set({ loadingAll: false });
     }
   },
   

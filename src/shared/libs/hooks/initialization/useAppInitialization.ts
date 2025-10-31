@@ -73,6 +73,15 @@ export const useAppInitialization = () => {
           if (__DEV__) console.error('[useAppInitialization] Error loading dictionary:', error);
         }
         
+        // 5-1. AllPlants 데이터 사전 로딩 (비동기, 블로킹하지 않음)
+        try {
+          const { fetchAllPlants } = useFoundPlantsStore.getState();
+          fetchAllPlants(); // Promise를 await하지 않아도 됨 (백그라운드 로딩)
+          if (__DEV__) console.log('[useAppInitialization] AllPlants data loading started');
+        } catch (error) {
+          if (__DEV__) console.error('[useAppInitialization] Error loading allPlants:', error);
+        }
+        
         // 6. MyPlants 데이터 사전 로딩 (로그인된 경우만)
         try {
           const { userId } = useAuthStore.getState();
