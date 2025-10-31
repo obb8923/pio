@@ -18,6 +18,7 @@ import { Line } from '@components/Line';
 import { MapModal } from '@domain/App/Map/ImageProcessing/components/MapModal.tsx';
 import { DescriptionModal } from '@domain/App/Map/ImageProcessing/components/DescriptionModal.tsx';
 import { MemoModal } from '@domain/App/Map/ImageProcessing/components/MemoModal.tsx';
+import { PlantDetail } from '@shared/components/PlantDetail';
 // 상수 & 타입
 import { plantTypeImages } from '@domain/App/Map/constants/images.ts';
 import { found_plants_columns, PlantTypeMap } from '@libs/supabase/operations/foundPlants/type';
