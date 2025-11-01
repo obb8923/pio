@@ -18,19 +18,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS")  return new Response(null, { status: 204, headers });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "Method Not Allowed" }), { status: 405, headers });
 
+  let language = 'ko';
   try {
-    const { imageBase64 } = await req.json(); 
+    const parsedBody = await req.json();
+    const { imageBase64 } = parsedBody;
+    language = parsedBody.language || 'ko'; 
     if (!imageBase64) return new Response(JSON.stringify({ error: "imageBase64 is required" }), { status: 400, headers });
-    const contents = [
-      {
-        inlineData: {
-          mimeType: "image/jpeg",
-          data: imageBase64,
-        },
-      },
-      { text: `
+    
+    // Define prompts for each language
+    const prompts: Record<string, string> = {
+      ko: `
 너는 식물 도감 역할을 맡은 식물 전문가야.  
-사용자가 올린 식물 사진을 분석해서 아래 JSON 형식으로 결과를 반환해줘.  
+사용자가 올린 식물 사진을 분석해서 아래 JSON 형식으로 결과를 반환해줘.
+모든 응답은 반드시 한국어로 작성해줘.
 
 - 사진에 여러 식물이 있을 경우, 사진의 중앙에서 가장 가까운 식물을 우선 분석해줘.  
 - 반드시 다음 항목들을 포함해줘:  
@@ -39,7 +39,7 @@ serve(async (req) => {
   - 설명(plant_description): 식물에 대한 설명을 해줘 식물에 대해 잘 모르는 사람이 들었을때 알 수 있도록 쉽고, 유익하거나 알면 재밌는 정보가 있으면 좋아. 설명은 최대 4줄 까지 작성할 수 있어. 구분없이 쭉 작성
   - 활동성 곡선(plant_activity_curve): 1월부터 12월까지 각 달의 활동성을 0~1 범위로 표현한 배열 (인덱스 0=1월, 1=2월, ..., 11=12월)  
 
-- 'plant_type' 값은 반드시 아래 7가지 중 하나를 정확히 사용하고, 해당하는 'plant_type_code'도 정확히 매칭해줘:  
+- 'plant_type' 값은 반드시 아래 8가지 중 하나를 정확히 사용하고, 해당하는 'plant_type_code'도 정확히 매칭해줘:  
   - 기타 (0)  
   - 꽃 (1)  
   - 관목 (2)  
@@ -77,7 +77,93 @@ serve(async (req) => {
   "error_message": "문제가 발생했습니다. 다시 시도해주세요."  
 }  
 
-` },
+`,
+      en: `
+You are a plant expert playing the role of a plant field guide.  
+Analyze the plant photo uploaded by the user and return the result in the JSON format below.
+All responses must be written in English.
+
+- If there are multiple plants in the photo, prioritize analyzing the plant closest to the center.  
+- You must include the following items:  
+  - Plant name (plant_name)  
+  - Plant type (plant_type) and corresponding code (plant_type_code)  
+  - Description (plant_description): Provide a description of the plant that is easy to understand for people who don't know much about plants, informative, or includes interesting facts. The description can be up to 4 lines. Write it continuously without line breaks.
+  - Activity curve (plant_activity_curve): An array expressing the activity level from 0 to 1 for each month from January to December (index 0=January, 1=February, ..., 11=December)  
+
+- The 'plant_type' value must be one of the following 8 options exactly, and the corresponding 'plant_type_code' must match exactly:  
+  - Other (0)  
+  - Flower (1)  
+  - Shrub (2)  
+  - Tree (3)  
+  - Cactus/Succulent (4)  
+  - Aquatic Plant (5)  
+  - Vine (6)  
+  - Grass (7)  
+
+Example response for a plant:  
+{  
+  "response_code": "success",  
+  "plant_name": "Evening Primrose",  
+  "plant_type": "Flower",  
+  "plant_type_code": 1,  
+  "plant_description": "Evening primrose is a yellow flower that blooms in the evening and wilts in the morning, just as its name suggests. It blooms fully at night as if greeting the moonlight, which is why it's also called the moon-viewing plant. The reason it blooms at night is a clever strategy to get help from moths and other nocturnal insects to produce seeds. Surprisingly, evening primrose is known to secrete more nectar when it hears the sound of bees buzzing, a fascinating research result showing that petals act like ears detecting vibrations. The oil extracted from its seeds is rich in gamma-linolenic acid, known as evening primrose seed oil, and is famous as a health food. Its flower language is waiting all night long.",  
+  "plant_activity_curve": [0.0, 0.0, 0.2, 0.5, 0.8, 1.0, 0.9, 0.6, 0.3, 0.1, 0.0, 0.0],  
+}  
+
+Example response when not a plant:  
+{  
+  "response_code": "not_plant",  
+  "error_message": "This is not a plant photo. Please try again."  
+}  
+
+Example response when uncertain:  
+{  
+  "response_code": "low_confidence",  
+  "error_message": "This appears to be a plant, but it's difficult to identify the exact species. Please try a photo from a different angle."  
+}  
+
+Example response for other errors:  
+{  
+  "response_code": "error",  
+  "error_message": "An error occurred. Please try again."  
+}  
+
+`
+    };
+
+    const selectedLanguage = language === 'en' ? 'en' : 'ko';
+    const prompt = prompts[selectedLanguage] || prompts['ko'];
+    
+    // Define error messages for each language
+    const errorMessages: Record<string, Record<string, string>> = {
+      ko: {
+        recognitionFailed: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요.",
+        fetchFailed: "식물 정보를 가져오는데 실패했습니다. 다시 시도해주세요.",
+        invalidTypeCode: "식물 유형 코드가 유효하지 않습니다. 다시 시도해주세요.",
+        invalidActivityCurve: "활동성 곡선 데이터가 유효하지 않습니다. 다시 시도해주세요.",
+        parsingError: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요.",
+        generalError: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+      },
+      en: {
+        recognitionFailed: "A problem occurred while recognizing the plant. Please try again.",
+        fetchFailed: "Failed to retrieve plant information. Please try again.",
+        invalidTypeCode: "Invalid plant type code. Please try again.",
+        invalidActivityCurve: "Invalid activity curve data. Please try again.",
+        parsingError: "A problem occurred while recognizing the plant. Please try again.",
+        generalError: "An error occurred while recognizing the plant. Please try again."
+      }
+    };
+
+    const errorMsg = errorMessages[selectedLanguage] || errorMessages['ko'];
+    
+    const contents = [
+      {
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: imageBase64,
+        },
+      },
+      { text: prompt },
     ];
 
     
@@ -108,7 +194,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             response_code: "error",
-            error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+            error_message: errorMsg.recognitionFailed
           }),
           { headers }
         );
@@ -122,7 +208,7 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({
               response_code: "error",
-              error_message: "식물 정보를 가져오는데 실패했습니다. 다시 시도해주세요."
+              error_message: errorMsg.fetchFailed
             }),
             { headers }
           );
@@ -135,7 +221,7 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({
               response_code: "error",
-              error_message: "식물 유형 코드가 유효하지 않습니다. 다시 시도해주세요."
+              error_message: errorMsg.invalidTypeCode
             }),
             { headers }
           );
@@ -148,7 +234,7 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({
               response_code: "error",
-              error_message: "활동성 곡선 데이터가 유효하지 않습니다. 다시 시도해주세요."
+              error_message: errorMsg.invalidActivityCurve
             }),
             { headers }
           );
@@ -160,7 +246,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             response_code: "error",
-            error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+            error_message: errorMsg.recognitionFailed
           }),
           { headers }
         );
@@ -173,7 +259,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           response_code: "error",
-          error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+          error_message: errorMsg.parsingError
         }),
         { headers }
       );
@@ -187,10 +273,16 @@ serve(async (req) => {
     if (error.response && error.response.data) {
       console.error("Google API Error Data:", JSON.stringify(error.response.data, null, 2));
     }
+    const selectedLanguage = language === 'en' ? 'en' : 'ko';
+    const errorMessages: Record<string, string> = {
+      ko: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요.",
+      en: "An error occurred while recognizing the plant. Please try again."
+    };
+    const errorMessage = errorMessages[selectedLanguage] || errorMessages['ko'];
     return new Response(
       JSON.stringify({
         response_code: "error",
-        error_message: "식물을 인식하는데 문제가 발생했습니다. 다시 시도해주세요."
+        error_message: errorMessage
       }),
       { status: 500, headers }
     );

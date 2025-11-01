@@ -2,6 +2,7 @@ import { supabase } from '@libs/supabase/supabase.ts';
 import { SUPABASE_REF, SUPABASE_ANON_KEY } from '@env';
 import * as RNFS from 'react-native-fs';
 import { type PlantType, type PlantTypeCode } from '@libs/supabase/operations/foundPlants/type';
+import i18n from '@libs/i18n';
 
 export type ResponseCode = "success" | "error" | "not_plant" | "low_confidence";
 export type AIResponseType = {
@@ -46,13 +47,15 @@ export async function getAIResponseWithImage(imageUri: string): Promise<AIRespon
       throw new Error("Unable to retrieve user session token and SUPABASE_ANON_KEY is not defined.");
     }
 
+    const currentLanguage = i18n.language as 'en' | 'ko';
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authorizationHeader
       },
-      body: JSON.stringify({ imageBase64 })
+      body: JSON.stringify({ imageBase64, language: currentLanguage })
     });
 
     if (!response.ok) {
@@ -68,9 +71,14 @@ export async function getAIResponseWithImage(imageUri: string): Promise<AIRespon
       status: error.status,
       details: error.details
     });
+    const currentLanguage = i18n.language as 'en' | 'ko';
+    const errorMessages: Record<string, string> = {
+      ko: "이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.",
+      en: "An error occurred while processing the image. Please try again."
+    };
     return {
       response_code: "error",
-      error_message: "이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요."
+      error_message: errorMessages[currentLanguage] || errorMessages['ko']
     };
   }
 }
