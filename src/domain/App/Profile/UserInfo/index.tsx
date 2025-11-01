@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, Alert, TextInput } from "react-native"
 import { Background } from "@components/Background"
 import { useState, useEffect } from "react"
+import { useTranslation } from 'react-i18next'
 import { signOut } from "@libs/supabase/operations/auth/signOut"
 import { requestAccountDeletion } from "@libs/supabase/operations/users/requestAccountDeletion"
 import { getUserInfo } from "@libs/supabase/operations/users/getUserInfo"
@@ -13,31 +14,35 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from "react-native"
 import { AppBar } from "@components/AppBar"
 import React from 'react'
+import { useLanguageStore } from "@store/languageStore"
 type UserInfoScreenProps = NativeStackScreenProps<ProfileStackParamList,'UserInfo'>
 
-const GENDER_OPTIONS = ["남성", "여성", "선택안함"] as const
+type GenderKey = 'male' | 'female' | 'notSelected'
+const GENDER_KEYS: GenderKey[] = ['male', 'female', 'notSelected']
 
 const Label = ({ text }: { text: string }) => (
     <Text className="text-sm text-gray-600 mb-2 px-4">{text}</Text>
 )
 
-const convertGenderToBoolean = (gender: string): boolean | null => {
-    if (gender === "남성") return true
-    if (gender === "여성") return false
+const convertGenderToBoolean = (genderKey: GenderKey): boolean | null => {
+    if (genderKey === "male") return true
+    if (genderKey === "female") return false
     return null
 }
 
-const convertBooleanToGender = (gender: boolean | null): string => {
-    if (gender === true) return "남성"
-    if (gender === false) return "여성"
-    return "선택안함"
+const convertBooleanToGender = (gender: boolean | null): GenderKey => {
+    if (gender === true) return "male"
+    if (gender === false) return "female"
+    return "notSelected"
 }
 
 export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
+    const { t } = useTranslation('domain');
+    const { currentLanguage } = useLanguageStore();
     const [name, setName] = useState("")
     const [nickname, setNickname] = useState("")
     const [email, setEmail] = useState("")
-    const [gender, setGender] = useState("선택안함")
+    const [gender, setGender] = useState<GenderKey>("notSelected")
     const [birthDate, setBirthDate] = useState<Date | null>(null)
     const [showDatePicker, setShowDatePicker] = useState(false)
     const { logout } = useAuthStore()
@@ -63,7 +68,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
             }
         } catch (error) {
             console.error('Error fetching user info:', error)
-            Alert.alert("오류", "사용자 정보를 가져오는 중 오류가 발생했습니다.")
+            Alert.alert(t('profile.userInfo.error'), t('profile.userInfo.fetchError'))
         }
     }
 
@@ -75,26 +80,36 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
     }
 
     const formatDate = (date: Date | null) => {
-        if (!date) return "생년월일 선택하기"
-        return date.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).replace(/\. /g, '년 ').replace('.', '월 ') + '일'
+        if (!date) return t('profile.userInfo.selectBirthDate')
+        const locale = currentLanguage === 'ko' ? 'ko-KR' : 'en-US'
+        if (currentLanguage === 'ko') {
+            return date.toLocaleDateString(locale, {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\. /g, '년 ').replace('.', '월 ') + '일'
+        } else {
+            return date.toLocaleDateString(locale, {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            })
+        }
     }
 
     const handleUpdate = async () => {
         const { canUpdate, nextUpdateDate } = await checkProfileUpdateAvailability();
         
         if (!canUpdate && nextUpdateDate) {
-            const formattedDate = nextUpdateDate.toLocaleDateString('ko-KR', {
+            const locale = currentLanguage === 'ko' ? 'ko-KR' : 'en-US'
+            const formattedDate = nextUpdateDate.toLocaleDateString(locale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
             Alert.alert(
-                "수정 불가",
-                `프로필 정보는 한 달에 한 번만 수정할 수 있습니다. 다음 수정 가능 날짜는 ${formattedDate}입니다.`
+                t('profile.userInfo.updateLimited'),
+                t('profile.userInfo.updateLimitedMessage', { date: formattedDate })
             );
             return;
         }
@@ -107,44 +122,44 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
             });
 
             if (result.success) {
-                Alert.alert("성공", "사용자 정보가 업데이트되었습니다.");
+                Alert.alert(t('profile.userInfo.success'), t('profile.userInfo.updateSuccess'));
             } else {
-                Alert.alert("오류", result.error?.message || "사용자 정보 업데이트 중 오류가 발생했습니다.");
+                Alert.alert(t('profile.userInfo.error'), result.error?.message || t('profile.userInfo.updateError'));
             }
         } catch (error) {
             console.error('Error updating user info:', error);
-            Alert.alert("오류", "사용자 정보 업데이트 중 오류가 발생했습니다.");
+            Alert.alert(t('profile.userInfo.error'), t('profile.userInfo.updateError'));
         }
     };
 
     const handleLogout = async () => {
         Alert.alert(
-            "로그아웃",
-            "정말 로그아웃 하시겠습니까?",
+            t('profile.userInfo.logoutTitle'),
+            t('profile.userInfo.logoutMessage'),
             [
                 {
-                    text: "취소",
+                    text: t('profile.userInfo.cancel'),
                     style: "cancel"
                 },
                 {
-                    text: "로그아웃",
+                    text: t('profile.auth.logout'),
                     style: "destructive",
                     onPress: async () => {
                         try {
                             const result = await signOut()
                             if (result.success) {
                                 logout() // 로컬 상태 업데이트
-                                Alert.alert("성공", "로그아웃되었습니다.", [
+                                Alert.alert(t('profile.userInfo.success'), t('profile.userInfo.logoutSuccess'), [
                                     {
-                                        text: "확인",
+                                        text: t('profile.userInfo.confirm'),
                                         onPress: () => navigation.goBack()
                                     }
                                 ])
                             } else {
-                                Alert.alert("오류", "로그아웃 중 오류가 발생했습니다.")
+                                Alert.alert(t('profile.userInfo.error'), t('profile.userInfo.logoutError'))
                             }
                         } catch (error) {
-                            Alert.alert("오류", "로그아웃 중 오류가 발생했습니다.")
+                            Alert.alert(t('profile.userInfo.error'), t('profile.userInfo.logoutError'))
                         }
                     }
                 }
@@ -154,32 +169,32 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
 
     const handleAccountDeletion = async () => {
         Alert.alert(
-            "회원탈퇴",
-            "정말 회원탈퇴 하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+            t('profile.userInfo.deleteAccountTitle'),
+            t('profile.userInfo.deleteAccountMessage'),
             [
                 {
-                    text: "취소",
+                    text: t('profile.userInfo.cancel'),
                     style: "cancel"
                 },
                 {
-                    text: "탈퇴하기",
+                    text: t('profile.userInfo.deleteAccountButton'),
                     style: "destructive",
                     onPress: async () => {
                         try {
                             const result = await requestAccountDeletion()
                             if (result.success) {
                                 logout() // 로컬 상태 업데이트
-                                Alert.alert("완료", "회원탈퇴가 완료되었습니다.",[
+                                Alert.alert(t('profile.userInfo.completed'), t('profile.userInfo.deleteAccountSuccess'),[
                                     {
-                                        text:'확인',
+                                        text: t('profile.userInfo.confirm'),
                                         onPress: ()=>navigation.goBack()
                                     }
                                 ])
                             } else {
-                                Alert.alert("오류", result.error?.message || "회원탈퇴 중 오류가 발생했습니다.")
+                                Alert.alert(t('profile.userInfo.error'), result.error?.message || t('profile.userInfo.deleteAccountError'))
                             }
                         } catch (error) {
-                            Alert.alert("오류", "회원탈퇴 중 오류가 발생했습니다.")
+                            Alert.alert(t('profile.userInfo.error'), t('profile.userInfo.deleteAccountError'))
                         }
                     }
                 }
@@ -189,12 +204,12 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
 
     return (
         <Background isStatusBarGap={true} type="white">
-            <AppBar title="회원 정보" navigation={navigation}/>
+            <AppBar title={t('profile.userInfoTitle')} navigation={navigation}/>
             <ScrollView className="flex-1">
                 <View className="p-4">
                     {/* 이름 */}
                     <View className="my-2">
-                        <Label text="이름" />
+                        <Label text={t('profile.userInfo.name')} />
                         <View className="rounded-lg border-b border-gray-200 px-4 py-3">
                             <Text className="text-base text-black">{name}</Text>
                         </View>
@@ -202,13 +217,13 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
 
                     {/* 닉네임 */}
                     <View className="my-2">
-                        <Label text="닉네임" />
+                        <Label text={t('profile.userInfo.nickname')} />
                         <View className="bg-white rounded-lg border border-gray-200 px-4"
                         style={{paddingVertical: Platform.OS === 'ios' ? 10 : 0}}>
                             <TextInput
                                 value={nickname}
                                 onChangeText={setNickname}
-                                placeholder="닉네임을 입력하세요"
+                                placeholder={t('profile.userInfo.nicknamePlaceholder')}
                                 maxLength={15}
                             />
                         </View>
@@ -216,7 +231,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
 
                     {/* 이메일 */}
                     <View className="my-2">
-                        <Label text="이메일" />
+                        <Label text={t('profile.userInfo.email')} />
                         <View className="rounded-lg border-b border-gray-200 px-4 py-3">
                             <Text className="text-base text-black">{email}</Text>
                         </View>
@@ -224,16 +239,16 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
 
                     {/* 성별 */}
                     <View className="my-2">
-                        <Label text="성별" />
+                        <Label text={t('profile.userInfo.gender')} />
                         <View className="flex-row bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            {GENDER_OPTIONS.map((option, index) => (
+                            {GENDER_KEYS.map((genderKey, index) => (
                                 <TouchableOpacity
-                                    key={option}
-                                    onPress={() => setGender(option)}
-                                    className={`flex-1 py-3 ${index !== GENDER_OPTIONS.length - 1 ? 'border-r border-gray-200' : ''} ${gender === option ? 'bg-blue-50' : ''}`}
+                                    key={genderKey}
+                                    onPress={() => setGender(genderKey)}
+                                    className={`flex-1 py-3 ${index !== GENDER_KEYS.length - 1 ? 'border-r border-gray-200' : ''} ${gender === genderKey ? 'bg-blue-50' : ''}`}
                                 >
-                                    <Text className={`text-center text-base ${gender === option ? 'text-blue-600 font-medium' : 'text-gray-600'}`}>
-                                        {option}
+                                    <Text className={`text-center text-base ${gender === genderKey ? 'text-blue-600 font-medium' : 'text-gray-600'}`}>
+                                        {t(`profile.userInfo.${genderKey}`)}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
@@ -242,7 +257,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
 
                     {/* 생년월일 */}
                     <View className="my-2">
-                        <Label text="생년월일" />
+                        <Label text={t('profile.userInfo.birthDate')} />
                         <TouchableOpacity 
                             onPress={() => setShowDatePicker(true)}
                             className="bg-white rounded-lg border border-gray-200 px-4 py-3"
@@ -256,7 +271,7 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
                     {/* 수정 버튼 */}
                     <View className="w-full flex-row justify-end mt-2">
                         <TouchableOpacity onPress={handleUpdate}>
-                            <Text className="text-blue-600">수정하기</Text>
+                            <Text className="text-blue-600">{t('profile.userInfo.update')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -276,19 +291,19 @@ export const UserInfoScreen = ({navigation}:UserInfoScreenProps) => {
                 {/* 로그아웃 버튼 */}
                 <View className="mt-4 p-4 flex-row justify-between">
                     <Text className="text-sm text-gray-500">
-                        로그아웃 하시겠습니까?
+                        {t('profile.userInfo.logoutConfirmQuestion')}
                     </Text>
                     <TouchableOpacity onPress={handleLogout}>
-                        <Text className="text-sm text-blue-600 underline">로그아웃</Text>
+                        <Text className="text-sm text-blue-600 underline">{t('profile.auth.logout')}</Text>
                     </TouchableOpacity>
                 </View>
                 {/* 회원탈퇴 버튼 */}
                 <View className="mt-4 p-4 flex-row justify-between">
                     <Text className="text-sm text-gray-500">
-                        서비스를 더 이상 사용하지 않으시나요?
+                        {t('profile.userInfo.deleteAccountQuestion')}
                     </Text>
                     <TouchableOpacity onPress={handleAccountDeletion}>
-                        <Text className="text-sm text-blue-600 underline">회원탈퇴하기</Text>
+                        <Text className="text-sm text-blue-600 underline">{t('profile.userInfo.deleteAccountButtonText')}</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

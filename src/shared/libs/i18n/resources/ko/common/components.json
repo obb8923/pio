@@ -1,0 +1,36 @@
+{
+  "button": {
+    "confirm": "확인",
+    "cancel": "취소",
+    "done": "완료",
+    "next": "다음",
+    "ok": "확인",
+    "delete": "삭제",
+    "save": "저장",
+    "edit": "수정"
+  },
+  "modal": {
+    "close": "닫기"
+  },
+  "form": {
+    "emailPlaceholder": "이메일을 입력하세요",
+    "passwordPlaceholder": "비밀번호를 입력하세요",
+    "descriptionPlaceholder": "설명을 입력하세요"
+  },
+  "filter": {
+    "myPlantsOnly": "내 식물만",
+    "allPlants": "전체 식물"
+  },
+  "navigation": {
+    "map": "지도",
+    "piodex": "기록",
+    "profile": "프로필",
+    "back": "뒤로가기"
+  },
+  "memo": {
+    "title": "메모",
+    "noMemo": "메모가 없습니다.",
+    "placeholder": "식물에 대한 메모를 입력해주세요"
+  }
+}
+

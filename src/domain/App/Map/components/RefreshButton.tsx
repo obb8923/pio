@@ -1,5 +1,6 @@
 import { memo, useCallback } from "react";
 import { TouchableOpacity, ActivityIndicator, Text } from "react-native";
+import { useTranslation } from 'react-i18next';
 import { Colors } from "@constants/Colors.ts";
 
 // 새로고침 버튼 컴포넌트
@@ -10,6 +11,7 @@ export const RefreshButton = memo(({
     isLoading: boolean; 
     onRefresh: () => void;
   }) => {
+    const { t } = useTranslation('domain');
     const handlePress = useCallback(() => {
       if (!isLoading) {
         onRefresh();
@@ -25,7 +27,7 @@ export const RefreshButton = memo(({
         {isLoading ? (
           <ActivityIndicator size="small" color={Colors.greenTab} />
         ) : (
-          <Text className="text-greenTab font-medium text-sm">지도 새로고침</Text>
+          <Text className="text-greenTab font-medium text-sm">{t('map.refreshMap')}</Text>
         )}
       </TouchableOpacity>
     );

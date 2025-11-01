@@ -1,0 +1,43 @@
+{
+  "plantRecorded": {
+    "title": "Do you remember the plant you met today?",
+    "body": "If you record it on Pio, you won't forget and can meet it again 🌱"
+  },
+  "flowerSpotted": {
+    "title": "Did you see any flowers on the street today?",
+    "body": "Save it on Pio now and complete your own flower map 🌸"
+  },
+  "dailyRecord": {
+    "title": "How about recording a flower a day?",
+    "body": "Capture precious moments on Pio 🌼"
+  },
+  "collectionAdd": {
+    "title": "Adding to your plant collection today?",
+    "body": "Pio is waiting for you 🍃"
+  },
+  "bloomToday": {
+    "title": "Want to bloom a flower on Pio today?",
+    "body": "Mark the plant you found with a marker! Don't forget to record 🌿"
+  },
+  "flowerName": {
+    "title": "Were you curious about the name of the flower you saw today?",
+    "body": "Pio will help you find it 🌺"
+  },
+  "plantDay": {
+    "title": "A day with plants, save it on Pio",
+    "body": "Your small records come together to create a beautiful map 🗺️"
+  },
+  "natureGift": {
+    "title": "Did you receive nature's gift again today?",
+    "body": "Preserve that moment with Pio 🍀"
+  },
+  "markerMemory": {
+    "title": "One marker is one memory",
+    "body": "Mark today's plant on the map! 📍"
+  },
+  "flowerPath": {
+    "title": "You're creating your own flower path",
+    "body": "Pio will remember today's footprints too 🌸"
+  }
+}
+

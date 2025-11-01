@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { View, Text, ScrollView, Platform ,Image } from "react-native"
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Animated, { Keyframe } from 'react-native-reanimated'
 import ImageX from '@assets/svgs/ImageX.svg'
 import {Colors} from "@constants/Colors"
 import { BlurView } from "@components/BlurView"
 import { plantTypeImages } from "@domain/App/Map/constants/images"
-import { PlantTypeCode, PlantTypeMap } from "@libs/supabase/operations/foundPlants/type"
+import { PlantTypeCode } from "@libs/supabase/operations/foundPlants/type"
 import { type ResponseCode } from "@libs/utils/AI"
 import { Line } from "@components/Line"
 import { NaverMapView, NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map"
@@ -15,7 +16,7 @@ import { MapModalButton } from "@components/PlantDetail/MapModalButton"
 import { Divider } from "@components/Divider"
 type PlantDetailProps = {
     type : "imageProcessing" | "detail" | "detailProcessing";
-    image_url?: string | null;
+    image_url?: string | number | null;
     plant_name: string;
     type_code: PlantTypeCode;
     description?: string;
@@ -31,6 +32,7 @@ type PlantDetailProps = {
 }
 
 export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, description, activity_curve, memo, lat, lng, onOpenModal, isLocationSelected, isPreviousScreenDictionary, isAILoading, AIResponseCode}: PlantDetailProps) => {
+  const { t } = useTranslation(['domain', 'common']);
   const insets = useSafeAreaInsets();
   const [curveWidth, setCurveWidth] = useState<number>(200);
   const isLoading = !!isAILoading;
@@ -43,12 +45,12 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
     if (!hasError) return undefined;
     switch (AIResponseCode) {
       case 'not_plant':
-        return '식물이 아닌 것 같아요. 다른 사진으로 시도해 주세요.';
+        return t('piodex.plantDetail.errorMessages.notPlant');
       case 'low_confidence':
-        return '식물을 구별하지 못했어요. 다른 각도의 사진으로 다시 시도해주세요.';
+        return t('piodex.plantDetail.errorMessages.lowConfidence');
       case 'error':
       default:
-        return '분석 중 오류가 발생했어요. 다시 시도해 주세요.';
+        return t('piodex.plantDetail.errorMessages.error');
     }
   })();
   return (
@@ -86,7 +88,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
          ) : (
            <>
              <Image
-               source={{ uri: image_url as string }}
+               source={typeof image_url === 'number' ? image_url : { uri: image_url as string }}
                className="w-full h-full"
                resizeMode="cover"
              />                 
@@ -109,7 +111,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
             {(isLoading || hasError) && (
               <View className="absolute top-0 left-0 right-0 bottom-0 w-full h-full justify-center items-center" style={{backgroundColor:'rgba(0,0,0,0.35)'}}>
                 <Text className="text-white text-base font-semibold">
-                  {isLoading ? '분석 중...' : (errorMessage as string)}
+                  {isLoading ? t('piodex.plantDetail.analyzing') : (errorMessage as string)}
                 </Text>
               </View>
             )}
@@ -154,7 +156,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
                ],}} innerStyle={{borderRadius:20}}>
                <View className="justify-center items-center px-6 py-4 flex-row">
                  <Image source={plantTypeImages[type_code ?? 0]} style={{width:24,height:24}}/>
-                 <Text className="text-center text-md ml-2">{PlantTypeMap[type_code]}</Text>
+                 <Text className="text-center text-md ml-2">{t(`map.plantType.${type_code}` as any)}</Text>
                </View>
              </BlurView>
            </Animated.View>
@@ -165,7 +167,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
     <View className="w-full py-8 items-center">
        {/* 설명 영역 */}
        <Text className="text-gray-900 min-h-[90px] p-4 rounded-lg overflow-y-scroll">
-          {hasError ? (errorMessage as string) : (isLoading ? 'AI가 사진을 분석하고 있어요...' : (description ? description : '설명이 없습니다.'))}
+          {hasError ? (errorMessage as string) : (isLoading ? t('piodex.plantDetail.analyzingMessage') : (description ? description : t('piodex.plantDetail.noDescription')))}
          </Text>
 
          <Divider/>
@@ -173,7 +175,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
         {/* 활동 곡선 영역 */}
         {!hasError && !isLoading && (
           <View className="w-full items-center p-4">
-            <Text className="w-full text-gray-600 text-sm">식물의 활동 곡선</Text>
+            <Text className="w-full text-gray-600 text-sm">{t('piodex.plantDetail.activityCurve')}</Text>
             <View 
               className="justify-center items-center mb-2" 
               style={{width: '90%'}} 
@@ -196,7 +198,7 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
       {!isPreviousScreenDictionary && !hasError && !isLoading && (
         <>
           <View className="w-full p-4">
-            <Text className="w-full text-gray-600 text-sm mb-2">발견한 위치{isPreviousScreenDictionary}</Text>
+            <Text className="w-full text-gray-600 text-sm mb-2">{t('piodex.plantDetail.locationTitle')}</Text>
             {type === "imageProcessing" && (
               <MapModalButton isLocationSelected={isLocationSelected ?? false} onOpenModal={onOpenModal as (modalType: 'map' | 'memo' | 'reviewRequest') => void} />
             )}

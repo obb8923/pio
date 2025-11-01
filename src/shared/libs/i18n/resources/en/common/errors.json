@@ -1,0 +1,21 @@
+{
+  "loginRequired": "Login required",
+  "networkError": "Network error. Please try again.",
+  "unknownError": "An unknown error occurred",
+  "cameraPermission": {
+    "title": "Camera Permission Required",
+    "message": "Camera permission is required to use this feature. Please enable it in settings.",
+    "cancel": "Cancel",
+    "settings": "Go to Settings"
+  },
+  "albumPermission": {
+    "title": "Album Access Permission Required",
+    "message": "Permission is required to select photos from album. Please enable it in settings.",
+    "cancel": "Cancel",
+    "settings": "Go to Settings"
+  },
+  "imageLoadError": "Failed to load image",
+  "cameraError": "Error occurred while using camera",
+  "galleryError": "Error occurred while accessing gallery"
+}
+

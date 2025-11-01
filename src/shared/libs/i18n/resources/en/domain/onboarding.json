@@ -1,0 +1,17 @@
+{
+  "screen1": {
+    "question": "Curious about a plant?",
+    "subtitle": "Take a photo",
+    "action": "and find out!"
+  },
+  "screen2": {
+    "title": "Check nearby plants!",
+    "confirm": "Got it"
+  },
+  "example": {
+    "plantName": "Rose",
+    "plantType": "Flower",
+    "description": "Roses are widely known shrub plants with beautiful flowers. The scientific name is Rosa spp., family is Rosaceae, genus is Rosa, and species varies. There are various cultivars worldwide, and they are cultivated for ornamental purposes."
+  }
+}
+

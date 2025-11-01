@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+import { useTranslation } from 'react-i18next';
 import Svg, { Path, Circle, Defs, LinearGradient, Stop, Rect, Text } from "react-native-svg";
 import {Colors} from "@constants/Colors";
 /**
@@ -10,6 +11,8 @@ import {Colors} from "@constants/Colors";
  * @param data - 12개의 데이터 포인트를 포함하는 배열
  */
 export const Line = ({ width, height, data }: { width: number, height: number, data: number[] }) => {
+  const { t } = useTranslation('domain');
+  
   // 데이터가 없거나 12개의 포인트가 아닌 경우 렌더링하지 않음
   if (!data || data.length !== 12) return null;
 
@@ -21,7 +24,7 @@ export const Line = ({ width, height, data }: { width: number, height: number, d
   // 3월~2월 순서로 배열 재정렬
   const reorderedData = [...data.slice(2), ...data.slice(0, 2)];
   // 계절 라벨 배열 (3월~2월 기준, 중간 월에만 계절명 표시)
-  const seasonLabels = ["", "봄", "", "", "여름", "", "", "가을", "", "", "겨울", ""];
+  const seasonLabels = ["", t('piodex.seasons.spring'), "", "", t('piodex.seasons.summer'), "", "", t('piodex.seasons.autumn'), "", "", t('piodex.seasons.winter'), ""];
 
   // 그래프 영역의 여백과 크기 계산
   const padding = 20;

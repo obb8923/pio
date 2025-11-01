@@ -1,0 +1,58 @@
+{
+  "title": "Profile",
+  "userInfoTitle": "Account Info",
+  "contact": "Contact Us",
+  "feedback": "Feedback",
+  "rateApp": "Rate App",
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy",
+  "language": "Language",
+  "version": {
+    "versionInfo": "Version",
+    "latestVersion": "Latest",
+    "update": "Update"
+  },
+  "auth": {
+    "loginRequired": "Login required",
+    "emailLoginTitle": "Login with Email",
+    "emailPlaceholder": "Enter your email",
+    "logout": "Logout",
+    "deleteAccount": "Delete Account"
+  },
+  "userInfo": {
+    "name": "Name",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "Enter your nickname",
+    "email": "Email",
+    "gender": "Gender",
+    "birthDate": "Birth Date",
+    "selectBirthDate": "Select Birth Date",
+    "male": "Male",
+    "female": "Female",
+    "notSelected": "Not Selected",
+    "update": "Update",
+    "updateSuccess": "User information has been updated.",
+    "updateError": "An error occurred while updating user information.",
+    "fetchError": "An error occurred while fetching user information.",
+    "updateLimited": "Cannot Update",
+    "updateLimitedMessage": "Profile information can only be updated once per month. The next update date is {{date}}.",
+    "logoutTitle": "Logout",
+    "logoutMessage": "Are you sure you want to logout?",
+    "cancel": "Cancel",
+    "logoutSuccess": "You have been logged out.",
+    "logoutError": "An error occurred while logging out.",
+    "logoutConfirmQuestion": "Do you want to logout?",
+    "deleteAccountTitle": "Delete Account",
+    "deleteAccountMessage": "Are you sure you want to delete your account?\nThis action cannot be undone.",
+    "deleteAccountButton": "Delete Account",
+    "deleteAccountSuccess": "Account deletion has been completed.",
+    "deleteAccountError": "An error occurred while deleting your account.",
+    "deleteAccountQuestion": "Are you no longer using the service?",
+    "deleteAccountButtonText": "Delete Account",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success",
+    "completed": "Completed"
+  }
+}
+

@@ -1,0 +1,29 @@
+{
+  "title": "Piodex",
+  "tabDictionary": "Dictionary",
+  "tabPiodex": "Records",
+  "loginRequired": "Login required.",
+  "loadingData": "Loading data...",
+  "noPlantsFound": "No plants found yet.",
+  "discoverPlants": "Discover some plants!",
+  "seasons": {
+    "spring": "Spring",
+    "summer": "Summer",
+    "autumn": "Autumn",
+    "winter": "Winter"
+  },
+  "plantDetail": {
+    "description": "Description",
+    "activityCurve": "Plant Activity Curve",
+    "locationTitle": "Discovered Location",
+    "noDescription": "No description available.",
+    "analyzing": "Analyzing...",
+    "analyzingMessage": "AI is analyzing the photo...",
+    "errorMessages": {
+      "notPlant": "This doesn't appear to be a plant. Please try with another photo.",
+      "lowConfidence": "Could not identify the plant. Please try again with a photo from a different angle.",
+      "error": "An error occurred during analysis. Please try again."
+    }
+  }
+}
+

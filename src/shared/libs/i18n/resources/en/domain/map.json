@@ -1,0 +1,34 @@
+{
+  "addPlant": "Add plant",
+  "cameraButton": "Take Photo",
+  "galleryButton": "Select photo",
+  "refreshMap": "Refresh Map",
+  "allPlants": "All Plants",
+  "myPlantsOnly": "My Plants Only",
+  "loginRequired": "Login required",
+  "loginRequiredMessage": "Login is required to view your plants.",
+  "descriptionModal": {
+    "title": "Enter description for the plant",
+    "placeholder": "Enter description for the plant"
+  },
+  "mapModal": {
+    "title": "Move the map to select the location where you found it"
+  },
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "plantDetail": {
+    "noName": "Unnamed plant",
+    "noDescription": "No description available."
+  },
+  "plantType": {
+    "0": "Other",
+    "1": "Flower",
+    "2": "Shrub",
+    "3": "Tree",
+    "4": "Cactus/Succulent",
+    "5": "Aquatic Plant",
+    "6": "Vine",
+    "7": "Grass"
+  }
+}
+

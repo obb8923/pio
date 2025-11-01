@@ -2,6 +2,7 @@ import {
     BottomTabNavigationOptions,
     createBottomTabNavigator,
   } from '@react-navigation/bottom-tabs';
+import { useTranslation } from 'react-i18next';
 import {MapStack} from '@nav/stack/Map.tsx';
 import {PiodexStack} from '@nav/stack/Piodex.tsx';
 import {ProfileStack} from '@nav/stack/Profile.tsx';
@@ -13,6 +14,7 @@ import {Colors} from '@constants/Colors.ts';
 import {TabNavOptions, TabBarStyle,TabBarStyleNone} from '@constants/TabNavOptions.ts';
 const Tab = createBottomTabNavigator();
 const AppTab = () => {
+  const { t } = useTranslation('common');
   return (
 <Tab.Navigator 
 screenOptions={TabNavOptions as BottomTabNavigationOptions}>
@@ -22,7 +24,7 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
         options={({route}) => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'Map';
           return {
-          tabBarLabel: '지도',
+          tabBarLabel: t('components.navigation.map'),
           tabBarIcon: ({focused}) =>
             focused ? (
               <MapIcon style={{color: Colors.greenActive}} />
@@ -40,7 +42,7 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
         options={({route}) => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'Piodex';
           return {
-            tabBarLabel: '기록',
+            tabBarLabel: t('components.navigation.piodex'),
             tabBarIcon: ({focused}) =>
               focused ? (
                 <PiodexIcon style={{color: Colors.greenActive}} />
@@ -58,7 +60,7 @@ screenOptions={TabNavOptions as BottomTabNavigationOptions}>
         options={({route}) => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'Profile';
           return {
-          tabBarLabel: '프로필',
+          tabBarLabel: t('components.navigation.profile'),
           tabBarIcon: ({focused}) =>
             focused ? (
               <ProfileIcon style={{color: Colors.greenActive}} />

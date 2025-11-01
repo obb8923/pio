@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, Animated, Alert, Linking } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '@constants/Colors';
 import CameraIcon from '@assets/svgs/Camera.svg';
 import ImageAddIcon from '@assets/svgs/ImageAdd.svg';
@@ -13,6 +14,7 @@ interface AddPlantFABProps {
 }
 
 export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
+  const { t } = useTranslation(['domain', 'common']);
   const { isOpen, toggle, close, fabAnimation, animations } = useFab();
   const { cameraButtonTranslateY, galleryButtonTranslateY, buttonScale } = animations;
   const {cameraPermission,photoLibraryPermission,checkAndRequestCameraPermission,checkAndRequestPhotoLibraryPermission } = usePermissions();
@@ -23,11 +25,11 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
       const permissionGranted = await checkAndRequestCameraPermission();
       if(!permissionGranted){
       Alert.alert(
-        "카메라 권한 필요",
-        "카메라를 사용하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+        t('common:errors.cameraPermission.title'),
+        t('common:errors.cameraPermission.message'),
         [
-          { text: "취소", style: "cancel" },
-          { text: "설정으로 이동", onPress: () => Linking.openSettings() }
+          { text: t('common:errors.cameraPermission.cancel'), style: "cancel" as any },
+          { text: t('common:errors.cameraPermission.settings'), onPress: () => Linking.openSettings() }
         ]
       );
       }
@@ -43,7 +45,7 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
         return;
       }
       if (response.errorCode) {
-        Alert.alert('오류', '카메라 실행 중 오류가 발생했습니다.');
+        Alert.alert(t('common:errors.unknownError'), t('common:errors.cameraError'));
         return;
       }
       if (response.assets && response.assets[0]?.uri) {
@@ -51,10 +53,10 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
           imageUri: response.assets[0].uri,
         });
       } else {
-        Alert.alert('오류', '이미지를 가져올 수 없습니다.');
+        Alert.alert(t('common:errors.unknownError'), t('common:errors.imageLoadError'));
       }
     });
-  }, [cameraPermission, checkAndRequestCameraPermission, close, onNavigate]);
+  }, [cameraPermission, checkAndRequestCameraPermission, close, onNavigate, t]);
 
   const handleGalleryPress = useCallback(async () => {
     if (!photoLibraryPermission) {
@@ -62,11 +64,11 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
       const permissionGranted = await checkAndRequestPhotoLibraryPermission();
       if(!permissionGranted){
       Alert.alert(
-        "앨범 접근 권한 필요",
-        "앨범에서 사진을 선택하려면 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+        t('common:errors.albumPermission.title'),
+        t('common:errors.albumPermission.message'),
         [
-          { text: "취소", style: "cancel" },
-          { text: "설정으로 이동", onPress: () => Linking.openSettings() }
+          { text: t('common:errors.albumPermission.cancel'), style: "cancel" as any },
+          { text: t('common:errors.albumPermission.settings'), onPress: () => Linking.openSettings() }
         ]
       );
     }
@@ -82,7 +84,7 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
         return;
       }
       if (response.errorCode) {
-        Alert.alert('오류', '갤러리 실행 중 오류가 발생했습니다.');
+        Alert.alert(t('common:errors.unknownError'), t('common:errors.galleryError'));
         return;
       }
       if (response.assets && response.assets[0]?.uri) {
@@ -90,10 +92,10 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
           imageUri: response.assets[0].uri,
         });
       } else {
-        Alert.alert('오류', '이미지를 가져올 수 없습니다.');
+        Alert.alert(t('common:errors.unknownError'), t('common:errors.imageLoadError'));
       }
     });
-  }, [photoLibraryPermission, checkAndRequestPhotoLibraryPermission, close, onNavigate]);
+  }, [photoLibraryPermission, checkAndRequestPhotoLibraryPermission, close, onNavigate, t]);
 
   return (
     <View className="w-1/2 absolute bottom-8 right-4">
@@ -113,7 +115,7 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
           onPress={handleGalleryPress}
         >
           <ImageAddIcon style={{color: Colors.greenActive, width: 20, height: 20, marginRight: 8}}/>
-          <Text className="text-greenActive font-medium">앨범에서 선택</Text>
+          <Text className="text-greenActive font-medium">{t('map.galleryButton')}</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -133,7 +135,7 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
           onPress={handleCameraPress}
         >
           <CameraIcon style={{color: Colors.greenActive, width: 20, height: 20, marginRight: 8}}/>
-          <Text className="text-greenActive font-medium">카메라로 찍기</Text>
+          <Text className="text-greenActive font-medium">{t('map.cameraButton')}</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -155,7 +157,7 @@ export const AddPlantFAB = memo(({ onNavigate }:AddPlantFABProps) => {
           +
         </Animated.Text>
         {!isOpen && (
-          <Text className="text-greenActive text-lg font-bold ml-2">발견한 식물 추가하기</Text>
+          <Text className="text-greenActive text-lg font-bold ml-2">{t('map.addPlant')}</Text>
         )}
       </TouchableOpacity>
     </View>

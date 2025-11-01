@@ -1,0 +1,58 @@
+{
+  "title": "프로필",
+  "userInfoTitle": "회원 정보",
+  "contact": "문의하기",
+  "feedback": "건의하기",
+  "rateApp": "평점 남기기",
+  "termsOfService": "이용약관",
+  "privacyPolicy": "개인정보처리방침",
+  "language": "언어",
+  "version": {
+    "versionInfo": "버전정보",
+    "latestVersion": "최신버전",
+    "update": "업데이트하기"
+  },
+  "auth": {
+    "loginRequired": "로그인이 필요합니다",
+    "emailLoginTitle": "이메일로 로그인 하기",
+    "emailPlaceholder": "이메일을 입력하세요",
+    "logout": "로그아웃",
+    "deleteAccount": "계정 삭제"
+  },
+  "userInfo": {
+    "name": "이름",
+    "nickname": "닉네임",
+    "nicknamePlaceholder": "닉네임을 입력하세요",
+    "email": "이메일",
+    "gender": "성별",
+    "birthDate": "생년월일",
+    "selectBirthDate": "생년월일 선택하기",
+    "male": "남성",
+    "female": "여성",
+    "notSelected": "선택안함",
+    "update": "수정하기",
+    "updateSuccess": "사용자 정보가 업데이트되었습니다.",
+    "updateError": "사용자 정보 업데이트 중 오류가 발생했습니다.",
+    "fetchError": "사용자 정보를 가져오는 중 오류가 발생했습니다.",
+    "updateLimited": "수정 불가",
+    "updateLimitedMessage": "프로필 정보는 한 달에 한 번만 수정할 수 있습니다. 다음 수정 가능 날짜는 {{date}}입니다.",
+    "logoutTitle": "로그아웃",
+    "logoutMessage": "정말 로그아웃 하시겠습니까?",
+    "cancel": "취소",
+    "logoutSuccess": "로그아웃되었습니다.",
+    "logoutError": "로그아웃 중 오류가 발생했습니다.",
+    "logoutConfirmQuestion": "로그아웃 하시겠습니까?",
+    "deleteAccountTitle": "회원탈퇴",
+    "deleteAccountMessage": "정말 회원탈퇴 하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+    "deleteAccountButton": "탈퇴하기",
+    "deleteAccountSuccess": "회원탈퇴가 완료되었습니다.",
+    "deleteAccountError": "회원탈퇴 중 오류가 발생했습니다.",
+    "deleteAccountQuestion": "서비스를 더 이상 사용하지 않으시나요?",
+    "deleteAccountButtonText": "회원탈퇴하기",
+    "confirm": "확인",
+    "error": "오류",
+    "success": "성공",
+    "completed": "완료"
+  }
+}
+

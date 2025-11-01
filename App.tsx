@@ -9,6 +9,9 @@ import SplashScreen from "react-native-splash-screen";
 // 글로벌 스타일
 import "./global.css";
 
+// i18n 초기화
+import '@libs/i18n';
+
 // 내부 네비게이션/컴포넌트
 import { RootStack } from "@nav/stack/Root";
 import { OnboardingStack } from "@nav/stack/Onboarding";

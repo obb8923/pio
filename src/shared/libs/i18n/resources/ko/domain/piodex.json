@@ -1,0 +1,29 @@
+{
+  "title": "피오덱스",
+  "tabDictionary": "도감",
+  "tabPiodex": "식물 사전",
+  "loginRequired": "로그인이 필요합니다.",
+  "loadingData": "데이터를 불러오는 중...",
+  "noPlantsFound": "아직 발견한 식물이 없습니다.",
+  "discoverPlants": "식물을 발견해보세요!",
+  "seasons": {
+    "spring": "봄",
+    "summer": "여름",
+    "autumn": "가을",
+    "winter": "겨울"
+  },
+  "plantDetail": {
+    "description": "설명",
+    "activityCurve": "식물의 활동 곡선",
+    "locationTitle": "발견한 위치",
+    "noDescription": "설명이 없습니다.",
+    "analyzing": "분석 중...",
+    "analyzingMessage": "AI가 사진을 분석하고 있어요...",
+    "errorMessages": {
+      "notPlant": "식물이 아닌 것 같아요. 다른 사진으로 시도해 주세요.",
+      "lowConfidence": "식물을 구별하지 못했어요. 다른 각도의 사진으로 다시 시도해주세요.",
+      "error": "분석 중 오류가 발생했어요. 다시 시도해 주세요."
+    }
+  }
+}
+

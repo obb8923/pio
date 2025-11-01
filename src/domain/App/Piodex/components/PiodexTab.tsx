@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity,RefreshControl, SectionList, ActivityIndicator } from "react-native";
 import { useState, useMemo } from "react";
+import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PiodexStackParamList } from "@nav/stack/Piodex";
 import { useAuthStore } from "@store/authStore.ts";
@@ -9,6 +10,7 @@ import { found_plants_columns } from "@libs/supabase/operations/foundPlants/type
 import { useSignedUrls } from "@libs/hooks/useSignedUrls";
 import { ImageItem } from "@domain/App/Piodex/components/ImageItem";
 import { ITEMS_PER_ROW, ITEM_SPACING, DEFAULT_ITEM_WIDTH } from "@domain/App/Piodex/components/DictionaryTab/constants.ts";
+import { useLanguageStore } from "@store/languageStore";
 type PiodexTabNavigationProp = NativeStackNavigationProp<PiodexStackParamList, 'Piodex'>;
 
 interface PiodexTabProps {
@@ -16,6 +18,8 @@ interface PiodexTabProps {
 }
 
 export const PiodexTab = ({ navigation }: PiodexTabProps) => {
+  const { t } = useTranslation('domain');
+  const { currentLanguage } = useLanguageStore();
   const [containerWidth, setContainerWidth] = useState(0);
   const { myPlants, isLoading: loading, fetchPlants } = useFoundPlants(true);
   const { signedUrls, isLoading: isLoadingImages } = useSignedUrls(myPlants);
@@ -40,7 +44,8 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
+    const locale = currentLanguage === 'ko' ? 'ko-KR' : 'en-US';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
@@ -77,12 +82,12 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
     : DEFAULT_ITEM_WIDTH;
 
   // 섹션 데이터 메모이제이션
-  const sectionsData = useMemo(() => groupPlantsByDate(myPlants), [myPlants]);
+  const sectionsData = useMemo(() => groupPlantsByDate(myPlants), [myPlants, currentLanguage]);
 
   // 로그인 상태 체크
   if(!isLoggedIn) return (
     <View className="flex-1 justify-center items-center">
-      <Text className="text-gray-500 text-center">로그인이 필요합니다.</Text>
+      <Text className="text-gray-500 text-center">{t('piodex.loginRequired')}</Text>
     </View>
   );
 
@@ -91,7 +96,7 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color={Colors.greenTab} />
-        <Text className="text-gray-500 mt-2">데이터를 불러오는 중...</Text>
+        <Text className="text-gray-500 mt-2">{t('piodex.loadingData')}</Text>
       </View>
     );
   }
@@ -103,8 +108,8 @@ export const PiodexTab = ({ navigation }: PiodexTabProps) => {
         sections={[{ title: '', data: [[]] }]}
         renderItem={() => (
           <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-gray-500 text-center text-lg mb-2">아직 발견한 식물이 없습니다.</Text>
-            <Text className="text-gray-400 text-center">식물을 발견해보세요!</Text>
+            <Text className="text-gray-500 text-center text-lg mb-2">{t('piodex.noPlantsFound')}</Text>
+            <Text className="text-gray-400 text-center">{t('piodex.discoverPlants')}</Text>
           </View>
         )}
         renderSectionHeader={() => null}

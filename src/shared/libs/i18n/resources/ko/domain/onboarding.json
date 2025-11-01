@@ -1,0 +1,17 @@
+{
+  "screen1": {
+    "question": "식물이 궁금하다면?",
+    "subtitle": "사진을 찍어서",
+    "action": "확인해보세요!"
+  },
+  "screen2": {
+    "title": "근처 식물을\n확인해보세요!",
+    "confirm": "확인"
+  },
+  "example": {
+    "plantName": "장미",
+    "plantType": "꽃",
+    "description": "장미는 아름다운 꽃으로 널리 알려진 관목 식물이며, 학명은 Rosa spp., 과는 장미과(Rosaceae), 속은 Rosa, 종은 다양합니다. 전 세계적으로 다양한 품종이 있으며, 관상용으로 재배됩니다."
+  }
+}
+

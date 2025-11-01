@@ -1,4 +1,5 @@
 import { View,Text,Modal,TouchableOpacity,ActivityIndicator, TextInput, Animated, Easing } from "react-native"
+import { useTranslation } from 'react-i18next';
 import GoogleLogo from "@assets/svgs/GoogleLogo.svg"
 import AppleLogo from "@assets/svgs/AppleLogo.svg"
 import MailLogo from "@assets/svgs/Mail.svg"
@@ -8,6 +9,7 @@ import { useAuthStore } from "@store/authStore.ts";
 import { useEffect, useState, useRef } from "react";
 type AuthButtonProps = { type: 'Google' | 'Apple' | 'Email' };
 export const AuthButton = ({ type }: AuthButtonProps) => {
+  const { t } = useTranslation('domain');
   const { handleGoogleLogin,handleAppleLogin, handleEmailLogin,isLoading } = useAuthStore();
   const {openModalBackground,closeModalBackground} = useModalBackgroundStore();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -75,10 +77,10 @@ export const AuthButton = ({ type }: AuthButtonProps) => {
           </TouchableOpacity>
             {/* inner container (border) */}
             <View className="w-full h-full rounded-2xl pl-6 pr-10 flex-col justify-evenly">
-              <Text className="text-greenActive">이메일로 로그인 하기</Text>
+              <Text className="text-greenActive">{t('profile.auth.emailLoginTitle')}</Text>
               <TextInput
                 className="w-full p-4 border border-greenActive rounded-xl text-greenActive bg-white/30"
-                placeholder="이메일을 입력하세요"
+                placeholder={t('profile.auth.emailPlaceholder')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -86,7 +88,7 @@ export const AuthButton = ({ type }: AuthButtonProps) => {
               />
               <TextInput
                 className="w-full mt-2 p-4 border border-greenActive rounded-xl text-greenActive bg-white/30"
-                placeholder="비밀번호를 입력하세요"
+                placeholder={t('common:components.form.passwordPlaceholder')}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry

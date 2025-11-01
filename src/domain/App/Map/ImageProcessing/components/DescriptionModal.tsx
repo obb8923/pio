@@ -1,4 +1,5 @@
 import { View, TextInput, Modal, Text, Platform} from "react-native";
+import { useTranslation } from 'react-i18next';
 import { CustomButton } from "@components/CustomButton";
 import { useModalBackground } from "@libs/hooks/useModalBackground";
 import { DEVICE_HEIGHT } from "@constants/normal.ts";
@@ -15,8 +16,8 @@ export const DescriptionModal = ({
   description, 
   onDescriptionChange 
 }: DescriptionModalProps) => {
-    
-    useModalBackground(isVisible);
+  const { t } = useTranslation('domain');
+  useModalBackground(isVisible);
 
     const containerStyle = Platform.select({
       ios: {
@@ -40,7 +41,7 @@ export const DescriptionModal = ({
         >
             {/* 타이틀 */}
           <View className="items-start justify-end px-4 py-2" style={{height: DEVICE_HEIGHT/18}}>
-            <Text className="text-center text-lg text-greenActive">식물에 대한 설명을 입력해주세요</Text>
+            <Text className="text-center text-lg text-greenActive">{t('map.descriptionModal.title')}</Text>
           </View>
           {/* 텍스트 인풋 */}
           <TextInput
@@ -48,12 +49,12 @@ export const DescriptionModal = ({
             multiline
             value={description}
             onChangeText={onDescriptionChange}
-            placeholder="식물에 대한 설명을 입력해주세요"
+            placeholder={t('map.descriptionModal.placeholder')}
             autoFocus
           />
           {/* 버튼 */}
           <View className="flex-row justify-end items-center px-4" style={{height: DEVICE_HEIGHT/13}}>
-            <CustomButton text="완료" size={DEVICE_HEIGHT/15} onPress={onClose}/>
+            <CustomButton text={t('common:components.button.done')} size={DEVICE_HEIGHT/15} onPress={onClose}/>
           </View>
         </View>
     </Modal>

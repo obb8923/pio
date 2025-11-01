@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Background } from '@components/Background';
 import { CustomButton } from '@components/CustomButton';
 import { View, Image, Text } from 'react-native';
@@ -14,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export const Onboarding2Screen = () => {
+  const { t } = useTranslation(['domain', 'common']);
   const { completeOnboarding } = useOnboarding();
   // 애니메이션 값들
   const textTranslateY = useSharedValue(-30);
@@ -158,7 +160,7 @@ export const Onboarding2Screen = () => {
         <View className="w-full h-1/6 justify-center items-center">
           <Animated.View style={textAnimatedStyle}>
             <Text className="text-greenTab900 font-bold text-3xl text-center">
-              {`근처 식물을\n확인해보세요!`}
+              {t('onboarding.screen2.title')}
             </Text>
           </Animated.View>
         </View>
@@ -209,7 +211,7 @@ export const Onboarding2Screen = () => {
         {/* 다음 버튼 */}
         <View className="w-full h-1/6 flex-row justify-end items-center px-4">
           <Animated.View style={buttonAnimatedStyle}>
-            <CustomButton text="확인" size={60} onPress={handleNextPress} />
+            <CustomButton text={t('onboarding.screen2.confirm')} size={60} onPress={handleNextPress} />
           </Animated.View>
         </View>
       </View>

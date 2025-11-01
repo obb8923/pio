@@ -1,10 +1,12 @@
 import {useState,useEffect} from 'react'
 import { View,Text,TouchableOpacity,Linking,Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import VersionCheck from 'react-native-version-check';
 import {Colors} from '@constants/Colors.ts'
 import ArrowUpRight from "@assets/svgs/ArrowUpRight.svg";
 import { IOS_APP_ID } from '@constants/normal';
 export const VersionItem = () => {
+  const { t } = useTranslation('domain');
     const [currentVersion, setCurrentVersion] = useState<string>('');
     const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
     const [storeUrl, setStoreUrl] = useState<string>('');
@@ -57,11 +59,11 @@ export const VersionItem = () => {
           }
         }}
       >
-        <Text className="text-base text-greenTab">버전정보</Text>
+        <Text className="text-base text-greenTab">{t('profile.version.versionInfo')}</Text>
         <View className="flex-row items-center">
           <Text className="text-base text-greenTab mr-2">v{currentVersion}</Text>
           <Text className="text-sm text-greenTab">
-            {needsUpdate ? '업데이트하기' : '최신버전'}
+            {needsUpdate ? t('profile.version.update') : t('profile.version.latestVersion')}
           </Text>
           {needsUpdate && <ArrowUpRight style={{width: 10, height: 12, color: Colors.greenTab,marginLeft:10}}/>}
         </View>

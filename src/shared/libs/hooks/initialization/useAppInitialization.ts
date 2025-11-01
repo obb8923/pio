@@ -7,6 +7,8 @@ import { useOnboarding } from "@libs/hooks/useOnboarding.ts";
 import { useDictionaryStore } from "@store/dictionaryStore.ts";
 import { useFoundPlantsStore } from "@store/foundPlantsStore.ts";
 import { type MaintenanceResponse, checkMaintenance } from "@libs/supabase/operations/normal/checkMaintenance.ts";
+import { loadSavedLanguage } from "@libs/i18n";
+import { useLanguageStore } from "@store/languageStore.ts";
 
 /**
  * 앱 초기화 로직을 관리하는 훅 (권한 요청 제외)
@@ -25,10 +27,20 @@ export const useAppInitialization = () => {
   const { checkLoginStatus } = useAuthStore();
   const { initPermissions, isInitialized: isPermissionsInitialized } = usePermissionStore();
   const { isOnboardingCompleted } = useOnboarding();
+  const { changeLanguage } = useLanguageStore();
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // 0. 언어 설정 로드
+        try {
+          const savedLanguage = await loadSavedLanguage();
+          await changeLanguage(savedLanguage as any);
+          if (__DEV__) console.log('[useAppInitialization] Language loaded:', savedLanguage);
+        } catch (error) {
+          if (__DEV__) console.error('[useAppInitialization] Error loading language:', error);
+        }
+
         // 1. Google Sign-In 설정
         try {
           GoogleSignin.configure({

@@ -1,0 +1,36 @@
+{
+  "button": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "done": "Done",
+    "next": "Next",
+    "ok": "OK",
+    "delete": "Delete",
+    "save": "Save",
+    "edit": "Edit"
+  },
+  "modal": {
+    "close": "Close"
+  },
+  "form": {
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "descriptionPlaceholder": "Enter description"
+  },
+  "filter": {
+    "myPlantsOnly": "My Plants Only",
+    "allPlants": "All Plants"
+  },
+  "navigation": {
+    "map": "Map",
+    "piodex": "Records",
+    "profile": "Profile",
+    "back": "Back"
+  },
+  "memo": {
+    "title": "Memo",
+    "noMemo": "Enter a memo about the plant",
+    "placeholder": "Enter a memo about the plant"
+  }
+}
+

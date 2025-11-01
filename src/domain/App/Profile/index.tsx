@@ -1,4 +1,6 @@
 import { View, Text, TouchableOpacity, Alert, ScrollView, Linking,Platform } from "react-native";
+import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from "@store/authStore.ts";
 import { Colors } from "@constants/Colors";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -12,6 +14,7 @@ import { AuthGate} from "@domain/App/Profile/components/AuthGate.tsx";
 import { VersionItem } from "@domain/App/Profile/components/VersionItem.tsx";
 import { AdmobBanner } from "@components/ads/AdmobBanner";
 import { TAB_BAR_HEIGHT } from "@constants/TabNavOptions";
+import { LanguageSelector } from "@domain/App/Profile/components/LanguageSelector";
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList,'Profile'>
 
 const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: () => void,type?: 'default' | 'link'|'mail'}) => {
@@ -26,45 +29,53 @@ const ProfileItem = ({title, onPress,type='default'}: {title: string, onPress: (
 };
 
 export const ProfileScreen = ({navigation}: ProfileScreenProps) => {
+  const { t } = useTranslation(['domain', 'common']);
   const { isLoggedIn } = useAuthStore();
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
  const storeUrl = Platform.OS==='ios'?APPSTORE_URL:GOOGLEPLAY_URL; 
   return (
     <Background type="white" isStatusBarGap={true} className="pt-4">
-      <Text className="text-2xl font-bold text-greenTab ml-9 mb-4">프로필</Text>
+      <Text className="text-2xl font-bold text-greenTab ml-9 mb-4">{t('domain:profile.title')}</Text>
       
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* 프로필 헤더 - 로그인 또는 이름*/}
+        
         {!isLoggedIn && <AuthGate />}
         
         <View className="h-8" />
 
         {/* 회원 정보 */}
-        <ProfileItem title="회원 정보" onPress={() => {
+        <ProfileItem title={t('domain:profile.userInfoTitle')} onPress={() => {
           if(isLoggedIn){
             navigation.navigate('UserInfo');
           }else{
-            Alert.alert("로그인이 필요합니다.")
+            Alert.alert(t('domain:profile.auth.loginRequired'))
           }
         }}/>
         <View className="h-8" />
-        <ProfileItem title="문의하기" onPress={()=>{
+        <ProfileItem title={t('domain:profile.contact')} onPress={()=>{
           Linking.openURL(`mailto:${MAIL_ADDRESS}`);
         }} type="mail"/>
-        <ProfileItem title="건의하기" onPress={() => navigation.navigate('WebView', {
+        <ProfileItem title={t('domain:profile.feedback')} onPress={() => navigation.navigate('WebView', {
           url: FEEDBACK_FORM_URL,
         })} type="link"/>   
+        <ProfileItem title={t('domain:profile.language')} onPress={() => setIsLanguageModalOpen(true)}/>
 
        <View className="h-8" />
         {/* 약관 및 정책 */}
-        <ProfileItem title="평점 남기기" onPress={() => Linking.openURL(storeUrl)} type="link"/>          
-        <ProfileItem title="이용약관" onPress={() => navigation.navigate('TermsOfService')}/>          
-        <ProfileItem title="개인정보처리방침" onPress={() => navigation.navigate('PrivacyPolicy')}/>
+        <ProfileItem title={t('domain:profile.rateApp')} onPress={() => Linking.openURL(storeUrl)} type="link"/>          
+        <ProfileItem title={t('domain:profile.termsOfService')} onPress={() => navigation.navigate('TermsOfService')}/>          
+        <ProfileItem title={t('domain:profile.privacyPolicy')} onPress={() => navigation.navigate('PrivacyPolicy')}/>
         <VersionItem />
       </ScrollView>
       {/* 광고 영역 */}
       <View style={{position:'absolute',bottom:TAB_BAR_HEIGHT,left: 0,right: 0}}>
         <AdmobBanner />
       </View>
+      
+      <LanguageSelector
+        isVisible={isLanguageModalOpen}
+        onClose={() => setIsLanguageModalOpen(false)}
+      />
 </Background>
   );
 };

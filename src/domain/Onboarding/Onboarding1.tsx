@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Background } from '@components/Background';
 import { CustomButton } from '@components/CustomButton';
-import { View, Image, Text } from 'react-native';
-import { Line } from '@components/Line';
+import { View, Text } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,16 +11,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {OnboardingStackParamList} from "@nav/stack/Onboarding"
-
+import {PlantDetail} from "@components/PlantDetail"
 type Onboarding1ScreenProps = NativeStackScreenProps<OnboardingStackParamList,'Onboarding1'>
 
 export const Onboarding1Screen = ({navigation}:Onboarding1ScreenProps) => {
+  const { t } = useTranslation('domain');
   const [step, setStep] = useState(1);
 
   // 애니메이션 값들
   const textTranslateY = useSharedValue(-30);
   const textOpacity = useSharedValue(1); // 텍스트 페이드아웃용 추가
-  const imageTranslateY = useSharedValue(100);
   const contentTranslateY = useSharedValue(100);
   const buttonOpacity = useSharedValue(0);
 
@@ -31,13 +31,6 @@ export const Onboarding1Screen = ({navigation}:Onboarding1ScreenProps) => {
         { translateY: textTranslateY.value }
       ],
       opacity: textOpacity.value, // opacity 추가
-    };
-  });
-
-  // 이미지 슬라이드 애니메이션 스타일
-  const imageAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: imageTranslateY.value }],
     };
   });
 
@@ -98,17 +91,8 @@ const handleNextPress = () => {
     // 텍스트 애니메이션은 모든 step에서 실행
     animateText();
     
-    // step 2: 이미지 슬라이드 인
+    // step 2: PlantDetail 슬라이드 인 + 버튼 페이드 인
     if (step === 2) {
-      imageTranslateY.value = 100;
-      imageTranslateY.value = withSpring(0, {
-        damping: 100,
-        stiffness: 100,
-      });
-    }
-    
-    // step 3: 컨텐츠 슬라이드 인 + 버튼 페이드 인
-    if (step === 3) {
       contentTranslateY.value = 100;
       contentTranslateY.value = withSpring(0, {
         damping: 100,
@@ -123,8 +107,8 @@ const handleNextPress = () => {
       }, 300);
     }
     
-    // step 3까지 자동 진행 
-    if (step < 3) {
+    // step 2까지 자동 진행 
+    if (step < 2) {
       const timer = setTimeout(() => {
         setStep(step + 1);
       }, 1500);
@@ -138,62 +122,35 @@ const handleNextPress = () => {
     <Background isStatusBarGap={true} isTabBarGap={false}>
       <View className="flex-1 p-4 justify-end items-center">
         {/* message section */}
-        <View className="w-full h-1/6 justify-center items-center">
+        <View className="w-full h-1/12 justify-center items-center">
           <Animated.View style={textAnimatedStyle}>
-            {step === 1 && <Text className="text-greenTab900 font-bold text-3xl">식물이 궁금하다면?</Text>}
-            {step === 2 && <Text className="text-greenTab900 font-bold text-3xl">사진을 찍어서</Text>}
-            {step >= 3 && <Text className="text-greenTab900 font-bold text-3xl">확인해보세요!</Text>}
+            {step === 1 && <Text className="text-greenTab900 font-bold text-3xl">{t('onboarding.screen1.question')}</Text>}
+            {step >= 2 && <Text className="text-greenTab900 font-bold text-3xl">{t('onboarding.screen1.action')}</Text>}
           </Animated.View>
         </View>
 
-        <View className="w-full h-4/6 px-4">
-          {/* step 2부터 이미지 표시 */}
+        <View className="flex-1 justify-center">
+          {/* step 2부터 PlantDetail 표시 */}
           {step >= 2 && (
-            <Animated.View style={imageAnimatedStyle}>
-              <Image
-                source={require('../../../assets/webps/rose.webp')}
-                className="w-full h-[200] rounded-xl"
-                resizeMode="cover"
+            <Animated.View style={[contentAnimatedStyle]} className="mt-4 w-full h-full">
+              <PlantDetail
+                type="detail"
+                image_url={require('../../../assets/webps/rose.webp')}
+                plant_name={t('onboarding.example.plantName')}
+                type_code={1}
+                description={t('onboarding.example.description')}
+                activity_curve={[0, 0.1, 0.3, 0.6, 0.9, 1, 0.8, 0.6, 0.3, 0.1, 0, 0]}
+                isPreviousScreenDictionary={true}
               />
-            </Animated.View>
-          )}
-
-          {/* step 3부터 식물 정보 영역 표시 */}
-          {step >= 3 && (
-            <Animated.View style={contentAnimatedStyle} className="mt-4 w-full bg-white rounded-lg p-4 pb-8">
-              {/* 식물 이름 영역 */}
-              <View className="mb-4 flex-row justify-center items-center">
-                <Text className="rounded-lg p-3 text-center bg-white text-2xl">장미</Text>
-              </View>
-
-              {/* 식물 종류 및 활동 곡선 영역 */}
-              <View className="flex-row items-center">
-                <View className="h-[60px] justify-center items-center" style={{ width: '30%' }}>
-                  <Image
-                    source={require('../../../assets/pngs/flowers/flower1.png')}
-                    className="w-[32px] h-[32px]"
-                  />
-                  <Text className="text-[#333] text-sm mt-2">꽃</Text>
-                </View>
-                <View className="h-[40px] w-0.5 bg-gray-200" />
-                <View className="justify-center items-center" style={{ width: '70%' }}>
-                  <Line data={[0, 0.1, 0.3, 0.6, 0.9, 1, 0.8, 0.6, 0.3, 0.1, 0, 0]} width={200} height={80} />
-                </View>
-              </View>
-
-              {/* 설명 영역 */}
-              <Text className="text-gray-600 min-h-[90px] max-h-[140px] bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-y-scroll">
-                장미는 아름다운 꽃으로 널리 알려진 관목 식물이며, 학명은 Rosa spp., 과는 장미과(Rosaceae), 속은 Rosa, 종은 다양합니다. 전 세계적으로 다양한 품종이 있으며, 관상용으로 재배됩니다.
-              </Text>
-            </Animated.View>
+             </Animated.View>
           )}
         </View>
 
-        {/* step 3에서 다음 버튼 표시 */}
+        {/* step 2에서 다음 버튼 표시 */}
         <View className="w-full h-1/6 flex-row justify-end items-center px-4">
-          {step >= 3 && (
+          {step >= 2 && (
             <Animated.View style={buttonAnimatedStyle}>
-              <CustomButton text="다음" size={60} onPress={handleNextPress}/>
+              <CustomButton text={t('common:components.button.next')} size={60} onPress={handleNextPress}/>
             </Animated.View>
           )}
         </View>
