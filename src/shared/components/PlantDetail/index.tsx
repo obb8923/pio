@@ -94,7 +94,10 @@ export const PlantDetail = ({type = "detail",image_url, plant_name, type_code, d
              />                 
               <View className="w-full h-full absolute top-0 left-0 right-0 bottom-0"
              style={{ 
-               borderRadius: 76,
+               borderTopLeftRadius: 76,
+               borderTopRightRadius: 76,
+               borderBottomLeftRadius: 20,
+               borderBottomRightRadius: 20,
                boxShadow: [
                  {
                    inset: true,
