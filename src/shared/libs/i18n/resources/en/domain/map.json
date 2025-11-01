@@ -43,6 +43,12 @@
     "5": "Aquatic Plant",
     "6": "Vine",
     "7": "Grass"
+  },
+  "reviewRequestModal": {
+    "saveComplete": "Save complete!",
+    "wasAppHelpful": "Was the app helpful?",
+    "pleaseTellUs": "Let us know in a review!",
+    "goToReview": "Go to Review!"
   }
 }
 

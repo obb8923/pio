@@ -43,6 +43,12 @@
     "5": "수중식물",
     "6": "덩굴식물",
     "7": "잔디류"
+  },
+  "reviewRequestModal": {
+    "saveComplete": "저장이 완료됐어요!",
+    "wasAppHelpful": "앱이 도움이 되셨나요?",
+    "pleaseTellUs": "리뷰로 알려주세요!",
+    "goToReview": "리뷰하러 가기!"
   }
 }
 

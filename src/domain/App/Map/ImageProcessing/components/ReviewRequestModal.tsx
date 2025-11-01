@@ -1,5 +1,6 @@
 import {View,Modal,TouchableOpacity,Text, Animated, Linking, Platform} from 'react-native'
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useModalBackground } from '@libs/hooks/useModalBackground';
 import { GOOGLEPLAY_URL ,APPSTORE_URL} from "@constants/normal";
 
@@ -10,6 +11,7 @@ type ReviewRequestModalProps = {
 }
 
 export const ReviewRequestModal = ({isVisible,onClose,setReviewedInYear}:ReviewRequestModalProps)=>{
+    const { t } = useTranslation(['domain', 'common']);
     const storeUrl = Platform.OS==='ios'?APPSTORE_URL:GOOGLEPLAY_URL; 
 
     useModalBackground(isVisible);
@@ -61,9 +63,9 @@ export const ReviewRequestModal = ({isVisible,onClose,setReviewedInYear}:ReviewR
           </TouchableOpacity>
             {/* inner container (border) */}
             <View className="w-full h-full rounded-2xl pl-6 pr-10 flex-col justify-center pb-4">
-            <Text className="text-greenActive text-2xl font-bold mb-2">저장이 완료됐어요!</Text>
-              <Text className="text-greenActive text-2xl font-bold mb-2">앱이 도움이 되셨나요?</Text>
-              <Text className="text-greenActive text-2xl font-bold">리뷰로 알려주세요!</Text>
+            <Text className="text-greenActive text-2xl font-bold mb-2">{t('domain:map.reviewRequestModal.saveComplete')}</Text>
+              <Text className="text-greenActive text-2xl font-bold mb-2">{t('domain:map.reviewRequestModal.wasAppHelpful')}</Text>
+              <Text className="text-greenActive text-2xl font-bold">{t('domain:map.reviewRequestModal.pleaseTellUs')}</Text>
 
             </View>
                  {/* submit button (absolute) */}
@@ -95,7 +97,7 @@ export const ReviewRequestModal = ({isVisible,onClose,setReviewedInYear}:ReviewR
               <View 
                 className="pl-4 flex-row items-center justify-center h-full rounded-full bg-black/50"
                 >
-                <Text className="text-greenActive font-bold text-xl ">리뷰하러 가기!</Text>
+                <Text className="text-greenActive font-bold text-xl ">{t('domain:map.reviewRequestModal.goToReview')}</Text>
                 {/* 화살표 컨테이너 */}
                 <View className="w-14 h-14 items-center justify-center rounded-full" style={{ transform: [{ rotate: '-45deg' }] }}>
                 {/* 화살표 몸통 */}
