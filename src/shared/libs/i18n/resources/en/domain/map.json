@@ -14,6 +14,20 @@
   "mapModal": {
     "title": "Move the map to select the location where you found it"
   },
+  "imageProcessing": {
+    "loginRequiredTitle": "Notice",
+    "loginRequiredMessage": "Please log in to use this feature.",
+    "locationRequiredTitle": "Notice",
+    "locationRequiredMessage": "Please select where you found it.",
+    "saveSuccessTitle": "Save Complete",
+    "saveSuccessMessage": "Plant information has been saved successfully."
+  },
+  "location": {
+    "locationSelected": "Location selected",
+    "selectLocation": "Please select where you found it",
+    "edit": "Edit",
+    "select": "Select"
+  },
   "camera": "Camera",
   "gallery": "Gallery",
   "plantDetail": {

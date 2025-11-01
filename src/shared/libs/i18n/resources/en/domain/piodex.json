@@ -24,6 +24,23 @@
       "lowConfidence": "Could not identify the plant. Please try again with a photo from a different angle.",
       "error": "An error occurred during analysis. Please try again."
     }
+  },
+  "detailProcessing": {
+    "title": "Edit Plant Information",
+    "loginRequiredTitle": "Notice",
+    "loginRequiredMessage": "Please log in to use this feature.",
+    "updateSuccessTitle": "Success",
+    "updateSuccessMessage": "Information has been updated successfully.",
+    "updateErrorTitle": "Error",
+    "updateErrorMessage": "Failed to update information.",
+    "updateErrorDefault": "An error occurred while updating information.",
+    "deleteConfirmTitle": "Delete Confirmation",
+    "deleteConfirmMessage": "Are you sure you want to delete this plant information?",
+    "deleteSuccessTitle": "Success",
+    "deleteSuccessMessage": "Deletion completed.",
+    "deleteErrorTitle": "Error",
+    "deleteErrorMessage": "Failed to delete.",
+    "deleteErrorDefault": "An error occurred while deleting."
   }
 }
 

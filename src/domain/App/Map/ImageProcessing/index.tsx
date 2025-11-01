@@ -3,6 +3,7 @@ import { View,Animated,Alert } from 'react-native';
 // 외부 라이브러리 
 import { useRoute } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 // Navigation
 import { MapStackParamList } from "@nav/stack/Map";
 // libs
@@ -43,22 +44,25 @@ const ButtonSection = memo(({
   isProcessing: boolean;
   isAiLoading: boolean;
   aiResponse: AIResponseType | null;
-}) => (
-  <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
-    <CustomButton text="취소" size={60} onPress={onCancel}/>
-    {!isAiLoading && aiResponse?.response_code === "success" && (
-      <>
-        <View className="w-20"/>
-        <CustomButton 
-          text="저장" 
-          size={70} 
-          onPress={onSave} 
-          isProcessing={isProcessing}
-        />
-      </>
-    )}
-  </View>
-));
+}) => {
+  const { t } = useTranslation(['domain', 'common']);
+  return (
+    <View className="absolute bottom-10 left-0 right-0 flex-row justify-evenly items-center mt-4">
+      <CustomButton text={t('common:components.button.cancel')} size={60} onPress={onCancel}/>
+      {!isAiLoading && aiResponse?.response_code === "success" && (
+        <>
+          <View className="w-20"/>
+          <CustomButton 
+            text={t('common:components.button.save')} 
+            size={70} 
+            onPress={onSave} 
+            isProcessing={isProcessing}
+          />
+        </>
+      )}
+    </View>
+  );
+});
 
 
 const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps) => {
@@ -66,6 +70,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
   const { userId } = useAuthStore.getState();
   const { forceCloseModalBackground } = useModalBackgroundStore();
   const { latitude: userLatitude, longitude: userLongitude } = useLocationStore();
+  const { t } = useTranslation(['domain', 'common']);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [memo, setMemo] = useState<string>('');
@@ -134,11 +139,17 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
 
   const handleSave = useCallback(async () => {
     if(!userId) {
-      Alert.alert("알림", "로그인 후 이용해주세요.");
+      Alert.alert(
+        t('map.imageProcessing.loginRequiredTitle'),
+        t('map.imageProcessing.loginRequiredMessage')
+      );
       return;
     }
     if (!isLocationSelected) {
-      Alert.alert("알림", "발견한 곳을 선택해주세요.");
+      Alert.alert(
+        t('map.imageProcessing.locationRequiredTitle'),
+        t('map.imageProcessing.locationRequiredMessage')
+      );
       return;
     }
 
@@ -181,11 +192,11 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
         
         // 저장 성공 알림 표시
         Alert.alert(
-          "저장 완료",
-          "식물 정보가 성공적으로 저장되었습니다.",
+          t('map.imageProcessing.saveSuccessTitle'),
+          t('map.imageProcessing.saveSuccessMessage'),
           [
             {
-              text: "확인",
+              text: t('common:components.button.confirm'),
               onPress: () => {
                 // 확인을 누르면 기존 로직 실행
                 if(!isReviewedInYear){
@@ -210,7 +221,7 @@ const ImageProcessingScreenComponent = ({navigation}:ImageProcessingScreenProps)
     } finally {
       setIsProcessing(false);
     }
-  }, [userId, aiResponse?.plant_name, memo, aiResponse?.plant_description, center, aiResponse, isLocationSelected, isReviewedInYear, isLoaded, isClosed, show, navigation, setReviewedInYear]);
+  }, [userId, aiResponse?.plant_name, memo, aiResponse?.plant_description, center, aiResponse, isLocationSelected, isReviewedInYear, isLoaded, isClosed, show, navigation, setReviewedInYear, t]);
 
   const fetchAIResponse = useCallback(async () => {
    

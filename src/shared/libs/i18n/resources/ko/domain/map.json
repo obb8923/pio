@@ -14,6 +14,20 @@
   "mapModal": {
     "title": "지도를 움직여서 발견한 위치를 선택해 주세요"
   },
+  "imageProcessing": {
+    "loginRequiredTitle": "알림",
+    "loginRequiredMessage": "로그인 후 이용해주세요.",
+    "locationRequiredTitle": "알림",
+    "locationRequiredMessage": "발견한 곳을 선택해주세요.",
+    "saveSuccessTitle": "저장 완료",
+    "saveSuccessMessage": "식물 정보가 성공적으로 저장되었습니다."
+  },
+  "location": {
+    "locationSelected": "위치가 선택되었습니다",
+    "selectLocation": "발견한 곳을 선택해 주세요",
+    "edit": "수정하기",
+    "select": "선택하기"
+  },
   "camera": "카메라",
   "gallery": "갤러리",
   "plantDetail": {

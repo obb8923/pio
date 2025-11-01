@@ -24,6 +24,23 @@
       "lowConfidence": "식물을 구별하지 못했어요. 다른 각도의 사진으로 다시 시도해주세요.",
       "error": "분석 중 오류가 발생했어요. 다시 시도해 주세요."
     }
+  },
+  "detailProcessing": {
+    "title": "식물 정보 수정하기",
+    "loginRequiredTitle": "알림",
+    "loginRequiredMessage": "로그인 후 이용해주세요.",
+    "updateSuccessTitle": "성공",
+    "updateSuccessMessage": "정보가 성공적으로 수정되었습니다.",
+    "updateErrorTitle": "오류",
+    "updateErrorMessage": "정보 수정에 실패했습니다.",
+    "updateErrorDefault": "정보 수정 중 오류가 발생했습니다.",
+    "deleteConfirmTitle": "삭제 확인",
+    "deleteConfirmMessage": "정말로 이 식물 정보를 삭제하시겠습니까?",
+    "deleteSuccessTitle": "성공",
+    "deleteSuccessMessage": "삭제가 완료되었습니다.",
+    "deleteErrorTitle": "오류",
+    "deleteErrorMessage": "삭제에 실패했습니다.",
+    "deleteErrorDefault": "삭제 중 오류가 발생했습니다."
   }
 }
 
