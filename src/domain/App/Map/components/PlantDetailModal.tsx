@@ -2,6 +2,7 @@ import { View, Text, Modal, Image, ScrollView, Animated } from 'react-native';
 import { CustomButton } from '@components/CustomButton';
 import { Skeleton } from '@components/Skeleton';
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getSignedUrls } from '@libs/supabase/operations/image/getSignedUrls';
 import { found_plants_columns } from '@libs/supabase/operations/foundPlants/type';
 import { DEVICE_WIDTH_HALF, DEVICE_HEIGHT_HALF, MODAL_ANIMATION_DURATION_CLOSE, MODAL_ANIMATION_DURATION_OPEN_LONG } from '@constants/normal.ts';
@@ -52,6 +53,7 @@ export const PlantDetailModal = React.memo(({
   selectedPlant,
   markerPositionAtScreen,
 }: PlantDetailModalProps) => {
+  const { t } = useTranslation(['domain', 'common']);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { closeModalBackground } = useModalBackground(isVisible);
@@ -207,7 +209,7 @@ export const PlantDetailModal = React.memo(({
              }}
              >
                 <Text className="text-xl font-bold text-gray-900" numberOfLines={1}>
-                  {selectedPlant?.plant_name || '이름 없는 식물'}
+                  {selectedPlant?.plant_name || t('map.plantDetail.noName')}
                 </Text>
                 </BlurView>
                 </View>
@@ -217,7 +219,7 @@ export const PlantDetailModal = React.memo(({
           >  
             <View className="mb-4 p-4">
               <Text className="text-gray-900 mb-2">
-                {selectedPlant?.description || '설명이 없습니다.'}
+                {selectedPlant?.description || t('map.plantDetail.noDescription')}
               </Text>
               <Text className="text-gray-600">
                 {selectedPlant?.memo || ''}
@@ -226,7 +228,7 @@ export const PlantDetailModal = React.memo(({
           </ScrollView>
           <View className="absolute bottom-6 left-0 right-0 justify-center items-center">
             <CustomButton
-              text="닫기"
+              text={t('common:components.modal.close')}
               size={60}
               onPress={handleCloseWithAnimation}
             />
